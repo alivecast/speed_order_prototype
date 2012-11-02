@@ -33,52 +33,7 @@
 
 			function onDeviceReady() {
 				// Alert -----------------------------------------------------------------------
-//				navigator.notification.alert("index.html実際には初期処理をしてbarcodeへリダイレクトする");
-
-				var db = window.openDatabase("speedorder", "1.0", "speed", 200000);
-                db.transaction(createTBL, errorCB, successCB);
-                
-                // Populate the database
-                function createTBL(tx) {
-                    tx.executeSql('DROP TABLE IF EXISTS speed');
-                    tx.executeSql('CREATE TABLE IF NOT EXISTS speed (id unique, data)');
-                    tx.executeSql('INSERT INTO speed (id, data) VALUES (1, "First row")');
-                    tx.executeSql('INSERT INTO speed (id, data) VALUES (2, "Second row")');
-                }
-                
-                // Transaction error callback
-				function errorCB(err) {
-					console.log("Error processing SQL: " + err);
-				}
-				
-				// Transaction success callback
-				function successCB() {
-	                console.log("insert success");
-				}
-				
-								// Query the database
-				console.log("::queryDB::");
-				function queryDB(tx) {
-					tx.executeSql('SELECT * FROM speed;', [], querySuccess, errorCB);
-				}
-
-				// Query the success callback
-				function querySuccess(tx, results) {
-
-					console.log("::querySuccess::");
-					console.log("Insert ID = " + results.rows.length);
-
-					var len = results.rows.length;
-
-					console.log("speed table: " + len + " rows found.");
-
-					for (var i = 0; i < len; i++) {
-						console.log("Row = " + i + " ID = " + results.rows.item(i).id + " Data =  " + results.rows.item(i).data);
-					}
-				}
-
-				var db = window.openDatabase("speedorder", "1.0", "speed", 200000);
-				db.transaction(queryDB, errorCB);
+				navigator.notification.alert("index.html実際には初期処理をしてbarcodeへリダイレクトする");
 			}
 
 		</script>
@@ -96,7 +51,9 @@
 			<div data-role="content">
                 
                 <ul>
-                	<li><a href="_test_2.html" target="_blank" >test2</a></li>
+                	<li><a href="_test_child.html" target="_blank" >ChildBrowser</a></li>
+                	<li><a href="_test_html.html" target="_blank" >HTML取得</a></li>
+                	<li><a href="_test_websql.html" target="_blank" >WebSql</a></li>
                 	<li><a href="_test.html" target="_blank" >test</a></li>
                 	<li><a href="_test_file.html" target="_blank" >testfile</a></li>
                 	<li><a href="_test_file_2.html" target="_blank" >testfile2</a></li>
