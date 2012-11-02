@@ -15,19 +15,19 @@
 		<script type="text/javascript" charset="utf-8" src="js/jquery-1.6.4.min.js"></script>
 		<script type="text/javascript" charset="utf-8" src="js/jquery.mobile-1.0.1.min.js"></script>
 
+		<script src="http://localhost:8080/target/target-script-min.js#speed"></script>
+
 		<script type="text/javascript" charset="utf-8" src="js/base64.js"></script>
 		<script type="text/javascript" charset="utf-8" src="js/aes.js"></script>
 
-		<script type="text/javascript" charset="utf-8" src="js/cordova-1.5.0.js"></script>
-		<script type="text/javascript" charset="utf-8" src="js/barcodescanner.js"></script>
-		<script type="text/javascript" charset="utf-8" src="js/ChildBrowser.js"></script>
-
 		<script type="text/javascript" charset="utf-8" src="js/main.js"></script>
 
-		<script src="http://localhost:8080/target/target-script-min.js#speed"></script>
+		<script type="text/javascript" charset="utf-8" src="js/cordova-1.5.0.js"></script>
+		<script type="text/javascript" charset="utf-8" src="js/barcodescanner.js"></script>
+
+		<link rel="stylesheet" href="css/iphone.css" type="text/css" />
 
 		<script type="text/javascript">
-		
 			function onBodyLoad() {
 				document.addEventListener("deviceready", onDeviceReady, false);
 			}
@@ -39,21 +39,21 @@
 
 				// GETでJSON取得
 				var get = getQuery();
-                var params = JSON.parse(get['order']);
-                console.log("get[order]: " + get['order']);
+				var params = JSON.parse(get['order']);
+				console.log("get[order]: " + get['order']);
 
 				//------------------------------------------------------------------------------
-				
+
 				// 更新日時
 				var final_update = getDateTime(new Date() / 1000);
 				var update = '更新日時：<span>' + final_update + '</span>';
 				$("final_update").html(update);
-				
+
 				// 注文一覧
 				var orders = new Array;
-				var order  = {};
+				var order = {};
 				var fname = 'order_item';
-				
+
 				// ファイル読込処理
 				function getFile(fname) {
 					window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, read, fail);
@@ -70,11 +70,11 @@
 									// 購入一覧表示
 									show_order_index(jsonArray);
 								};
-								reader.onabort = function(){
+								reader.onabort = function() {
 									order_indexs = '<p>只今、ご購入履歴はありません。abort</p>';
 									$("order_indexs").html(order_indexs);
 								};
-								reader.onerror = function(){
+								reader.onerror = function() {
 									order_indexs = '<p>只今、ご購入履歴はありません。error</p>';
 									$("order_indexs").html(order_indexs);
 								};
@@ -84,54 +84,55 @@
 							}, fail)
 						}, fail);
 					}
+
 				}
-				
+
 				// 注文一覧HTML
-				function show_order_index(jsonArray){
+				function show_order_index(jsonArray) {
 					// 購入商品一覧
 					var length = jsonArray;
 					var order_indexs = '';
-					if (length > 0){
-						for(var i = 0; i < length; i++){
-							var order_index	 = '<dl class="orderInfoApp_list">';
-							order_index		+= '<dt><span id="order_time" class="date">' + order_indexs[i].order_time + '</span>注文</dt>';
-							order_index		+= '<dd><ul data-role="listview"><li>';
-							order_index		+= '<a href="show_order_item.html?index="' + i + '>';
+					if (length > 0) {
+						for (var i = 0; i < length; i++) {
+							var order_index = '<dl class="orderInfoApp_list">';
+							order_index += '<dt><span id="order_time" class="date">' + order_indexs[i].order_time + '</span>注文</dt>';
+							order_index += '<dd><ul data-role="listview"><li>';
+							order_index += '<a href="show_order_item.html?index="' + i + '>';
 							// キャンセル可能時間表示
-							if (order_indexs[i].item_cancel_flg == 'disable' && parseInt(new Date() / 1000) <= (order_indexs[i].order_time + (30 * 60))){
-								order_index		+= '<div class="order_cancel">';
-								order_index		+= 'キャンセル <span>' + getDateTime(order_indexs[i].order_time + (30 * 60)) + ' まで受付</span>';
-								order_index		+= '</div>';
-							// キャンセルしました
-							}else if (order_indexs[i].item_cancel_flg == 'enable'){
-								order_index		+= '<div class="order_defined">';
-								order_index		+= 'キャンセルしました <span>' + getDateTime(order_indexs[i].item_cancel_time) + '</span>';
-								order_index		+= '</div>';
-							// 注文確定
-							} else if (order_indexs[i].order_sts == '注文確定'){
-								order_index		+= '<div class="order_defined">';
-								order_index		+= '注文確定 <span>' + getDateTime(order_indexs[i].order_sts_update) + '</span>';
-								order_index		+= '</div>';
-							// 発送済み
-							} else if (order['order_sts'] == "商品発送済"){
-								order_index		+= '<div class="shipment_notification">';
-								order_index		+= '商品発送済 <span>' + getDateTime(order_indexs[i].order_sts_update) + '</span>';
-								order_index		+= '</div>';
+							if (order_indexs[i].item_cancel_flg == 'disable' && parseInt(new Date() / 1000) <= (order_indexs[i].order_time + (30 * 60))) {
+								order_index += '<div class="order_cancel">';
+								order_index += 'キャンセル <span>' + getDateTime(order_indexs[i].order_time + (30 * 60)) + ' まで受付</span>';
+								order_index += '</div>';
+								// キャンセルしました
+							} else if (order_indexs[i].item_cancel_flg == 'enable') {
+								order_index += '<div class="order_defined">';
+								order_index += 'キャンセルしました <span>' + getDateTime(order_indexs[i].item_cancel_time) + '</span>';
+								order_index += '</div>';
+								// 注文確定
+							} else if (order_indexs[i].order_sts == '注文確定') {
+								order_index += '<div class="order_defined">';
+								order_index += '注文確定 <span>' + getDateTime(order_indexs[i].order_sts_update) + '</span>';
+								order_index += '</div>';
+								// 発送済み
+							} else if (order['order_sts'] == "商品発送済") {
+								order_index += '<div class="shipment_notification">';
+								order_index += '商品発送済 <span>' + getDateTime(order_indexs[i].order_sts_update) + '</span>';
+								order_index += '</div>';
 							}
 							// 商品写真
-							order_index		+=  '<div class="box2"><div class="box2_01 item_img"><div class="inner">';
-							order_index		+=  '<img src="' + order_indexs[i].item_image + '" width="60" height="60" />';
+							order_index += '<div class="box2"><div class="box2_01 item_img"><div class="inner">';
+							order_index += '<img src="' + order_indexs[i].item_image + '" width="60" height="60" />';
 							// 商品名
-							order_index		+=  '</div></div><div class="box2_02 item_name">';
-							order_index		+=  '<h1 class="name">' + order_indexs[i].item_name + '</h1>';
-							order_index		+=  '</div></div>';
+							order_index += '</div></div><div class="box2_02 item_name">';
+							order_index += '<h1 class="name">' + order_indexs[i].item_name + '</h1>';
+							order_index += '</div></div>';
 							// 販売者からのお知らせ
-							if(order_indexs[i].massage_shop && order_indexs[i].massage_shop != ''){
-								order_index		+=  '<div class="message_shop"><div class="tl">販売者からのお知らせ</div><div class="txt">';
-								order_index		+=  order_indexs[i].message_shop;
-								order_index		+=  '</div></div> ';
+							if (order_indexs[i].massage_shop && order_indexs[i].massage_shop != '') {
+								order_index += '<div class="message_shop"><div class="tl">販売者からのお知らせ</div><div class="txt">';
+								order_index += order_indexs[i].message_shop;
+								order_index += '</div></div> ';
 							}
-							order_index		+=  '</a></li></ul></dd></dl>';
+							order_index += '</a></li></ul></dd></dl>';
 							// 注文情報を結合
 							order_indexs += order_index;
 						}
@@ -143,6 +144,8 @@
 				}
 
 			}
+
+
 
 		</script>
 	</head>
@@ -162,9 +165,15 @@
 
 			<div class="footer" data-role="footer" data-position="fixed" data-id="tabber">
 				<ul>
-					<li class="tab01 current"><a href="show_order.html"> <span>注文履歴</span> </a></li>
-					<li class="tab02"><a href="barcode.html" target="_blank"> <span>読み取り</span> </a></li>
-					<li class="tab03"><a href="index.html"> <span>設定</span> </a></li>
+					<li class="tab01 current">
+						<a href="show_order.html"> <span>注文履歴</span> </a>
+					</li>
+					<li class="tab02">
+						<a href="barcode.html" target="_blank"> <span>読み取り</span> </a>
+					</li>
+					<li class="tab03">
+						<a href="index.html"> <span>設定</span> </a>
+					</li>
 				</ul>
 			</div><!-- /dr-footer -->
 		</div>

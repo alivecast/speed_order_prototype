@@ -26,6 +26,8 @@
 	</array>
 	<key>Plugins</key>
 	<dict>
+		<key>ChildBrowser</key>
+		<string>ChildBrowser.js</string>
 		<key>ChildBrowserCommand</key>
 		<string>ChildBrowserCommand</string>
 		<key>org.apache.cordova.accelerometer</key>

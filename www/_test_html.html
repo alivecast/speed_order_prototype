@@ -34,7 +34,7 @@
 				navigator.notification.alert("_test_Html.html");
 				
 				// html取得
-				var filename = 'http://speed-order.jp/class/phonegap/test2.html';
+				var filename = 'http://speed-order.jp/class/phonegap/_test_html.html';
 				getIndex(filename);
 				function getIndex(filename) {
 					xmlhttp = new XMLHttpRequest();
@@ -58,8 +58,37 @@
 	</head>
 
 	<body onload="onBodyLoad()">
-		<h1>testHTML</h1>
-        <div id="htmlData"></div>
+		
+		<div data-role="page" data-add-back-btn="false">
+            
+			<div data-role="header" data-position="inline">
+				<h1>testHTML</h1>
+			</div>
+            
+			<div data-role="content">
+       			 <div id="htmlData"></div>
+       	</div>
+       	<div class="footer" data-role="footer" data-position="fixed" data-id="tabber">
+				<ul>
+					<li class="tab01">
+						<a href="show_order.html">
+							<span>注文履歴</span>
+						</a>
+					</li>
+					<li class="tab02">
+						<a href="barcode.html" target="_blank">
+							<span>読み取り</span>
+						</a>
+					</li>
+					<li class="tab03 current">
+						<a href="setting.html">
+							<span>設定</span>
+						</a>
+					</li>
+				</ul>
+			</div><!-- /dr-footer -->
+            
+		</div>
 	</body>
 </html>
 

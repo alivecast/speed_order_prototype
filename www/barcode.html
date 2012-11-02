@@ -61,7 +61,8 @@
 
 				// 設定・お届け先がある場合に取得
 				var area_name = '';
-				var addressee = JSON.parse(window.localStorage.getItem('addressee'));
+				// var addressee = JSON.parse(window.localStorage.getItem('addressee'));
+				var addressee = {};addressee.recipient_pref = '北海道';
 				if (addressee){
 					var area_name = addressee.recipient_pref;
 				}

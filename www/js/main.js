@@ -170,8 +170,55 @@ function delFile(fname) {
 	}, fail);
 }
 
-// error処理
+// ファイル操作　error処理
 function fail(error) {
 	console.log("ファイル処理失敗: " + error.code);
+}
+
+// 郵便番号の取得 //////////////////////////////////////////////////////////////////////
+function getAddress() {
+	var zipcode = $('#ordering\\[customer_zipcode\\]').val();
+	$.get('/app/Ordering/get_address?zip=' + zipcode);
+}
+
+function setPref(data) {
+	$('#ordering\\[customer_pref\\]').val(data);
+//	var select = $('#ordering\\[customer_pref\\]');
+//	select.val(40);
+}
+function setAddress(data) {
+	$('#ordering\\[customer_address1\\]').val(data);
+}
+
+// 合計金額の取得 //////////////////////////////////////////////////////////////////////
+function getCarriage(price, carriage, non_carriage_price) {
+	var amount = document.getElementById('#order_amount').value;
+	var total = (price * amount) + carriage;
+	var neoCarriage = carriage;
+	if (total >= non_carriage_price){
+		total = (price * amount)
+		neoCarriage = 0;
+	}
+	// 桁区切り
+	str = String(total);
+	var num = new String(str).replace(/,/g, "");
+	while(num != (num = num.replace(/^(-?\d+)(\d{3})/, "$1,$2")));
+//	return num;
+	// 送料無料を反映
+	setCarriage(neoCarriage)
+	document.getElementById('#total').innerHTML = num + '円(税込)';
+}
+
+function setCarriage(carriage) {
+	// 桁区切り
+	str = String(carriage);
+	var num = new String(str).replace(/,/g, "");
+	while(num != (num = num.replace(/^(-?\d+)(\d{3})/, "$1,$2")));
+	if (num = '0' ){
+		num = '無料'
+	} else {
+		num + '円'
+	}
+	document.getElementById('#carriage').innerHTML = String(num);
 }
 

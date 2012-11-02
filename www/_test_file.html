@@ -38,7 +38,16 @@
 
 				$("#loadBtn").bind("tap", function() {
 					// window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, gotFS_read, fail);
-					var res = gotFS_read('ordering');
+					// var res = gotFS_read('ordering');
+					gotFS_read('ordering');
+					// sleep(2000);
+					var res = window.localStorage.getItem('tmp');
+					
+					// var res = getFile('ordering');
+					// if(typeof res === undefind) {
+						// res = gotFS_read('ordering');
+						// console.log("retry res:" + res);
+					// }
 					console.log("res:" + res);
 					$('#return_json').innerText(res);
 				});
@@ -69,30 +78,79 @@
 
 			// ファイル読込処理
 			function gotFS_read(fname) {
-				window.text = '';
-				window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, read, fail);
-				function read(fileSystem){
-					fileSystem.root.getFile(fname, {}, function(fileEntry) {
-						fileEntry.file(function(file) {
-							var reader = new FileReader();
-							reader.onloadend = function(evt) {
-								// ここに読み込み完了後の処理を書く
-								console.log(evt.target.result);
-								window.text = evt.target.result;
-								console.log(window.text);
-								// json = JSON.parse(jsonText);
-								$("#textarea").val(window.text);
-								console.log("正常にテキストを読み込みました。");
-								// ここの値を戻したい
-								return window.text;
-							};
-							reader.readAsText(file, "utf-8");
-							// Data URL として読み込む
-							// reader.readAsDataURL(file);
-							}, fail)
-					}, fail);
+				// var obj = this;
+				// window.obj = '';
+				window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, fncRead, fail);
+				function resolve(uri){
+					window.resolveLocalFileSystemURI(uri, fncFileEntry, fail);
 				}
+				function fncRead(fileSystem){
+					fileSystem.root.getFile(fname, {}, fncFileEntry, fail);
+				}
+				function fncFileEntry(fileEntry) {
+					fileEntry.file(fncFile, fail);
+				}
+				function fncFile(file) {
+					var reader = new FileReader();
+					reader.readAsText(file, "utf-8");
+					reader.onloadend = getText;
+				}
+				var getText = function(evt) {
+					// ここに読み込み完了後の処理を書く
+					var text = evt.target.result;
+					console.log("callback: " + text);
+					// json = JSON.parse(jsonText);
+					$("#textarea").val(text);
+					console.log("正常にテキストを読み込みました。");
+					
+					// 重複削除処理
+					window.localStorage.removeItem('tmp');
+					//JSON登録
+					window.localStorage.setItem('tmp', text);
+
+					// obj.text = text;
+					// window.obj = text;
+				}
+				// console.log("getText: " + getText);
+				// return obj.text;
+				// return window.obj = text;
 			}
+			
+			// function getFile(fname){
+				// var res = '';
+				// setTimeout( function() {
+					// res = gotFS_read(fname);
+					// return res;
+				// }, 300);
+				// gotFS_read(fname);
+			// }
+// 			
+			// // 複数ファイル読込処理
+			// function readFiles(files) {
+				// window.objArray = new Array();
+				// var length = fArray.length;
+				// for(var i = 0; i < length; i++){
+					// window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, fncRead, fail);
+					// function fncRead(fileSystem){
+						// fileSystem.root.getFile(files[i], {}, fncFileEntry, fail);
+					// }
+					// function fncFileEntry(fileEntry) {
+						// fileEntry.file(fncFile, fail);
+					// }
+					// function fncFile(file) {
+						// var reader = new FileReader();
+						// reader.readAsText(file, "utf-8");
+						// reader.onloadend = getText;
+					// }
+					// var getText = function(evt) {
+						// // ここに読み込み完了後の処理を書く
+						// var text = evt.target.result;
+						// console.log("正常にテキストを読み込みました。: " + text);
+						// window.objArray.push(text);
+					// }
+				// }
+				// return window.objArray;
+			// }
 			
 			// ファイル削除
 			function removeFS(fname) {
@@ -109,6 +167,8 @@
 			function fail(error) {
 				console.log(error.code);
 			}
+			
+		// }
 
 		</script>
 
