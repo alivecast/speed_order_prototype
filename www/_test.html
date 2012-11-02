@@ -29,24 +29,7 @@
 
 			function onDeviceReady() {
 				// Alert -----------------------------------------------------------------------
-				navigator.notification.alert("index.html");
-
-				$("#saveBtn").bind("tap", function() {
-					var hash = {
-						customer_name:"あいうえお",
-						customer_sex:"man"
-					}
-					var jsonObj = hash;
-                                   
-					setItem('ordering', jsonObj);
-					
-				});
-
-				$("#loadBtn").bind("tap", function() {
-					var json = getItem('ordering');
-                                   
-					navigator.notification.alert(json);
-				});
+				navigator.notification.alert("test.html");
 			}
 
 		</script>
@@ -57,27 +40,31 @@
 
 		<section data-role="page">
 			<div data-role="header">
-				<h1>testFile</h1>
+				<h1>_test.html</h1>
 			</div><!-- header -->
 			<div data-role="content">
+				
+				
+			</div><!-- content -->
+			<div class="footer" data-role="footer" data-position="fixed" data-id="tabber">
 				<ul>
-					<li>
-						<a href="index.html">index</a>
+					<li class="tab01">
+						<a href="show_order.html">
+							<span>注文履歴</span>
+						</a>
 					</li>
-					<li>
-						<a href="setting.html">設定</a>
+					<li class="tab02">
+						<a href="barcode.html" target="_blank">
+							<span>読み取り</span>
+						</a>
+					</li>
+					<li class="tab03 current">
+						<a href="setting.html">
+							<span>設定</span>
+						</a>
 					</li>
 				</ul>
-				<div data-role="fieldcontain">
-
-					<button id="saveBtn" >
-						save
-					</button >
-					<button id="loadBtn" >
-						load
-					</button >
-				</div>
-			</div><!-- content -->
+			</div><!-- /dr-footer -->
 		</section><!-- page -->
 
 	</body>
