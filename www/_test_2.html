@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title></title>
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no;" />
+		<meta charset="utf-8">
+
+		<!-- iPad/iPhone specific css below, add after your main css >
+		<link rel="stylesheet" media="only screen and (max-device-width: 1024px)" href="ipad.css" type="text/css" />
+		<link rel="stylesheet" media="only screen and (max-device-width: 480px)" href="iphone.css" type="text/css" />
+		-->
+
+		<link rel="stylesheet" href="js/jquery.mobile-1.0.1.min.css" type="text/css" />
+		<script type="text/javascript" charset="utf-8" src="js/jquery-1.6.4.min.js"></script>
+		<script type="text/javascript" charset="utf-8" src="js/jquery.mobile-1.0.1.min.js"></script>
+		
+		<script type="text/javascript" charset="utf-8" src="js/base64.js"></script>
+        <script type="text/javascript" charset="utf-8" src="js/aes.js"></script>
+
+		<script type="text/javascript" charset="utf-8" src="js/cordova-1.5.0.js"></script>
+		<script type="text/javascript" charset="utf-8" src="ChildBrowser.js"></script>
+
+		<script type="text/javascript" charset="utf-8" src="js/main.js"></script>
+		
+		<link rel="stylesheet" href="css/iphone.css" type="text/css" />
+
+		<script type="text/javascript">
+            
+			var childbrowser;
+            
+			function onBodyLoad() {
+				document.addEventListener("deviceready", onDeviceReady, false);
+			}
+
+			function onDeviceReady() {
+				// Alert -----------------------------------------------------------------------
+				navigator.notification.alert("_test_2.html");
+
+				// html取得
+				// var filename = 'http://speed-order.jp/class/phonegap/test2.html';
+				// getIndex(filename);
+				
+				//ChildBrowser
+				childbrowser = ChildBrowser.install();
+				
+				function onLinkClick() {
+ 
+					if(childbrowser != null){
+						childbrowser.onLocationChange = function(loc){ alert("In index.html new loc = " + loc); };
+						childbrowser.onClose = function(){alert("In index.html child browser closed");};
+						childbrowser.onOpenExternal = function(){alert("In index.html onOpenExternal");};
+				 
+						window.plugins.childBrowser.showWebPage("http://google.com");
+					}
+				}
+				
+				function getIndex(filename) {
+					xmlhttp = new XMLHttpRequest();
+					if (xmlhttp){
+						xmlhttp.onreadystatechange = check;
+						xmlhttp.open("GET", filename);
+						xmlhttp.send(null);
+					}
+				}
+				function check(){
+					if (xmlhttp.readyState == 4 && xmlhttp.status == 200){
+						document.getElementById("htmlData").innerHTML = xmlhttp.responseText;
+						console.log(xmlhttp.responseText);
+					}
+				}
+				
+			}
+
+		</script>
+
+	</head>
+
+	<body onload="onBodyLoad()">
+		<!--
+		<section data-role="page">
+			
+			<div data-role="header">
+				<h1>セキュリティコードとは</h1>
+			</div>
+			<div id="htmlData" data-role="content"></div>
+			<div class="footer" data-role="footer" data-position="fixed" data-id="tabber">
+				<ul>
+					<li class="tab01">
+						<a href="show_order.html"> <span>注文履歴</span> </a>
+					</li>
+					<li class="tab02 current">
+						<a href="barcode.html" target="_blank"> <span>読み取り</span> </a>
+					</li>
+					<li class="tab03">
+						<a href="index.html"> <span>設定</span> </a>
+					</li>
+				</ul>
+			</div>
+			
+		</section>
+		-->
+
+	</body>
+</html>
+

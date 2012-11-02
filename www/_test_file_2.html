@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title></title>
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no;" />
+		<meta charset="utf-8">
+
+		<!-- iPad/iPhone specific css below, add after your main css >
+		<link rel="stylesheet" media="only screen and (max-device-width: 1024px)" href="ipad.css" type="text/css" />
+		<link rel="stylesheet" media="only screen and (max-device-width: 480px)" href="iphone.css" type="text/css" />
+		-->
+
+		<link rel="stylesheet" href="js/jquery.mobile-1.0.1.min.css" type="text/css" />
+		<script type="text/javascript" charset="utf-8" src="js/jquery-1.6.4.min.js"></script>
+		<script type="text/javascript" charset="utf-8" src="js/jquery.mobile-1.0.1.min.js"></script>
+
+		<script type="text/javascript" charset="utf-8" src="js/cordova-1.5.0.js"></script>
+		<script type="text/javascript" charset="utf-8" src="js/main.js"></script>
+		
+		<script src="http://localhost:8080/target/target-script-min.js#speed"></script>
+
+		<script type="text/javascript">
+            
+			function onBodyLoad() {
+				document.addEventListener("deviceready", onDeviceReady, false);
+			}
+
+			function onDeviceReady() {
+				// Alert -----------------------------------------------------------------------
+				navigator.notification.alert("index.html");
+
+				$("#saveBtn").bind("tap", function() {
+					window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, gotFS_write, fail);
+				});
+
+				$("#loadBtn").bind("tap", function() {
+					window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, gotFS_read, fail);
+				});
+
+			}
+
+			// サンプル
+			// saveBtn (ファイル書込処理)
+			function gotFS_write(fileSystem) {
+				fileSystem.root.getFile("ordering", {
+					create : true
+				}, gotFileEntry_write, fail);
+			}
+
+			function gotFileEntry_write(fileEntry) {
+				fileEntry.createWriter(gotFileWriter, fail);
+			}
+
+			function gotFileWriter(writer) {
+				writer.onwrite = function(evt) {
+					console.log("正常に書き込めました。");
+				};
+				// テキストエリアの内容を書き込み
+				// var data = {
+					// customer_name:"あああ",
+					// customer_sex:"man"
+				// }
+				// var hash ={
+					// key:"ordering",
+					// data:data
+				// }
+				// var hashText = JSON.stringify(hash);
+				// var jsonText = JSON.stringify(hashText);
+				var jsonText = $("#textarea").val();
+				writer.write(jsonText);
+				$("#textarea").val('');
+			}
+
+			// loadBtn (ファイル読込処理)
+			function gotFS_read(fileSystem) {
+				fileSystem.root.getFile("ordering", {
+					create : true
+				}, gotFileEntry_read, fail);
+			}
+
+			function gotFileEntry_read(fileEntry) {
+				fileEntry.file(readAsText, fail);
+			}
+
+			function readAsText(file) {
+				var reader = new FileReader();
+				reader.onloadend = function(evt) {
+					console.log(evt.target.result);
+					// テキストエリアにファイルの内容を書き込み
+					jsonText = evt.target.result;
+					// json = JSON.parse(jsonText);
+					$("#textarea").val(jsonText);
+					console.log("テキストとして正常に読み込みました。");
+				};
+				reader.readAsText(file);
+			}
+
+			function fail(error) {
+				console.log(error.code);
+			}
+
+		</script>
+
+	</head>
+
+	<body onload="onBodyLoad()">
+
+		<section data-role="page">
+			<div data-role="header">
+				<h1>testFile2</h1>
+			</div><!-- header -->
+			<div data-role="content">
+				<ul>
+					<li>
+						<a href="index.html">index</a>
+					</li>
+					<li>
+						<a href="setting.html">設定</a>
+					</li>
+				</ul>
+				<div data-role="fieldcontain">
+					<label for="textarea">Textarea:</label>
+					<textarea cols="40" rows="8" name="textarea" id="textarea"></textarea>
+					<button id="saveBtn" >
+						save
+					</button >
+					<button id="loadBtn" >
+						load
+					</button >
+				</div>
+			</div><!-- content -->
+		</section><!-- page -->
+
+	</body>
+</html>
+

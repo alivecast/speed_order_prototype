@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no;" />
+		<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+
+		<link rel="stylesheet" href="js/jquery.mobile-1.0.1.min.css" />
+		<script type="text/javascript" charset="utf-8" src="js/jquery-1.6.4.min.js"></script>
+		<script type="text/javascript" charset="utf-8" src="js/jquery.mobile-1.0.1.min.js"></script>
+
+		<script type="text/javascript" charset="utf-8" src="js/cordova-1.5.0.js"></script>
+
+		<script type="text/javascript">
+
+			function onBodyLoad() {
+				document.addEventListener("deviceready", onDeviceReady, false);
+			}
+
+			function onDeviceReady() {
+
+				var key;
+
+				// 起動時にlocalStorageに保存されているメモを一覧に書き出し
+				for (var i = 0; i < window.localStorage.length; i++) {
+					key = window.localStorage.key(i);
+					$('#memoList').append('<li><a href="#edit" id="' + key + '" class="edit" /></li>');
+					$('#' + key).text(window.localStorage.getItem(key));
+				}
+				$('#memoList').listview('refresh');
+
+				// メモを新規に作成
+				$('#new').live('click', function(){
+					var new_memo_id = 'memo_' + (window.localStorage.length + 1);
+					window.localStorage.setItem(new_memo_id, '');
+					$('#editMemo').attr('name', new_memo_id);
+					$('#editMemo').val('');
+					$('#memoList').append('<li><a href="#edit" id="' + new_memo_id + '" class="editMemo" /></li>');
+					$('#memoList').listview('refresh');
+				});
+
+				// メモを編集
+				$('.edit').live('click', function(){
+					$('#editMemo').attr('name', this.id);
+					$('#editMemo').val(window.localStorage.getItem(this.id));
+				});
+
+				// テキストエリアを監視し，変更がおこなわれると localStorage に保存をおこなう
+				$('#editMemo').live('change', function() {
+					window.localStorage.setItem(this.name, this.value);
+					$('#' + this.name).text(this.value);
+				});
+
+				// メモを削除
+				$('#delete').live('click', function() {
+					navigator.notification.confirm('メモを削除します', function(button) {
+						if (1 === button) {
+							$('#' + String($('#editMemo').attr('name'))).parent().parent().remove();
+							window.localStorage.removeItem($('#editMemo').attr('name'));
+							location.href = '#home';
+						}
+					}, 'メモの削除', 'OK,キャンセル');
+				});
+
+				// メモを全削除
+				$('#drop').live('click', function() {
+					navigator.notification.confirm('メモをすべて削除します', function(button) {
+						if (1 === button) {
+							window.localStorage.clear();
+							$('#memoList').empty();
+						}
+					}, 'メモの全削除', 'OK,キャンセル');
+				});
+
+			}
+
+		</script>
+
+	</head>
+
+	<body onload="onBodyLoad()">
+
+		<!-- 一覧 -->
+		<div id="home" data-role="page">
+			<div data-role="header" data-theme="b">
+				<h1>一覧</h1>
+				<a id="new" href="#edit" data-role="button" data-icon="plus" class="ui-btn-right">New</a>
+			</div>
+			<div data-role="content">
+				<ul>
+					<li>
+						<a href="index.html" >index</a>
+					</li>
+					<li>
+						<a href="barcode.html" target="_blank" >Barcode</a>
+					</li>
+				</ul>
+				<ul id="memoList" data-role="listview" data-theme="g"></ul>
+			</div>
+			<div data-role="footer" data-position="fixed" data-theme="b" class="id-bar">
+				<a id="drop" href="javascript:void(0)" data-role="button" data-icon="delete">All delete</a>
+                
+                    
+                    <nav id="custom" data-role="navbar">
+                        <ul>
+                            <li><a href="#" id="bercode" data-icon="custom">QRコード</a></li>
+                            <li><a href="#" id="order" data-icon="custom">購入履歴</a></li>
+                            <li><a href="#" id="setting" data-icon="custom">設定</a></li>
+                        </ul>
+                    </nav>
+                    
+                    <style>
+                        .ui-btn-inner{
+                            padding-top:40px !important;
+                        }
+                        .ui-btn .ui-icon{
+                            width:30px !important;
+                            height:30px !important;
+                            margin-left:-15px !important;
+                            box-shadow:none !important;
+                            -moz-box-shadow:none !important;
+                            -webkit-box-shadow:none !important;
+                            -webkit-border-radius:0 !important;
+                            border-radius:0 !important;
+                        }
+                        #bercode .ui-icon{
+                            background:url(icon/barcode.png) 50% 50% no-repeat !important;
+                            background-size:20px 24px !important;
+                        }
+                        #order .ui-icon{
+                            background:url(icon/shopping.png) 50% 50% no-repeat !important;
+                            background-size:20px 24px !important;
+                        }
+                        #setting .ui-icon{
+                            background:url(icon/gear2.png) 50% 50% no-repeat !important;
+                            background-size:20px 24px !important;
+                        }
+                        </style>
+                    
+			</div>
+		</div>
+
+		<!-- 編集 -->
+		<div id="edit" data-role="page">
+			<div data-role="header" data-theme="b">
+				<a id="back" href="#home" data-direction="reverse" data-role="button" data-icon="arrow-l">Back</a>
+				<h1>Edit</h1>
+				<a id="delete" href="javascript:void(0)" data-direction="reverse" data-role="button" data-icon="delete">Delete</a>
+			</div>
+			<div data-role="content">
+				<textarea placeholder="Hello, PhoneGap!" id="editMemo" rows="8" style="height:100%;"></textarea>
+			</div>
+		</div>
+
+	</body>
+</html>

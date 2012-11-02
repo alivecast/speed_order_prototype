@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title></title>
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no;" />
+		<meta charset="utf-8">
+
+		<!-- iPad/iPhone specific css below, add after your main css >
+		<link rel="stylesheet" media="only screen and (max-device-width: 1024px)" href="ipad.css" type="text/css" />
+		<link rel="stylesheet" media="only screen and (max-device-width: 480px)" href="iphone.css" type="text/css" />
+		-->
+
+		<link rel="stylesheet" href="js/jquery.mobile-1.2.0.min.css" type="text/css" />
+		<link rel="stylesheet" href="css/iphone.css" type="text/css" />
+
+		<script type="text/javascript" charset="utf-8" src="js/jquery-1.8.2.min.js"></script>
+
+		<script type="text/javascript" charset="utf-8" src="js/base64.js"></script>
+		<script type="text/javascript" charset="utf-8" src="js/aes.js"></script>
+
+		<script type="text/javascript" charset="utf-8" src="js/cordova-1.5.0.js"></script>
+		<script type="text/javascript" charset="utf-8" src="js/barcodescanner.js"></script>
+		<script type="text/javascript" charset="utf-8" src="js/ChildBrowser.js"></script>
+		<script type="text/javascript" charset="utf-8" src="js/NativeControls.js"></script>
+
+		<script type="text/javascript" charset="utf-8" src="js/main.js"></script>
+
+		<script type="text/javascript" charset="utf-8" src="js/ajaxzip3.js"></script>
+		<script type='text/javascript' charset="utf-8" src="js/jquery.validate.min.js"></script>
+
+		<script type="text/javascript">
+			function onBodyLoad() {
+
+				document.addEventListener("deviceready", onDeviceReady, false);
+
+			}
+
+			function onDeviceReady() {
+
+				// Alert -----------------------------------------------------------------------
+				navigator.notification.alert("index.html");
+			}
+
+			// POST通信 ---------------------------------------------------------------------
+			function sendPost(url, params) {
+				$.post(url, // アクセスするURL
+				params, // 送信データ
+				function(data, status, XHR) {// 処理結果
+					resultSpan.innerText = status + JSON.stringify(data);
+				});
+			}
+
+		</script>
+
+	<script type="text/javascript" charset="utf-8" src="js/jquery.mobile-1.2.0.min.js"></script>
+
+	</head>
+
+	<body onload="onBodyLoad()">
+
+		<div data-role="page" data-add-back-btn="false">
+
+			<div data-role="header" id="header" data-position="fixed">
+				<h1>クレジット情報の確認</h1>
+				<a data-rel="back" href="#" class="ui-btn-left" data-icon="arrow-l" data-direction="reverse" data-ajax="false">
+					戻る
+				</a>
+			</div>
+
+			<div class="cont_card_edit" data-role="content">
+				<div data-role="fieldcontain" >
+					<ul class="setup_list" data-role="listview">
+
+						<li class="shop_neme">
+							<p class="txt">
+								ご登録いただいているクレジットカード番号
+							</p>
+							<span>************<%= hide_card_number(@card.card_number) %></span>
+							<p class="txt">
+								有効期限
+							</p>
+							<span>xx月/xx年</span>
+
+						</li>
+
+						<li class="report">
+							<div class="txt">
+								クレジットカードの再登録はこちら。<br />（安全の為、登録している情報の確認・変更は出来ません。変更を行いたい場合は、再登録をお願い致します）
+							</div>
+							<div class="report_btn">
+								<a class="btn_prev" href="card_new.html" data-role="button"> クレジットカードを再登録する </a>
+							</div>
+						</li>
+
+					</ul>
+				</div>
+			</div>
+
+			<!-- nav -->
+			<div class="footer" data-role="footer" data-position="fixed" data-id="tabber">
+				<ul>
+					<li class="tab01">
+						<a href="show_order.html" data-ajax="false">
+							<span>注文履歴</span>
+						</a>
+					</li>
+					<li class="tab02">
+						<a href="barcode.html" data-ajax="false">
+							<span>読み取り</span>
+						</a>
+					</li>
+					<li class="tab03 current">
+						<a href="setting.html" data-ajax="false">
+							<span>設定</span>
+						</a>
+					</li>
+				</ul>
+				<!-- /dr-footer -->
+			</div>
+
+		</div>
+
+	</body>
+</html>
+

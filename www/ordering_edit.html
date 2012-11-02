@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title></title>
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no;" />
+		<meta charset="utf-8">
+
+		<!-- iPad/iPhone specific css below, add after your main css >
+		<link rel="stylesheet" media="only screen and (max-device-width: 1024px)" href="ipad.css" type="text/css" />
+		<link rel="stylesheet" media="only screen and (max-device-width: 480px)" href="iphone.css" type="text/css" />
+		-->
+
+		<link rel="stylesheet" href="js/jquery.mobile-1.2.0.min.css" type="text/css" />
+		<link rel="stylesheet" href="css/iphone.css" type="text/css" />
+
+		<script type="text/javascript" charset="utf-8" src="js/jquery-1.8.2.min.js"></script>
+
+		<script type="text/javascript" charset="utf-8" src="js/base64.js"></script>
+		<script type="text/javascript" charset="utf-8" src="js/aes.js"></script>
+
+		<script type="text/javascript" charset="utf-8" src="js/cordova-1.5.0.js"></script>
+		<script type="text/javascript" charset="utf-8" src="js/barcodescanner.js"></script>
+		<script type="text/javascript" charset="utf-8" src="js/ChildBrowser.js"></script>
+		<script type="text/javascript" charset="utf-8" src="js/NativeControls.js"></script>
+
+		<script type="text/javascript" charset="utf-8" src="js/main.js"></script>
+
+		<script type="text/javascript" charset="utf-8" src="js/ajaxzip3.js"></script>
+		<script type='text/javascript' charset="utf-8" src="js/jquery.validate.min.js"></script>
+
+		<script type="text/javascript">
+			function onBodyLoad() {
+
+				document.addEventListener("deviceready", onDeviceReady, false);
+			}
+
+			function onDeviceReady() {
+				// Alert -----------------------------------------------------------------------
+				navigator.notification.alert("ordring_edit.html");
+				
+				// 入力値をセット
+				setOrdering();
+			}
+
+			// POST通信 ---------------------------------------------------------------------
+			function sendPost(url, params) {
+				$.post(url, // アクセスするURL
+					params, // 送信データ
+					function(data, status, XHR) {// 処理結果
+	                    if (status == 'success') {
+							return data;
+						} else {
+							message = 'お客様情報の登録に失敗しました';
+							title = 'サーバーと通信できませんでした';
+							button = 'OK';
+							navigator.notification.alert(message, alertCallBack(), title, button);
+						}
+					}
+				);
+			}
+
+			function setOrdering(){
+				console.log("::setOrdering::");
+				
+				var ordering = JSON.parse(window.localStorage.getItem('ordering'));
+				document.getElementById("customer_name").value = ordering.customer_name;
+                if(ordering.customer_sex == "man"){
+                    document.getElementsById("user_gender01").checked = true;
+                } else {
+                    document.getElementsById("user_gender02").checked = true;
+                }
+				document.getElementById("customer_birthday").value = ordering.customer_birthday;
+				document.getElementById("customer_zipcode").value = ordering.customer_zipcode;
+                var objSelect = document.getElementById("customer_pref");
+                var length = objSelect.length;
+                var i = 0;
+                for(i = 0; length > i; i++){
+                    if(objSelect.options[i].value == ordering.customer_pref){
+                        objSelect.options[i].selected = true;
+                        break;
+                    }
+                }
+				document.getElementById("customer_address1").value = ordering.customer_address1;
+				document.getElementById("customer_address2").value = ordering.customer_address2;
+				document.getElementById("customer_phone").value = ordering.customer_phone;
+				document.getElementById("customer_mail_1").value = ordering.customer_mail_1;
+				document.getElementById("customer_mail_2").value = ordering.customer_mail_2;
+				document.getElementById("customer_mail_3").value = ordering.customer_mail_3;
+				document.getElementById("customer_mail_4").value = ordering.customer_mail_4;
+			}
+
+			// 登録
+			function saveOrdering(){
+                console.log("::saveOrdering::");
+				// 新規ID
+				var new_id = 'ordering';
+				// var new_id = 'ordering' + (window.localStorage.length + 1);
+				// 入力値
+				var customer_name 		= document.getElementById("customer_name").value;
+				var customer_sex 		= document.getElementByName("customer_sex").value;
+				var customer_birthday 	= document.getElementById("customer_birthday").value;
+				var customer_zipcode 	= document.getElementById("customer_zipcode").value;
+				var customer_pref 		= document.getElementById("customer_pref").value;
+				var customer_address1 	= document.getElementById("customer_address1").value;
+				var customer_address2 	= document.getElementById("customer_address2").value;
+				var customer_phone 		= document.getElementById("customer_phone").value;
+				var customer_mail_1 	= document.getElementById("customer_mail_1").value;
+				var customer_mail_2 	= document.getElementById("customer_mail_2").value;
+				var customer_mail_3 	= document.getElementById("customer_mail_3").value;
+				var customer_mail_4 	= document.getElementById("customer_mail_4").value;
+                
+
+//				var hash = getCustomerId(customer_phone);
+//				var customer_id = hash.customer_id;
+//				// var key = hash.key;
+//				var iv = hahs.iv;
+				//json
+				var datalist = {
+//					customer_id: customer_id,
+//					// key: key,
+//					iv: iv,
+					customer_name: customer_name,
+					customer_sex:  customer_sex,
+					customer_birthday: customer_birthday,
+					customer_zipcode:  customer_zipcode,
+					customer_pref:     customer_pref,
+					customer_address1: customer_address1,
+					customer_address2: customer_address2,
+					customer_phone:  customer_phone,
+					customer_mail_1: customer_mail_1,
+					customer_mail_2: customer_mail_2,
+					customer_mail_3: customer_mail_3,
+					customer_mail_4: customer_mail_4
+				}
+                console.log("datalist: " + datalist);
+				// 重複削除処理
+				window.localStorage.removeItem(new_id);
+				//JSON登録
+				window.localStorage.setItem(new_id, JSON.stringify(datalist));
+				// お届け先への登録
+//				saveAddressee(datalist);
+                // 確認
+                var ordering = JSON.parse(window.localStorage.getItem('ordering'));
+                
+                
+                // 設定画面へ移動
+                return false;
+			}
+			
+			// お届け先への保存
+			function saveAddressee(ordering){
+				// 要追加:他のお届け先のprimary設定をチェック
+				primary = 'primary';
+				// 新規ID
+				var new_id = 'addressee' + (window.localStorage.length + 1);
+				var datalist = {
+					customer_id: ordering.customer_id,
+					recipient_name: ordering.customer_name,
+				    recipient_subject: '個人設定と同じ',
+				    recipient_subject_ext: '個人設定と同じ',
+				    recipient_phone: ordering.customer_phone,
+				    recipient_zipcode: ordering.customer_zipcode,
+				    recipient_pref: ordering.customer_pref,
+				    recipient_address1: ordering.customer_address1,
+				    recipient_address2: ordering.customer_address2,
+				    recipient_main_flg: primary
+				}
+				// 重複削除処理
+				window.localStorage.removeItem(new_id);
+				//JSON登録
+				window.localStorage.setItem(new_id, JSON.stringify(datalist));
+			}
+
+			// 住所取得 -------------------------------------------------------------
+			function onAddress(){
+				AjaxZip3.zip2addr('customer_zipcode','','customer_pref','customer_address1','','customer_address2');
+			}
+
+		</script>
+<style type='text/css'> 
+    label.error {
+    color: red;
+    font-size: 16px;
+    font-weight: normal;
+    line-height: 1.4;
+    margin-top: 0.5em;
+    width: 100%;
+    float: none;
+}
+ 
+ label.error { display: inline-block; margin-left: 22%; }
+ 
+ label.error { margin-left: 0; display: block; }
+ 
+em { color: red; font-weight: bold; padding-right: .25em; }
+ 
+ 
+  </style> 
+<script type='text/javascript'> 
+$(function(){
+	$.extend($.validator.messages, {
+		required: "必須項目です",
+		number: "数値のみで入力してください",
+		equalTo: 'もう一度同じ値を入力して下さい。',
+		email: "メールアドレスを入力してください"
+	});
+
+	$('#form_ordering').validate({
+		// エラーの位置を設定します。
+		// 下記ではラジオボタンとチェックボックスのエラーメッセージを
+		// グループの最後に表示するように調整しています。
+		errorPlacement: function(error, element){
+			if (element.is(':radio, :checkbox')) {
+				error.appendTo(element.parent());
+			} else {
+				error.insertAfter(element);
+			}
+		}
+	});
+});
+</script>
+
+	<script type="text/javascript" charset="utf-8" src="js/jquery.mobile-1.2.0.min.js"></script>
+
+	</head>
+
+	<body onload="onBodyLoad()">
+
+		<div data-role="page" data-add-back-btn="false">
+			<div data-role="header" id="header" data-position="fixed">
+				<h1>個人情報変更</h1>
+				<a data-rel="back" href="#" class="ui-btn-left" data-icon="arrow-l" data-direction="reverse" data-ajax="false">
+					戻る
+				</a>
+			</div>
+
+			<div data-role="content">
+
+				<form id="form_ordering" method="get" action="setting.html" onsubmit="return saveOrdering();">
+					<input type="hidden" name="id" value=""/>
+
+					<div data-role="fieldcontain">
+
+						<ul class="setup_list" data-role="listview">
+							<li class="user_name vali">
+								<label for="customer_name" class="fieldLabel">ご利用者の情報</label>
+								<br />
+								<input type="text" id="customer_name" name="customer_name" value="" class="required"  placeholder="ご利用者の氏名" />
+							</li>
+
+							<li class="user_gender">
+								<fieldset data-role="controlgroup" data-type="horizontal" data-role="fieldcontain">
+									<legend>
+										性別
+									</legend>
+									<input type="radio" id="user_gender01" class="required" name="customer_sex" value="man" />
+									<label for="user_gender01">男性</label>
+									<input type="radio" id="user_gender02" class="required" name="customer_sex" value="woman" />
+									<label for="user_gender02">女性</label>
+								</fieldset>
+							</li>
+
+							<li class="user_birth">
+								<label for="birth_day" class="fieldLabel">生年月日</label>
+								<br />
+								<input type="date" id="customer_birthday" name="customer_birthday" class="required" value="1980/01/01" placeholder="生年月日 1980/01/01" />
+							</li>
+
+							<li class="address_zipcode">
+								<label for="customer_zipcode" class="fieldLabel">郵便番号</label>
+								<br />
+								<div class="box2">
+									<div class="box2_01">
+										<input type="tel" id="customer_zipcode" name="customer_zipcode" maxlength=7 value="" class="required number" placeholder="例）1234567" />
+									</div>
+									<div class="box2_02">
+										<a href="" data-role="button" class="btn_prev" onclick="onAddress();">郵便番号から住所入力</a>
+									</div>
+								</div>
+							</li>
+
+							<li class="address_pref">
+								<label for="customer_pref">住所</label>
+								<br />
+								<select id="customer_pref" class="required" name="customer_pref">
+									<option value="">都道府県</option>
+									<option value="北海道">北海道</option>
+									<option value="青森県">青森県</option>
+									<option value="岩手県">岩手県</option>
+									<option value="宮城県">宮城県</option>
+									<option value="秋田県">秋田県</option>
+									<option value="山形県">山形県</option>
+									<option value="福島県">福島県</option>
+									<option value="茨城県">茨城県</option>
+									<option value="栃木県">栃木県</option>
+									<option value="群馬県">群馬県</option>
+									<option value="埼玉県">埼玉県</option>
+									<option value="千葉県">千葉県</option>
+									<option value="東京都">東京都</option>
+									<option value="神奈川県">神奈川県</option>
+									<option value="新潟県">新潟県</option>
+									<option value="富山県">富山県</option>
+									<option value="石川県">石川県</option>
+									<option value="福井県">福井県</option>
+									<option value="山梨県">山梨県</option>
+									<option value="長野県">長野県</option>
+									<option value="岐阜県">岐阜県</option>
+									<option value="静岡県">静岡県</option>
+									<option value="愛知県">愛知県</option>
+									<option value="三重県">三重県</option>
+									<option value="滋賀県">滋賀県</option>
+									<option value="京都府">京都府</option>
+									<option value="大阪府">大阪府</option>
+									<option value="兵庫県">兵庫県</option>
+									<option value="奈良県">奈良県</option>
+									<option value="和歌山県">和歌山県</option>
+									<option value="鳥取県">鳥取県</option>
+									<option value="島根県">島根県</option>
+									<option value="岡山県">岡山県</option>
+									<option value="広島県">広島県</option>
+									<option value="山口県">山口県</option>
+									<option value="徳島県">徳島県</option>
+									<option value="香川県">香川県</option>
+									<option value="愛媛県">愛媛県</option>
+									<option value="高知県">高知県</option>
+									<option value="福岡県">福岡県</option>
+									<option value="佐賀県">佐賀県</option>
+									<option value="長崎県">長崎県</option>
+									<option value="熊本県">熊本県</option>
+									<option value="大分県">大分県</option>
+									<option value="宮崎県">宮崎県</option>
+									<option value="鹿児島県">鹿児島県</option>
+									<option value="沖縄県">沖縄県</option>
+								</select>
+								<br />
+								<input type="text" id="customer_address1" name="customer_address1" class="required" value=""  placeholder="〇〇市〇〇町" />
+								<br />
+								<input type="text" id="customer_address2" name="customer_address2" class="required" value=""  placeholder="１-２-３　〇〇マンション101" />
+							</li>
+
+							<li class="address_phone">
+								<label for="customer_phone" class="fieldLabel">電話番号</label>
+								<br />
+								<input type="tel" id="customer_phone" name="customer_phone" maxlength=11 class="required number" value="" placeholder="例）0123456789(ハイフンなし)" />
+							</li>
+
+							<li class="address_phone">
+								<div class="tl">
+									メールアドレスの登録
+								</div>
+								<div class="txt">
+									メインでやり取り使われるメールアドレスをご登録ください。このアドレスに注文情報やお問合せのへ返答が送信されます。
+								</div>
+								<input type="email" id="customer_mail_1" name="customer_mail_1" value="" class="required email" placeholder="【必須】例）sample1@speed-order.jp" />
+
+							</li>
+
+							<li class="address_phone">
+								<div class="tl">
+									メールアドレスの追加
+								</div>
+								<div class="txt">
+									上記以外で3つまでご登録いただけます。上記以外のメールアドレスにも注文情報などを送りたい場合は、こちらにメールアドレスを登録し、チェックをいれてください。
+								</div>
+
+								<input type="email" id="customer_mail_2" name="customer_mail_2" value="" class="email" placeholder="【任意】例）sample2@speed-order.jp" />
+								<label for="customer_mail_2ck"><input type="checkbox" value=1 id="customer_mail_2ck" />このアドレスにも送る</label>
+								<br/>
+								<input type="email" id="customer_mail_3" name="customer_mail_3" value="" class="email" placeholder="【任意】例）sample3@speed-order.jp" />
+								<label for="customer_mail_3ck"><input type="checkbox" value=1 id="customer_mail_3ck" />このアドレスにも送る</label>
+								<br/>
+								<input type="email" id="customer_mail_4" name="customer_mail_4" value="" class="email" placeholder="【任意】例）sample4@speed-order.jp" />
+								<label for="customer_mail_4ck"><input type="checkbox" value=1 id="customer_mail_4ck" />このアドレスにも送る</label>
+							</li>
+
+							<li class="item_buy_1btn btn_txt_ow">
+								<div>
+									<input class="btn_next" type="submit" value="登録する" />
+								</div>
+							</li>
+
+						</ul>
+					</div>
+				</form>
+				
+			</div>
+
+			<!-- nav -->
+			<div class="footer" data-role="footer" data-position="fixed" data-id="tabber">
+				<ul>
+					<li class="tab01">
+						<a href="show_order.html" data-ajax="false">
+							<span>注文履歴</span>
+						</a>
+					</li>
+					<li class="tab02">
+						<a href="barcode.html" data-ajax="false">
+							<span>読み取り</span>
+						</a>
+					</li>
+					<li class="tab03 current">
+						<a href="setting.html" data-ajax="false">
+							<span>設定</span>
+						</a>
+					</li>
+				</ul>
+				<!-- /dr-footer -->
+			</div>
+
+		</div>
+	</body>
+</html>
+

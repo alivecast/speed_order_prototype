@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title></title>
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no;" />
+		<meta charset="utf-8">
+
+		<!-- iPad/iPhone specific css below, add after your main css >
+		<link rel="stylesheet" media="only screen and (max-device-width: 1024px)" href="ipad.css" type="text/css" />
+		<link rel="stylesheet" media="only screen and (max-device-width: 480px)" href="iphone.css" type="text/css" />
+		-->
+
+		<link rel="stylesheet" href="js/jquery.mobile-1.2.0.min.css" type="text/css" />
+		<link rel="stylesheet" href="css/iphone.css" type="text/css" />
+
+		<script type="text/javascript" charset="utf-8" src="js/jquery-1.8.2.min.js"></script>
+
+		<script type="text/javascript" charset="utf-8" src="js/base64.js"></script>
+		<script type="text/javascript" charset="utf-8" src="js/aes.js"></script>
+
+		<script type="text/javascript" charset="utf-8" src="js/cordova-1.5.0.js"></script>
+		<script type="text/javascript" charset="utf-8" src="js/barcodescanner.js"></script>
+		<script type="text/javascript" charset="utf-8" src="js/ChildBrowser.js"></script>
+		<script type="text/javascript" charset="utf-8" src="js/NativeControls.js"></script>
+
+		<script type="text/javascript" charset="utf-8" src="js/main.js"></script>
+
+		<script type="text/javascript" charset="utf-8" src="js/ajaxzip3.js"></script>
+		<script type='text/javascript' charset="utf-8" src="js/jquery.validate.min.js"></script>
+
+		<script type="text/javascript">
+		
+			function onBodyLoad() {
+				document.addEventListener("deviceready", onDeviceReady, false);
+			}
+
+			function onDeviceReady() {
+
+				// Alert -----------------------------------------------------------------------
+				navigator.notification.alert("index.html");
+			}
+
+			// サンプル データ ----------------------------------------------------------------
+			function sampleItem() {
+				var qr_id = '2001010000160000038101';
+				var area_name = '北海道';
+				var url = 'http://speed-order.jp/class/json_pg/send_item_info.php';
+				var params = {
+					qr_id : qr_id,
+					area_name : area_name
+				};
+				var sample = {
+					url : url,
+					params : params
+				};
+
+				return sample;
+			}
+
+			// POST通信 ---------------------------------------------------------------------
+			function sendPost(url, params) {
+
+				$.post(url, // アクセスするURL
+				params, // 送信データ
+				function(data, status, XHR) {// 処理結果
+					resultSpan.innerText = status + JSON.stringify(data);
+				});
+			}
+
+			// GET通信 ---------------------------------------------------------------------
+			function sendGet(url, params) {
+
+				$.get(url, // アクセスするURL
+				params, // 送信データ
+				function(data, status, XHR) {// 処理結果
+					if (status == 'success') {
+						resultSpan.innerText = status + JSON.stringify(data);
+					} else {
+						resultSpan.innerText = status + JSON.stringify('NG');
+					}
+				});
+			}
+
+		</script>
+
+<style type='text/css'> 
+    label.error {
+    color: red;
+    font-size: 16px;
+    font-weight: normal;
+    line-height: 1.4;
+    margin-top: 0.5em;
+    width: 100%;
+    float: none;
+}
+ 
+ label.error { display: inline-block; margin-left: 22%; }
+ 
+ label.error { margin-left: 0; display: block; }
+ 
+em { color: red; font-weight: bold; padding-right: .25em; }
+ 
+ 
+  </style>
+
+
+<script type='text/javascript'> 
+$(function(){
+	$.extend($.validator.messages, {
+		required: "必須項目です",
+		number: "数値のみで入力してください",
+		equalTo: 'もう一度同じ値を入力して下さい。',
+		email: "メールアドレスを入力してください"
+	});
+
+	$('#form_password').validate({
+		// それぞれの項目に適用される検証ルール 
+		rules: { 
+			passcode_number: { 
+				required: true,    // 必須検証 
+				number:   true,    // 必須検証 
+				rangelength: [4, 4]    // 文字列長検証 (2～10文字) 
+			},
+			re_number: { 
+				equalTo: '[name=passcode_number]'
+			}
+
+		},
+
+		// 検証エラー時に表示されるエラー メッセージ 
+		messages: { 
+			passcode_number: { 
+				required: 'パスワードは必ず入力してください。',
+				number: 'パスワードは数字４桁で入力してください。', 
+				rangelength: $.format('パスワードは{0}文字で入力してください。') // xxは{0}から{1}文字で入力してください。
+			},
+			re_number: { 
+				equalTo: '上と同じパスワードを入力してください'
+			}
+
+		},
+
+		// エラーの位置を設定します。
+		// 下記ではラジオボタンとチェックボックスのエラーメッセージを
+		// グループの最後に表示するように調整しています。
+		errorPlacement: function(error, element){
+			if (element.is(':radio, :checkbox')) {
+				error.appendTo(element.parent());
+			} else {
+				error.insertAfter(element);
+			}
+		}
+	});
+});
+</script>
+
+	<script type="text/javascript" charset="utf-8" src="js/jquery.mobile-1.2.0.min.js"></script>
+
+	</head>
+
+	<body onload="onBodyLoad()">
+
+		<div data-role="page" data-add-back-btn="false">
+
+			<div data-role="header" id="header" data-position="fixed">
+				<h1>暗証番号の設定</h1>
+				<a data-rel="back" href="#" class="ui-btn-left" data-icon="arrow-l" data-direction="reverse" data-ajax="false">
+					戻る
+				</a>
+			</div>
+
+			<div class="cont_passcode_edit" data-role="content">
+
+				<div class="page_description">
+					<div class="txt">
+						Speed Orderでご利用する暗証番号を設定します。
+					</div>
+					<br/>
+					<div class="txt" style="color: red;">
+						※ セキュリティにより、登録されたパスワードは、ご本人にも確認ができなくなります。
+						<br />
+						<br/>
+						※ 秘密の質問を設定することで、パスワードを忘れた場合でも再登録できるようになります。
+					</div>
+				</div>
+
+				<form method="POST" action="<%= url_for :action => :create %>" id="form_password">
+					<input type="hidden" name="id" value="<%= @passcode.object %>"/>
+					<input type="hidden" name="item_object" value="<%= @item_object %>"/>
+
+					<div data-role="fieldcontain" >
+						<ul class="setup_list" data-role="listview">
+
+							<li class="passcode">
+								<label for="passcode[passcode_number]" class="fieldLabel">暗証番号<span class="form_note">(数字４桁)</span></label>
+								<input type="password" id="passcode_number" name="passcode_number" class="" value="" maxlength=4 placeholder="例）1234" />
+							</li>
+
+							<li class="passcode">
+								<label for="re_number" class="fieldLabel">確認のため再入力<span class="form_note">(数字４桁)</span></label>
+								<input type="password" id="re_number" name="re_number" class="password_confirm" value="" maxlength=4 placeholder="例）1234" />
+							</li>
+
+							<li>
+								パスワードを忘れた場合にそなえ、秘密の質問・回答を設定してください。
+							</li>
+
+							<li class="passcode">
+								<label for="passcode[question]" class="fieldLabel">秘密の質問<span class="form_note">(自分だけにわかる質問)</span></label>
+								<input type="text" id="passcode[question]" name="passcode[question]" class="required" value="" placeholder="例）ペットの名前は？" />
+								</li>
+
+								<li class="passcode">
+								<label for="passcode[answer]" class="fieldLabel">質問の回答</label>
+								<input type="text" id="passcode[answer]" name="passcode[answer]" class="required" value="" placeholder="例）ポチ" />
+							</li>
+
+							<li class="item_buy_1btn btn_txt_ow">
+								<div>
+									<button class="btn_next" type="submit">
+										登録する
+									</button>
+								</div>
+							</li>
+						</ul>
+					</div>
+				</form>
+			</div>
+
+			<!-- nav -->
+			<div class="footer" data-role="footer" data-position="fixed" data-id="tabber">
+				<ul>
+					<li class="tab01">
+						<a href="show_order.html" data-ajax="false">
+							<span>注文履歴</span>
+						</a>
+					</li>
+					<li class="tab02">
+						<a href="barcode.html" data-ajax="false">
+							<span>読み取り</span>
+						</a>
+					</li>
+					<li class="tab03 current">
+						<a href="setting.html" data-ajax="false">
+							<span>設定</span>
+						</a>
+					</li>
+				</ul>
+				<!-- /dr-footer -->
+			</div>
+
+		</div>
+	</body>
+</html>
+

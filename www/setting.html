@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title></title>
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no;" />
+		<meta charset="utf-8">
+
+		<!-- iPad/iPhone specific css below, add after your main css >
+		<link rel="stylesheet" media="only screen and (max-device-width: 1024px)" href="ipad.css" type="text/css" />
+		<link rel="stylesheet" media="only screen and (max-device-width: 480px)" href="iphone.css" type="text/css" />
+		-->
+
+		<link rel="stylesheet" href="js/jquery.mobile-1.2.0.min.css" type="text/css" />
+		<link rel="stylesheet" href="css/iphone.css" type="text/css" />
+
+		<script type="text/javascript" charset="utf-8" src="js/jquery-1.8.2.min.js"></script>
+
+		<script type="text/javascript" charset="utf-8" src="js/base64.js"></script>
+		<script type="text/javascript" charset="utf-8" src="js/aes.js"></script>
+
+		<script type="text/javascript" charset="utf-8" src="js/cordova-1.5.0.js"></script>
+		<script type="text/javascript" charset="utf-8" src="js/barcodescanner.js"></script>
+		<script type="text/javascript" charset="utf-8" src="js/ChildBrowser.js"></script>
+		<script type="text/javascript" charset="utf-8" src="js/NativeControls.js"></script>
+
+		<script type="text/javascript" charset="utf-8" src="js/main.js"></script>
+
+		<script type="text/javascript" charset="utf-8" src="js/ajaxzip3.js"></script>
+		<script type='text/javascript' charset="utf-8" src="js/jquery.validate.min.js"></script>
+		<script type="text/javascript">
+			function onBodyLoad() {
+
+				document.addEventListener("deviceready", onDeviceReady, false);
+
+			}
+
+			function onDeviceReady() {
+
+				// Alert -----------------------------------------------------------------------
+				navigator.notification.alert("setting.html");
+
+				//JSONデータに戻して取得する
+				console.log("::setting::");
+				
+
+			}
+
+			// 個人設定（新規・編集）切り替え
+			function changeOrdering(){
+				console.log("::changeOrdering::");
+				var ordering_setting = '';
+				var ordering = JSON.parse(window.localStorage.getItem('ordering'));
+				console.log('changeOrdering: ' + window.localStorage.getItem('ordering'));
+				if (ordering == null && ordering.customer_name){
+					ordering_setting = '<a href="ordering_new.html"><span class="ico_check">';
+				} else {
+					ordering_setting = '<a href="ordering_edit.html"><span class="ico_check">';
+					ordering_setting += '<img src="images/speedorder/ico_check_r.png" width="16" height="15" alt=""  />';
+				}
+				ordering_setting += '</span> <span class="tl"> 個人設定（利用者情報） </span></a>';
+				document.getElementById('ordering_setting').innerHTML = ordering_setting;
+			}
+
+		</script>
+
+	<script type="text/javascript" charset="utf-8" src="js/jquery.mobile-1.2.0.min.js"></script>
+
+	</head>
+
+	<body onload="onBodyLoad()">
+
+		<div data-role="page" data-add-back-btn="false">
+
+			<div data-role="header" id="header" data-position="fixed">
+				<h1>設定</h1>
+				<a data-rel="back" href="#" class="ui-btn-left" data-icon="arrow-l" data-direction="reverse" data-ajax="false">
+					戻る
+				</a>
+			</div>
+
+			<div data-role="content">
+
+<!--
+				<% if $buy['flg'] == 'enable' && @item_info_app %>
+				<ul data-role="listview">
+					<li style="background-color:#ccc;">
+						<div class="txt">
+							ご購入をご希望された商品
+						</div>
+						<%= @item_info_app.item_name %>
+					</li>
+				</ul>
+				<% end %>
+-->
+				<div class="setup_no">
+
+					<!--% if !@setting && !@is_item %-->
+
+					<div class="tl">
+						ご注文いただくには下記の設定を行ってください。
+					</div>
+					<div class="txt">
+						<img src="images/speedorder/ico_check_r.png" width="16" height="15" alt="" />表示がない項目の設定を行ってください。
+					</div>
+<!--
+					<% elsif !@setting && @is_item %>
+					<div class="tl">
+						下記の設定をすると購入手続きが完了いたします。
+						<br>
+						購入手続き後のキャンセルもできます。
+					</div>
+					<div class="txt">
+						<img src="images/speedorder/ico_check_r.png" width="16" height="15" alt="" />表示がない項目の設定を行ってください。
+					</div>
+					<% else %>
+					<div class="setup_ok">
+						<div class="tl">
+							ご注文いただけます。
+						</div>
+					</div>
+					<% end %>
+-->
+				</div>
+				<ul data-role="listview">
+					<li id="ordering_setting">
+						<a data-ajax="false" href="ordering_new.html"> 
+							<span class="ico_check"> 
+							<!--% models = Ordering.find(:last)[0] %>
+							<% if models && models.error != 'disable' %-->
+								<img src="images/speedorder/ico_check_r.png" width="16" height="15" alt=""  /> 
+							<!--% end %--> 
+							</span> <span class="tl"> 個人設定（利用者情報） </span> 
+						</a>
+					</li>
+
+					<li>
+						<a data-ajax="false" href="addressee_edit.html"> <span class="ico_check">
+<!-- % models = Addressee.find(:last, :conditions => {:recipient_main_flg => 'primary'})[0] % -->
+							<!--% if models && models.error != 'disable' %--> <img src="images/speedorder/ico_check_r.png" width="16" height="15" alt=""  /> <!--% end %--> </span> <span class="tl"> お届け先 </span> </a>
+					</li>
+
+					<li>
+						<!--% if @card %-->
+						<a data-ajax="false" href="card_new.html"> <!--% else %> <a href="<%= url_for :controller => :Card, :action => :new %>"> <% end %--> <span class="ico_check"> <!--% models = Card.find(:last)[0] %-->
+							<!--% if models && models.error != 'disable' %--> <img src="images/speedorder/ico_check_r.png" width="16" height="15" alt=""  /> <!--% end %--> </span> <span class="tl"> クレジットカード </span> </a>
+					</li>
+
+					<li>
+						<a data-ajax="false" href="passcode_new.html"> <span class="ico_check"> <!--% models = Passcode.find(:all) %>
+							<% if models && models.size > 0 %--> <img src="images/speedorder/ico_check_r.png" width="16" height="15" alt=""  /> <!--% end %--> </span> <span class="tl"> 暗証番号 </span> </a>
+					</li>
+
+				</ul>
+
+			</div>
+
+			<!-- nav -->
+			<div class="footer" data-role="footer" data-position="fixed" data-id="tabber">
+				<ul>
+					<li class="tab01">
+						<a href="show_order.html" data-ajax="false">
+							<span>注文履歴</span>
+						</a>
+					</li>
+					<li class="tab02">
+						<a href="barcode.html" data-ajax="false">
+							<span>読み取り</span>
+						</a>
+					</li>
+					<li class="tab03 current">
+						<a href="setting.html" data-ajax="false">
+							<span>設定</span>
+						</a>
+					</li>
+				</ul>
+				<!-- /dr-footer -->
+			</div>
+
+		</div>
+	</body>
+</html>
+

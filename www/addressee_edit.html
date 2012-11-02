@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title></title>
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no;" />
+		<meta charset="utf-8">
+
+		<!-- iPad/iPhone specific css below, add after your main css >
+		<link rel="stylesheet" media="only screen and (max-device-width: 1024px)" href="ipad.css" type="text/css" />
+		<link rel="stylesheet" media="only screen and (max-device-width: 480px)" href="iphone.css" type="text/css" />
+		-->
+
+		<link rel="stylesheet" href="js/jquery.mobile-1.2.0.min.css" type="text/css" />
+		<link rel="stylesheet" href="css/iphone.css" type="text/css" />
+
+		<script type="text/javascript" charset="utf-8" src="js/jquery-1.8.2.min.js"></script>
+
+		<script type="text/javascript" charset="utf-8" src="js/base64.js"></script>
+		<script type="text/javascript" charset="utf-8" src="js/aes.js"></script>
+
+		<script type="text/javascript" charset="utf-8" src="js/cordova-1.5.0.js"></script>
+		<script type="text/javascript" charset="utf-8" src="js/barcodescanner.js"></script>
+		<script type="text/javascript" charset="utf-8" src="js/ChildBrowser.js"></script>
+		<script type="text/javascript" charset="utf-8" src="js/NativeControls.js"></script>
+
+		<script type="text/javascript" charset="utf-8" src="js/main.js"></script>
+
+		<script type="text/javascript" charset="utf-8" src="js/ajaxzip3.js"></script>
+		<script type='text/javascript' charset="utf-8" src="js/jquery.validate.min.js"></script>
+
+		<script type="text/javascript">
+			function onBodyLoad() {
+
+				document.addEventListener("deviceready", onDeviceReady, false);
+
+			}
+
+			function onDeviceReady() {
+
+				// Alert -----------------------------------------------------------------------
+				navigator.notification.alert("index.html");
+
+			}
+
+			// サンプル データ ----------------------------------------------------------------
+			function sampleItem() {
+
+				var qr_id = '2001010000160000038101';
+				var area_name = '北海道';
+
+				var url = 'http://speed-order.jp/class/json_pg/send_item_info.php';
+				var params = {
+					qr_id : qr_id,
+					area_name : area_name
+				};
+
+				var sample = {
+					url : url,
+					params : params
+				};
+
+				return sample;
+			}
+
+			// POST通信 ---------------------------------------------------------------------
+			function sendPost(url, params) {
+
+				$.post(url, // アクセスするURL
+				params, // 送信データ
+				function(data, status, XHR) {// 処理結果
+					resultSpan.innerText = status + JSON.stringify(data);
+
+				});
+			}
+
+			// GET通信 ---------------------------------------------------------------------
+			function sendGet(url, params) {
+
+				$.get(url, // アクセスするURL
+				params, // 送信データ
+				function(data, status, XHR) {// 処理結果
+					if (status == 'success') {
+						resultSpan.innerText = status + JSON.stringify(data);
+					} else {
+						resultSpan.innerText = status + JSON.stringify('NG');
+					}
+				});
+			}
+
+			// 住所取得 -------------------------------------------------------------
+			function onAddress(){
+				AjaxZip3.zip2addr('addressee[recipient_zipcode]','','addressee[recipient_pref]','addressee[recipient_address1]','','addressee[recipient_address2]');
+			}
+
+
+		</script>
+
+<style type='text/css'> 
+    label.error {
+    color: red;
+    font-size: 16px;
+    font-weight: normal;
+    line-height: 1.4;
+    margin-top: 0.5em;
+    width: 100%;
+    float: none;
+}
+ 
+ label.error { display: inline-block; margin-left: 22%; }
+ 
+ label.error { margin-left: 0; display: block; }
+ 
+em { color: red; font-weight: bold; padding-right: .25em; }
+ 
+ 
+  </style> 
+<script type='text/javascript'> 
+  //<![CDATA[ 
+jQuery.extend(jQuery.validator.messages, {
+	required: "必須項目です",
+	number: "数値のみで入力してください",
+	email: "メールアドレスを入力してください",
+	url: "URLを入力してください",
+});
+
+  $(window).load(function(){
+  $("#form_address").validate();
+  });
+  //]]> 
+  </script>
+
+	<script type="text/javascript" charset="utf-8" src="js/jquery.mobile-1.2.0.min.js"></script>
+
+	</head>
+
+	<body onload="onBodyLoad()">
+
+		<div data-role="page" data-add-back-btn="false">
+
+			<div data-role="header" id="header" data-position="fixed">
+				<h1>お届け先の設定</h1>
+				<a data-rel="back" href="#" class="ui-btn-left" data-icon="arrow-l" data-direction="reverse" data-ajax="false">
+					戻る
+				</a>
+			</div>
+
+			<div class="cont_addressEdit" data-role="content">
+				<form method="get" action="<!-- %= url_for :action => :update % -->">
+					<input type="hidden" name="id" value="<!-- %= @addressee.object % -->"/>
+
+					<div data-role="fieldcontain">
+						<ul class="address_edit" data-role="listview">
+							<li class="address_subject">
+								<!--<label for="addressee[recipient_subject]" class="fieldLabel">お届け先名称の設定</label>-->
+								<div class="txt">
+									お届け先名称の設定
+								</div>
+								<!-- %= @error['recipient_subject'] if @error && @error['recipient_subject'] % -->
+								<br />
+								<select id="addressee[recipient_subject]" name="addressee[recipient_subject]">
+									<option value="">お届け先の選択</option>
+									<option value="自宅">自宅</option>
+									<option value="会社">会社</option>
+									<option value="実家">実家</option>
+								</select>
+								<br />
+								<div class="txt">
+									任意の名称も可能です。下記に入力ください。
+								</div>
+								<input type="text" id="addressee[recipient_subject_ext]" name="addressee[recipient_subject_ext]" value="<!-- %= @addressee.recipient_subject_ext % -->" <!-- %= placeholder( "友人の名前など" ) % --> />
+							</li>
+
+							<li class="address_name">
+								<label for="addressee[recipient_name]" class="fieldLabel">お届け先氏名（受取人）</label>
+								<br />
+								<input type="text" id="addressee[recipient_name]" name="addressee[recipient_name]" value="<!-- %= @addressee.recipient_name % -->" <!-- %= placeholder( "受取人指名を入力" ) % --> />
+								<!-- %= @error['recipient_name'] if @error && @error['recipient_name'] % -->
+							</li>
+
+							<li class="address_phone">
+								<label for="addressee[recipient_phone]" class="fieldLabel">電話番号</label>
+								<br />
+								<input type="text" id="addressee[recipient_phone]" name="addressee[recipient_phone]" value="<!-- %= @addressee.recipient_phone % -->" <!-- %= placeholder( "例）0123456789(ハイフンなし)" ) % --> />
+								<!-- %= @error['recipient_phone'] if @error && @error['recipient_phone'] % -->
+							</li>
+
+							<li class="address_zipcode">
+								<label for="addressee[recipient_zipcode]" class="fieldLabel">郵便番号</label>
+								<br />
+								<div class="box2">
+									<div class="box2_01">
+										<input type="text" id="addressee[recipient_zipcode]" name="addressee[recipient_zipcode]" value="<!-- %= @addressee.recipient_zipcode % -->" placeholder="例）1234567(ハイフンなし)" />
+									<!-- %= @error['recipient_zipcode'] if @error && @error['recipient_zipcode'] % -->
+									</div>
+									<div class="box2_02">
+										<a href="#" data-role="button" class="btn_prev"> 郵便番号から住所入力 </a>
+									</div>
+								</div>
+							</li>
+
+							<li class="address_pref">
+								<label for="addressee[recipient_pref]">住所</label>
+								<br />
+								<select id="addressee[recipient_pref]" name="addressee[recipient_pref]" <!-- %= placeholder( "Recipient pref" )% -->>
+									<option value="">都道府県</option>
+									<option value="北海道">北海道</option>
+									<option value="青森県">青森県</option>
+									<option value="岩手県">岩手県</option>
+									<option value="宮城県">宮城県</option>
+									<option value="秋田県">秋田県</option>
+									<option value="山形県">山形県</option>
+									<option value="福島県">福島県</option>
+									<option value="茨城県">茨城県</option>
+									<option value="栃木県">栃木県</option>
+									<option value="群馬県">群馬県</option>
+									<option value="埼玉県">埼玉県</option>
+									<option value="千葉県">千葉県</option>
+									<option value="東京都">東京都</option>
+									<option value="神奈川県">神奈川県</option>
+									<option value="新潟県">新潟県</option>
+									<option value="富山県">富山県</option>
+									<option value="石川県">石川県</option>
+									<option value="福井県">福井県</option>
+									<option value="山梨県">山梨県</option>
+									<option value="長野県">長野県</option>
+									<option value="岐阜県">岐阜県</option>
+									<option value="静岡県">静岡県</option>
+									<option value="愛知県">愛知県</option>
+									<option value="三重県">三重県</option>
+									<option value="滋賀県">滋賀県</option>
+									<option value="京都府">京都府</option>
+									<option value="大阪府">大阪府</option>
+									<option value="兵庫県">兵庫県</option>
+									<option value="奈良県">奈良県</option>
+									<option value="和歌山県">和歌山県</option>
+									<option value="鳥取県">鳥取県</option>
+									<option value="島根県">島根県</option>
+									<option value="岡山県">岡山県</option>
+									<option value="広島県">広島県</option>
+									<option value="山口県">山口県</option>
+									<option value="徳島県">徳島県</option>
+									<option value="香川県">香川県</option>
+									<option value="愛媛県">愛媛県</option>
+									<option value="高知県">高知県</option>
+									<option value="福岡県">福岡県</option>
+									<option value="佐賀県">佐賀県</option>
+									<option value="長崎県">長崎県</option>
+									<option value="熊本県">熊本県</option>
+									<option value="大分県">大分県</option>
+									<option value="宮崎県">宮崎県</option>
+									<option value="鹿児島県">鹿児島県</option>
+									<option value="沖縄県">沖縄県</option>
+								</select>
+								<!-- %= @error['recipient_pref'] if @error && @error['recipient_pref'] % -->
+								<br />
+								<input type="text" id="addressee[recipient_address1]" name="addressee[recipient_address1]" value="<!-- %= @addressee.recipient_address1 % -->" <!-- %= placeholder( "〇〇市〇〇町" ) % --> />
+								<!-- %= @error['recipient_address1'] if @error && @error['recipient_address1'] % -->
+								<br />
+								<input type="text" id="addressee[recipient_address2]" name="addressee[recipient_address2]" value="<!-- %= @addressee.recipient_address2 % -->" <!-- %= placeholder( "１?２?３　〇〇マンション101" ) % --> />
+							</li>
+							<li class="address_main_check">
+								<fieldset data-role="controlgroup">
+									<!-- % if @count > 1 % -->
+									<input type="checkbox" id="addressee[recipient_main_flg]" name="addressee[recipient_main_flg]" value='primary' <!-- %=checked('primary',@addressee.recipient_main_flg) % --> />
+									<!-- % else % -->
+									<input type="checkbox" id="addressee[recipient_main_flg]" name="addressee[recipient_main_flg]" value='primary' checked="checked" />
+									<!-- % end % -->
+									<label for="addressee[recipient_main_flg]">通常のお届け先に設定</label>
+								</fieldset>
+							</li>
+
+							<li class="address_submit">
+								<input type="submit" value="更新する" class="btn_next" />
+							</li>
+
+						</ul>
+					</div>
+				</form>
+			</div>
+
+			<!-- nav -->
+			<div class="footer" data-role="footer" data-position="fixed" data-id="tabber">
+				<ul>
+					<li class="tab01">
+						<a href="show_order.html" data-ajax="false">
+							<span>注文履歴</span>
+						</a>
+					</li>
+					<li class="tab02">
+						<a href="barcode.html" data-ajax="false">
+							<span>読み取り</span>
+						</a>
+					</li>
+					<li class="tab03 current">
+						<a href="setting.html" data-ajax="false">
+							<span>設定</span>
+						</a>
+					</li>
+				</ul>
+				<!-- /dr-footer -->
+			</div>
+
+		</div>
+
+	</body>
+</html>
+

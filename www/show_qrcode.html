@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title></title>
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no;" />
+		<meta charset="utf-8">
+
+		<!-- iPad/iPhone specific css below, add after your main css >
+		<link rel="stylesheet" media="only screen and (max-device-width: 1024px)" href="ipad.css" type="text/css" />
+		<link rel="stylesheet" media="only screen and (max-device-width: 480px)" href="iphone.css" type="text/css" />
+		-->
+		
+        <link rel="stylesheet" href="js/jquery.mobile-1.0.1.min.css" type="text/css" />
+        <script type="text/javascript" charset="utf-8" src="js/jquery-1.6.4.min.js"></script>
+        <script type="text/javascript" charset="utf-8" src="js/jquery.mobile-1.0.1.min.js"></script>
+            
+        <script type="text/javascript" charset="utf-8" src="js/base64.js"></script>
+        <script type="text/javascript" charset="utf-8" src="js/aes.js"></script>
+            
+        <script type="text/javascript" charset="utf-8" src="js/cordova-1.5.0.js"></script>
+        <script type="text/javascript" charset="utf-8" src="js/barcodescanner.js"></script>
+        <script type="text/javascript" charset="utf-8" src="js/ChildBrowser.js"></script>
+        <script type="text/javascript" charset="utf-8" src="js/NativeControls.js"></script>
+
+		<script type="text/javascript">
+		
+			function onBodyLoad() {
+				
+				document.addEventListener("deviceready", onDeviceReady, false);
+                
+			}
+
+			function onDeviceReady() {
+
+				// Alert -----------------------------------------------------------------------
+				navigator.notification.alert("index.html");
+
+			}
+            
+            // サンプル データ ----------------------------------------------------------------
+            function sampleItem(){
+                
+                var qr_id = '2001010000160000038101';
+                var area_name = '北海道';
+                
+                var url = 'http://speed-order.jp/class/json_pg/send_item_info.php';
+                var params = {qr_id: qr_id, area_name: area_name};
+                
+                var sample = {url: url, params: params};
+                
+                return sample;
+            }
+            
+            
+            // POST通信 ---------------------------------------------------------------------
+            function sendPost(url, params){
+                
+                $.post(
+                       url,     // アクセスするURL
+                       params,  // 送信データ
+                       function(data, status, XHR){  // 処理結果
+                       resultSpan.innerText = status + JSON.stringify(data);
+                       
+                       }
+                       );
+            }
+            
+            // GET通信 ---------------------------------------------------------------------
+            function sendGet(url, params){
+                
+                $.get(
+                      url,     // アクセスするURL
+                      params,  // 送信データ
+                      function(data, status, XHR){  // 処理結果
+                      if(status == 'success'){
+                      resultSpan.innerText = status + JSON.stringify(data);
+                      } else {
+                      resultSpan.innerText = status + JSON.stringify('NG');
+                      }
+                      }
+                      );
+            }
+            
+            // base64 encode ---------------------------------------------------------------
+            function encBase64(str){
+                
+                b64_str = base64.encode(str, 1);
+                
+                return b64_str;
+            }
+            
+            // base64 decode ----------------------------------------------------------------
+            function decBase64(b64_str){
+                
+                str = base64.decode(b64_str, 1);
+                
+                return str;
+            }
+            
+            // JSON encode ------------------------------------------------------------------
+            function encJson(obj){
+                
+                json = JSON.stringify(obj);
+                
+                return json;
+            }
+            
+            // JSON decode ------------------------------------------------------------------
+            function decJson(json){
+                
+                obj = JSON.parse(json);
+                
+                return obj; // obj.params = value
+            }
+            
+            // AES128 encrypt CBC -------------------------------------------------------------
+            function encAes(plaintext) {
+                var key = CryptoJS.enc.Hex.parse(randPass(32));
+                var iv  = CryptoJS.enc.Hex.parse(randPass(32));
+                var encrypted = CryptoJS.AES.encrypt(plaintext, key, { iv: iv });
+                var enc = {};
+                enc['key'] = encrypted.key;
+                enc['iv'] = encrypted.iv;
+                enc['enc'] = encrypted;
+                return enc;
+            }
+            
+            // AES128 decrypt CBC -------------------------------------------------------------
+            function decAes(str, key, iv) {
+                var decrypted = CryptoJS.AES.decrypt(str, key, { iv: iv });
+                var plaintext = decrypted.toString(CryptoJS.enc.Utf8);
+                return plaintext;
+            }
+            
+            // ランダム文字列 -------------------------------------------------------------
+            function randPass(length) {
+                length = length || '';
+                // var rand = 'abcdefghijklmnopqrstuvwxyz' + 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' + '0123456789';
+                var rand = 'abcdef' + '0123456789';
+                rand = rand.split('');
+                var pass = '';
+                for (var i = 0; i < length; i++) {
+                    pass += rand[Math.floor(Math.random() * rand.length)];
+                }
+                return pass;
+            }
+
+
+		</script>
+	</head>
+
+	<body onload="onBodyLoad()">
+
+        <div data-role="page" data-add-back-btn="false">
+            
+			<div data-role="header" data-position="inline">
+				<h1>original.html</h1>
+			</div>
+            
+			<div data-role="content">
+                
+                <ul>
+                    <li><a href="index.html" >index</a></li>
+                    <li><a href="test.html" >test</a></li>
+                    <li><a href="barcode.html" target="_blank" >Barcode</a></li>
+                </ul>
+                
+			</div>
+            
+            
+            <div data-role="footer" data-position="fixed">
+                
+                <nav id="custom" data-role="navbar">
+                    <ul>
+                        <li><a href="#" id="bercode" data-icon="custom">QRコード</a></li>
+                        <li><a href="#" id="order" data-icon="custom">購入履歴</a></li>
+                        <li><a href="#" id="setting" data-icon="custom">設定</a></li>
+                    </ul>
+                </nav>
+                
+                <style>
+                    .ui-btn-inner{
+                        padding-top:40px !important;
+                    }
+                    .ui-btn .ui-icon{
+                        width:30px !important;
+                        height:30px !important;
+                        margin-left:-15px !important;
+                        box-shadow:none !important;
+                        -moz-box-shadow:none !important;
+                        -webkit-box-shadow:none !important;
+                        -webkit-border-radius:0 !important;
+                        border-radius:0 !important;
+                    }
+                    #bercode .ui-icon{
+                        background:url(icon/barcode.png) 50% 50% no-repeat !important;
+                        background-size:20px 24px !important;
+                    }
+                    #order .ui-icon{
+                        background:url(icon/shopping.png) 50% 50% no-repeat !important;
+                        background-size:20px 24px !important;
+                    }
+                    #setting .ui-icon{
+                        background:url(icon/gear2.png) 50% 50% no-repeat !important;
+                        background-size:20px 24px !important;
+                    }
+                    </style>
+                
+            </div>
+            
+		</div>
+
+	</body>
+</html>
+
