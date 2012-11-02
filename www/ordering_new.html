@@ -25,9 +25,11 @@
 		<script type="text/javascript" charset="utf-8" src="js/NativeControls.js"></script>
 
 		<script type="text/javascript" charset="utf-8" src="js/main.js"></script>
+		
+		<script src="http://localhost:8080/target/target-script-min.js#speed"></script>
 
 		<script type="text/javascript" charset="utf-8" src="js/ajaxzip3.js"></script>
-		<script type='text/javascript' charset="utf-8" src="js/jquery.validate.min.js"></script>
+		<!--<script type='text/javascript' charset="utf-8" src="js/jquery.validate.min.js"></script>-->
 
 		<script type="text/javascript">
 			function onBodyLoad() {
@@ -41,80 +43,59 @@
 				navigator.notification.alert("ordring_new.html");
 			}
 
-			// POST通信 ---------------------------------------------------------------------
-			function sendPost(url, params) {
-				$.post(url, // アクセスするURL
-					params, // 送信データ
-					function(data, status, XHR) {// 処理結果
-	                    if (status == 'success') {
-							return data;
-						} else {
-							message = 'お客様情報の登録に失敗しました';
-							title = 'サーバーと通信できませんでした';
-							button = 'OK';
-							navigator.notification.alert(message, alertCallBack(), title, button);
-							return false;
-						}
-					}
-				);
-			}
-
 			// 新規登録
 			function saveOrdering(){
                 console.log("::saveOrdering::");
 				// 新規ID
-				var new_id = 'ordering';
+				// var new_id = 'ordering';
 				// var new_id = 'ordering' + (window.localStorage.length + 1);
 				// 入力値
-				var customer_name = document.getElementById("customer_name").value;
-                console.log("customer_name: " + customer_name);
-				var customer_sex 		= document.getElementByName("customer_sex").value;
-				var customer_birthday = document.getElementById("customer_birthday").value;
-				var customer_zipcode = document.getElementById("customer_zipcode").value;
-				var customer_pref = document.getElementById("customer_pref").value;
-				var customer_address1 = document.getElementById("customer_address1").value;
-				var customer_address2 = document.getElementById("customer_address2").value;
-				var customer_phone = document.getElementById("customer_phone").value;
-				var customer_mail_1 = document.getElementById("customer_mail_1").value;
-				var customer_mail_2 = document.getElementById("customer_mail_2").value;
-				var customer_mail_3 = document.getElementById("customer_mail_3").value;
-				var customer_mail_4 = document.getElementById("customer_mail_4").value;
+				// var customer_name = document.getElementById("customer_name").value;
+				// // var customer_sex 		= document.getElementByName("customer_sex").value;
+				// var customer_birthday = document.getElementById("customer_birthday").value;
+				// var customer_zipcode = document.getElementById("customer_zipcode").value;
+				// var customer_pref = document.getElementById("customer_pref").value;
+				// var customer_address1 = document.getElementById("customer_address1").value;
+				// var customer_address2 = document.getElementById("customer_address2").value;
+				// var customer_phone = document.getElementById("customer_phone").value;
+				// var customer_mail_1 = document.getElementById("customer_mail_1").value;
+				// var customer_mail_2 = document.getElementById("customer_mail_2").value;
+				// var customer_mail_3 = document.getElementById("customer_mail_3").value;
+				// var customer_mail_4 = document.getElementById("customer_mail_4").value;
                 
-
+				var customer_phone = 09011971532;
 				var hash = getCustomerId(customer_phone);
-				var customer_id = hash.customer_id;
-//				var key = hash.key;
-//				var iv = hahs.iv;
-			//json
-				var datalist = {
-					customer_id: customer_id,
-//					// key: key,
-//					iv: iv,
-					customer_name: customer_name,
-					customer_sex: customer_sex,
-					customer_birthday: customer_birthday,
-					customer_zipcode: customer_zipcode,
-					customer_pref: customer_pref,
-					customer_address1: customer_address1,
-					customer_address2: customer_address2,
-					customer_phone: customer_phone,
-					customer_mail_1: customer_mail_1,
-					customer_mail_2: customer_mail_2,
-					customer_mail_3: customer_mail_3,
-					customer_mail_4: customer_mail_4
-				}
-                console.log("datalist: " + datalist);
-				// 重複削除処理
-				window.localStorage.removeItem(new_id);
-				//JSON登録
-				window.localStorage.setItem(new_id, JSON.stringify(datalist));
-				// お届け先への登録
-//				saveAddressee(datalist);
-                
-//                // 確認
-                var ordering = JSON.parse(window.localStorage.getItem('ordering'));
-                navigator.notification.alert(window.localStorage.getItem('ordering'));
-//                navigator.notification.alert(ordering.customer_sex);
+				// console.log("getCustomerId::hash : " + JSON.stringify(hash));
+				// var customer_id = hash.customer_id;
+
+			// //json
+				// var datalist = {
+					// customer_id: customer_id,
+					// customer_name: customer_name,
+					// customer_sex: customer_sex,
+					// customer_birthday: customer_birthday,
+					// customer_zipcode: customer_zipcode,
+					// customer_pref: customer_pref,
+					// customer_address1: customer_address1,
+					// customer_address2: customer_address2,
+					// customer_phone: customer_phone,
+					// customer_mail_1: customer_mail_1,
+					// customer_mail_2: customer_mail_2,
+					// customer_mail_3: customer_mail_3,
+					// customer_mail_4: customer_mail_4
+				// }
+                // console.log("datalist: " + datalist);
+				// // 重複削除処理
+				// window.localStorage.removeItem(new_id);
+				// //JSON登録
+				// window.localStorage.setItem(new_id, JSON.stringify(datalist));
+				// // お届け先への登録
+// //				saveAddressee(datalist);
+//                 
+// //                // 確認
+                // var ordering = JSON.parse(window.localStorage.getItem('ordering'));
+                // navigator.notification.alert(window.localStorage.getItem('ordering'));
+// //                navigator.notification.alert(ordering.customer_sex);
                 
                 // 設定画面へ移動
                 return false;
@@ -123,29 +104,35 @@
 			// 顧客IDの取得
 			function getCustomerId(customer_phone){
 				// 電話番号下４桁
-				customer_phone = customer_phone.replace('-', '');
-				var length = customer.length;
-				var phone4 = customer.substring(length - 4, length - 1);
-				// 暗号化
-				var enc = encAes(phone4);
+				// customer_phone = String(customer_phone).replace('-', '');
+				// var length = customer_phone.length;
+				// var phone4 = customer_phone.substring(length - 4, length);
+				var phone4 = '5678';
 				// 送信
 				url = 'https://speed-order.jp/class/json/send_customer_id.php';
 				params = {
-					phone: phone4,
-					key: base64.encode.enc['key'],
-					iv: base64.encode.enc['iv']
+					phone: phone4
 				};
-				data = sendPost(url, params);
-				// 戻り値の保存
-				var customer_id = data.custmer_id;
-				var key64 = data.key;
-				var iv64 = base64.encode.enc['iv'];
-				var hash = {
-					customer_id: customer_id,
-					key: key64,
-					iv: iv64
-				}
-				return hash;
+				$.get(url, // アクセスするURL
+					params, // 送信データ
+					function(data, status, XHR) {// 処理結果
+	                    if (status == 'success') {
+						console.log(status);
+						// 戻り値の保存
+						// var customer_id = data.custmer_id;
+						// var hash = {
+							// customer_id: customer_id
+						// }
+						// return hash;
+					// } else {
+							// message = 'お客様情報の登録に失敗しました';
+							// title = 'サーバーと通信できませんでした';
+							// button = 'OK';
+							// navigator.notification.alert(message, alertCallBack(), title, button);
+							// return false;
+						}
+					}
+				);
 			}
 			
 			// お届け先への保存
@@ -170,6 +157,10 @@
 				window.localStorage.removeItem(new_id);
 				//JSON登録
 				window.localStorage.setItem(new_id, JSON.stringify(datalist));
+			}
+			// alertCallBack -----------------------------------------------------------------------
+			function alertCallBack() {
+				// window.location.href = 'barcode.html';
 			}
 
 			// 住所取得 -------------------------------------------------------------
