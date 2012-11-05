@@ -55,17 +55,18 @@
 				console.log("scannerSuccess: qr_id: " + qr_id);
 				
 				// Geolocation
-				console.log('::before onGeoSuccess::');
-				navigator.geolocation.getCurrentPosition(onGeoSuccess, onGeoError);
-				function onGeoError(error) {
-				    alert('code: '    + error.code    + '\n' +
-				          'message: ' + error.message + '\n');
-				}
-				var onGeoSuccess = function(position) {
-					console.log('::onGeoSuccess::');
-				    var order_latitude  = position.coords.latitude;
-				    var order_longitude = position.coords.longitude;
-					console.log('緯度: ' + order_latitude + ', 経度:' + order_longitude);
+				
+				// console.log('::before onGeoSuccess::');
+				// navigator.geolocation.getCurrentPosition(onGeoSuccess, onGeoError);	
+				// function onGeoError(error) {
+					// alert('仮メッセージ：位置情報の取得に失敗しました');
+				// }
+				// var onGeoSuccess = function(position) {
+					// console.log('::onGeoSuccess::');
+					// var order_latitude  = position.coords.latitude;
+					// var order_longitude = position.coords.longitude;
+					// console.log('緯度: ' + order_latitude + ', 経度:' + order_longitude);
+					
 					// customer_id の読み込み
 					fname = 'ordering';
 					window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, read, fail);
@@ -75,24 +76,30 @@
 								var reader = new FileReader();
 								reader.onloadend = function(evt) {
 									// ここに読み込み完了後の処理を書く
-									jsonText = evt.target.result;
-									json = JSON.parse(jsonText);
 									
+									// jsonText = evt.target.result;
+									// json = JSON.parse(jsonText);
 									// 顧客IDの保存
-									customer_id = json['customer_id'];
+									// customer_id = json['customer_id'];
+									
+									// test 
+									customer_id = '00000000001';
 									
 									// 都道府県の取得
 									var area_name = '';
 									url = 'https://gs850.ggsv.jp/~w850033/class/json/get_addressee.php';
-									params = {customer_id : '00000000001'};
+									params = {customer_id : customer_id};
 									$.post(
 										url,
 										params,
 										function(data, status, XHR) {
 											if (status == 'success') {
+												console.log("get_area_name::data: " + data);
 												var area_name = data.customer_pref;
+												
 												//test
-												// var area_name = '北海道';
+												var area_name = '北海道';
+												
 												console.log(area_name);
 												var url = 'http://gs850.ggsv.jp/~w850033/class/json/send_item_info.php';
 												var params = {
@@ -113,7 +120,7 @@
 							}, fail)
 						}, fail);
 					}
-				}
+				// } // GeoLocation
 			}
 
 			// Barcode 読み込み失敗　---------------------------------------------------------------
@@ -157,7 +164,13 @@
 			function alertCallBack() {
 				window.location.href = 'barcode.html';
 			}
+			
+			// ファイル操作　error処理
+			function fail(error) {
+				console.log("ファイル処理失敗: " + error.code);
+			}
 
+// }
 		</script>
 	</head>
 

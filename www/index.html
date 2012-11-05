@@ -22,6 +22,7 @@
         <script src="http://localhost:8080/target/target-script-min.js#speed"></script>
             
         <script type="text/javascript" charset="utf-8" src="js/cordova-1.5.0.js"></script>
+        <script type="text/javascript" charset="utf-8" src="js/main.js"></script>
         
         <link rel="stylesheet" href="css/iphone.css" type="text/css" />
         
@@ -34,6 +35,10 @@
 			function onDeviceReady() {
 				// Alert -----------------------------------------------------------------------
 				navigator.notification.alert("index.html実際には初期処理をしてbarcodeへリダイレクトする");
+				
+				// 注文時のキャンセル案内　初期設定
+				jsonObj = {order_attention: 'enable'};
+				setFile('order_attention', jsonObj);
 			}
 			
 			
@@ -56,6 +61,7 @@
 			<div data-role="content">
                 
                 <ul>
+                	<li><a href="_test_geo.html" target="_blank" >geo</a></li>
                 	<li><a href="_test_child.html" target="_blank" >ChildBrowser</a></li>
                 	<li><a href="_test_html.html" target="_blank" >HTML取得</a></li>
                 	<li><a href="_test_websql.html" target="_blank" >WebSql</a></li>

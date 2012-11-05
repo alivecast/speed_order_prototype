@@ -36,12 +36,6 @@
 
 				// Alert -----------------------------------------------------------------------
 				navigator.notification.alert("show_order.html");
-
-				// GETでJSON取得
-				var get = getQuery();
-				var params = JSON.parse(get['order']);
-				console.log("get[order]: " + get['order']);
-
 				//------------------------------------------------------------------------------
 
 				// 更新日時
@@ -50,86 +44,90 @@
 				$("final_update").html(update);
 
 				// 注文一覧
-				var orders = new Array;
-				var order = {};
-				var fname = 'order_item';
-
-				// ファイル読込処理
-				function getFile(fname) {
-					window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, read, fail);
-					function read(fileSystem) {
-						fileSystem.root.getFile(fname, {}, function(fileEntry) {
-							fileEntry.file(function(file) {
-								var reader = new FileReader();
-								reader.onloadend = function(evt) {
-									// ここに読み込み完了後の処理を書く
-									console.log("jsonText: " + evt.target.result);
-									var jsonText = evt.target.result;
-									jsonArray = JSON.parse(jsonText);
-									console.log("正常にテキストを読み込みました。");
-									// 購入一覧表示
-									show_order_index(jsonArray);
+				window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, read, fail);
+				function read(fileSystem) {
+					fileSystem.root.getFile(fname, {}, function(fileEntry) {
+						fileEntry.file(function(file) {
+							var reader = new FileReader();
+							reader.onloadend = function(evt) {
+								// ここに読み込み完了後の処理を書く
+								jsonText = evt.target.result;
+								json = JSON.parse(jsonText);
+								customer_id = json.customer_id;
+								url = 'https://gs850.ggsv.jp/~w850033/class/json/get_order_index.php';
+								hash = {
+									customer_id: customer_id
 								};
-								reader.onabort = function() {
-									order_indexs = '<p>只今、ご購入履歴はありません。abort</p>';
-									$("order_indexs").html(order_indexs);
-								};
-								reader.onerror = function() {
-									order_indexs = '<p>只今、ご購入履歴はありません。error</p>';
-									$("order_indexs").html(order_indexs);
-								};
-								reader.readAsText(file, "utf-8");
-								// Data URL として読み込む
-								// reader.readAsDataURL(file);
-							}, fail)
-						}, fail);
-					}
-
+								$.post(
+									url,
+									hash,
+									function(data, status, XHR) {
+										if (status == 'success') {
+											// 購入一覧表示
+											show_order_index(data);
+										} else {
+											message = '通信エラー';
+											title = '購入履歴を取得できませんでした';
+											button = 'OK';
+											navigator.notification.alert(message, alertCallBack(), title, button);
+										}
+									}
+								);
+							};
+							reader.readAsText(file, "utf-8");
+						}, fail)
+					}, fail);
 				}
 
+			}
+			
+			function alertCallBack() {
+				window.location.href = 'setting.html';
+			}
+
 				// 注文一覧HTML
-				function show_order_index(jsonArray) {
+				function show_order_index(orders) {
 					// 購入商品一覧
-					var length = jsonArray;
+					var length = orders;
 					var order_indexs = '';
 					if (length > 0) {
 						for (var i = 0; i < length; i++) {
 							var order_index = '<dl class="orderInfoApp_list">';
-							order_index += '<dt><span id="order_time" class="date">' + order_indexs[i].order_time + '</span>注文</dt>';
+							order_index += '<dt><span id="order_time" class="date">' + orders[i].order_time + '</span>注文</dt>';
 							order_index += '<dd><ul data-role="listview"><li>';
 							order_index += '<a href="show_order_item.html?index="' + i + '>';
 							// キャンセル可能時間表示
-							if (order_indexs[i].item_cancel_flg == 'disable' && parseInt(new Date() / 1000) <= (order_indexs[i].order_time + (30 * 60))) {
+							if (orders[i].item_cancel_flg == 'disable' && parseInt(new Date() / 1000) <= (orders[i].order_time + (30 * 60))) {
 								order_index += '<div class="order_cancel">';
-								order_index += 'キャンセル <span>' + getDateTime(order_indexs[i].order_time + (30 * 60)) + ' まで受付</span>';
+								order_index += 'キャンセル <span>' + getDateTime(orders[i].order_time + (30 * 60)) + ' まで受付</span>';
 								order_index += '</div>';
 								// キャンセルしました
-							} else if (order_indexs[i].item_cancel_flg == 'enable') {
+							} else if (orders[i].item_cancel_flg == 'enable') {
 								order_index += '<div class="order_defined">';
-								order_index += 'キャンセルしました <span>' + getDateTime(order_indexs[i].item_cancel_time) + '</span>';
+								order_index += 'キャンセルしました <span>' + getDateTime(orders[i].item_cancel_time) + '</span>';
 								order_index += '</div>';
 								// 注文確定
-							} else if (order_indexs[i].order_sts == '注文確定') {
+							} else if (orders[i].order_sts == '配送準備中') {
 								order_index += '<div class="order_defined">';
-								order_index += '注文確定 <span>' + getDateTime(order_indexs[i].order_sts_update) + '</span>';
+								order_index += '配送準備中 <span>' + getDateTime(orders[i].order_sts_update) + '</span>';
 								order_index += '</div>';
 								// 発送済み
-							} else if (order['order_sts'] == "商品発送済") {
+							} else if (order['order_sts'] == "配送済み") {
 								order_index += '<div class="shipment_notification">';
-								order_index += '商品発送済 <span>' + getDateTime(order_indexs[i].order_sts_update) + '</span>';
+								order_index += '商品配送済 <span>' + getDateTime(orders[i].order_sts_update) + '</span>';
 								order_index += '</div>';
 							}
 							// 商品写真
 							order_index += '<div class="box2"><div class="box2_01 item_img"><div class="inner">';
-							order_index += '<img src="' + order_indexs[i].item_image + '" width="60" height="60" />';
+							order_index += '<img src="' + orders[i].item_image + '" width="60" height="60" />';
 							// 商品名
 							order_index += '</div></div><div class="box2_02 item_name">';
-							order_index += '<h1 class="name">' + order_indexs[i].item_name + '</h1>';
+							order_index += '<h1 class="name">' + orders[i].item_name + '</h1>';
 							order_index += '</div></div>';
 							// 販売者からのお知らせ
-							if (order_indexs[i].massage_shop && order_indexs[i].massage_shop != '') {
+							if (orders[i].massage_shop && orders[i].massage_shop != '') {
 								order_index += '<div class="message_shop"><div class="tl">販売者からのお知らせ</div><div class="txt">';
-								order_index += order_indexs[i].message_shop;
+								order_index += orders[i].message_shop;
 								order_index += '</div></div> ';
 							}
 							order_index += '</a></li></ul></dd></dl>';
@@ -142,10 +140,6 @@
 					}
 					$("order_indexs").html(order_indexs);
 				}
-
-			}
-
-
 
 		</script>
 	</head>

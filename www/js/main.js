@@ -219,6 +219,6 @@ function setCarriage(carriage) {
 	} else {
 		num + '円'
 	}
-	document.getElementById('#carriage').innerHTML = String(num);
+	document.getElementById('#shippingCost').innerHTML = String(num);
 }
 

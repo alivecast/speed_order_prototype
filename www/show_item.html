@@ -67,7 +67,8 @@
 
 				// １個の送料
 				// if (is_pref_flg == 'enable') {
-				var shippingCost = '<dl class="shippingCost"><dt>送料</dt><dd id="order_carriage"><span id="carriage">';
+				var shippingCost = '<dl class="shippingCost"><dt>送料</dt><dd id="order_carriage"><span id="carriage">';	
+				// var shippingCost = '<dl class="shippingCost"><dt>送料</dt><dd><span id="carriage">';
 				if (parseInt(params['order_carriage']) > 0) {
 					shippingCost += currency(params['order_carriage']) + '円</span></dd></dl>';
 				} else {
@@ -157,7 +158,7 @@
 									}
 									if (addressee != {} && addressee.recipient_subject){
 										var recipient_subject = '<a href="#"><li id="item_shippingAddress" class="item_shippingAddress">';
-										recipient_subject += '現在のお届け先：<span>' + String(addressee.recipient_subject) + '</span></p>';
+										recipient_subject += '現在のお届け先：<span id="recipient_subject">' + String(addressee.recipient_subject) + '</span></p>';
 										recipient_subject += '<p class="txt">お届け先の変更はこちら</p>';
 										recipient_subject += '</a></li>';
 										document.getElementById("addressee").innerHTML = recipient_subject;
@@ -242,238 +243,167 @@
 			}
 
 			// 注文へ
-			function order() {
+			function order(params) {
 				console.log('::order::');
-				// 設定項目チェック
-				if (checkSetting()) {
-					console.log('::checkSetting ok::');
-					
-					// 購入手続き開始
-					// GETでJSON取得
-					var get = getQuery();
-					var params = JSON.parse(get['item']);
-					params['order_time'] = parseInt(new Date() / 1000);
-					params['order_amount'] = document.getElementById('item_quantity_buy').value;
-					params['order_carriage'] = document.getElementById('shippingCost').value;
-
-					// 注文ファイル読込処理
-					var fname = 'order_detail';
-					window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, read, fail);
-					function read(fileSystem) {
-						fileSystem.root.getFile(fname, {}, function(fileEntry) {
-							fileEntry.file(function(file) {
-								var reader = new FileReader();
-								reader.onloadend = function(evt) {
-									// ここに読み込み完了後の処理を書く
-									console.log("text: " + evt.target.result);
-									text = evt.target.result;
-									// 商品情報の更新・商品バージョンの比較
-									check_update_item(text, params);
-
-									// クレジットカード与信
-									getPost(url, obj, title, message)
-									// 在庫状況確認
-									getPost(url, obj, title, message)
-									// キャンセル・イントロの有無
-
-									// 注文情報の保存
-									save_order_detail(params);
-									// 商品ごとの注文情報保存
-									save_order_item(params);
-									
-									var paramsText = JSON.stringify(params);
-									console.log('paramsText: ' + paramsText);
-									window.location.href = "show_order.html?order=" + paramsText;
+				
+				params['order_time'] = parseInt( new Date() /1000 );
+				params['order_amount'] = document.getElementById('order_amount').value;
+				params['order_carriage'] = document.getElementById('carriage').value;
+				params['total_price'] = document.getElementById('total_price').value;
+				params['recipient_subject'] = document.getElementById('recipient_subject').value;
+				
+				
+				// customer_id の読み込み
+				fname = 'ordering';
+				window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, read, fail);
+				function read(fileSystem) {
+					fileSystem.root.getFile(fname, {}, function(fileEntry) {
+						fileEntry.file(function(file) {
+							var reader = new FileReader();
+							reader.onloadend = function(evt) {
+								// ここに読み込み完了後の処理を書く
+								
+								// jsonText = evt.target.result;
+								// json = JSON.parse(jsonText);
+								// 顧客IDの保存
+								// customer_id = json['customer_id'];
+								
+								// test 
+								customer_id = '00000000001';
+								
+								url = 'https://gs850.ggsv.jp/~w850033/class/json/send_setup.php';
+								hash = {
+									customer_id: customer_id
 								};
-								reader.readAsText(file, "utf-8");
-								// Data URL として読み込む
-								// reader.readAsDataURL(file);
-							}, fail)
-						}, fail);
-					}
-
-				} else {
-					// 設定へ
-					window.location.href = "setting.html?item=" + paramsText;
+								$.post(
+									url,
+									hash,
+									function(data, status, XHR) {
+										// 通信OK
+										if (status == 'success') {
+											// 設定OK
+											if (data.setup_ok == 1){
+												
+												url = 'https://gs850.ggsv.jp/~w850033/class/json/receive_order.php';
+												// 注文商品
+												var item = params;
+												// 注文情報obj
+												var order = {};
+												// 位置情報
+												// order['order_latitude']     = item.latitude
+												// order['order_longitude']  = item.longitude
+												// 基本注文情報の代入
+												var order_time = parseInt( new Date() /1000 );
+												order['order_time'] = order_time;
+												order['item_name'] = item.item_name;
+												order['item_id'] = item.item_id;
+												order['company_id'] = item.company_id;
+												order['company_partner_id'] = item.company_partner_id;
+												order['item_version'] = item.item_version;
+												order['item_price'] = item.item_price;
+												order['tax_kbn'] = item.tax_kbn;
+												order['order_carriage'] = item.order_carriage;
+												order['qr_id'] = item.qr_id;
+												order['order_amount'] = item['order_amount'];
+												order['total_price'] = item['total_price'];
+												// 販売業者
+												order['company_name'] = item.company_name;
+												var shop_id = item.qr_id.substring(6, 12);
+												order['shop_id'] = shop_id;
+												// お届け先情報
+												order['recipient_subject']	= item.recipient_subject;
+												
+												hash = {
+													customer_id : customer_id,
+													order: JSON.stringify(order)
+												};
+												$.post(
+													url,
+													hash,
+													function(data, status, XHR) {
+														if (status == 'success') {
+															// 注文情報処理OK
+															if(data.order_id && data.order_id != ''){
+																// order_attention キャンセルについてのイントロ　有無
+																fname = 'order_attention';
+																window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, read, fail);
+																function read(fileSystem) {
+																	fileSystem.root.getFile(fname, {}, function(fileEntry) {
+																		fileEntry.file(function(file) {
+																			var reader = new FileReader();
+																			reader.onloadend = function(evt) {
+																				// ここに読み込み完了後の処理を書く
+																				jsonText = evt.target.result;
+																				json = JSON.parse(jsonText);
+																				if(json.order_attention == 'enable'){
+																					// キャンセルについてアラート表示
+																					var message = '30分以内は購入履歴からキャンセル可能です。ご注文確定メールが届きます。しばらくお待ちください。';
+																					var title = 'ありがとうございました';
+																					var button = "閉じる,次回から表示しない";
+																					navigator.notification.confirm(message, attentionCallBack, title, button);
+																				}
+																				// 購入商品一覧の表示
+																				window.location.href = 'show_order.html';
+																			}
+																			reader.readAsText(file, "utf-8");
+																		}, fail)
+																	}, fail);
+																}
+															} else {
+																// アラート
+																alert('仮メッセージ：注文の受付に失敗しました');
+															}
+																
+														} else {
+															// 注文手続きに失敗
+															alert('仮メッセージ：注文手続きに失敗');
+														}
+													}
+												);
+											} else{
+												// アラート
+												alert('仮メッセージ：設定を行ってください');
+												// 設定画面へ
+												window.location.href = "setting.html?item=" + paramsText;
+											}
+										} else {
+											// アラート
+											alert('仮メッセージ：設定を行ってください');
+											// 設定画面へ
+											window.location.href = "setting.html?item=" + paramsText;
+										}
+									}
+								);
+							};
+							// 設定ファイルの不備
+							reader.onerror = function(evt) {
+								// アラート
+								alert('仮メッセージ：設定を行ってください');
+								// 設定画面へ
+								window.location.href = "setting.html?item=" + paramsText;
+							};
+							reader.readAsText(file, "utf-8");
+						}, fail)
+					}, fail);
 				}
 			}
 
-			// 商品情報の更新
-			function check_update_item(objText, params) {
-				// 商品情報の更新
-				$.post('https://speed-order.jp/class/json/send_item_info.php',
-				{qr_id : params['qr_id']},
-				function(data, status, XHR) {
-					if (status == 'success') {
-						// 商品バージョンの比較
-						if (parseInt(data.item_version) > params.item_version) {
-							button = 'OK';
-							navigator.notification.alert('再度ご確認の上、あらためてご注文ください。', function() {
-								window.open("show_item.html?item=" + params);
-							}, '商品情報が更新されています。', button);
-						} else {
-							// 前回注文からの時間判定
-							if (text != "") {
-								order_details = JSON.parse(text);
-								order_last_time = parseInt(order_details.pop.order_time);
-								if (parseInt(params['order_time'] - order_last_time) > 30 * 60) {
-									// 30経過後の処理
-									params['order_passcode_flg'] = 'over';
-									// 暗証番号入力ページの表示
-									show_enter_passcode(params);
-								} else {
-									// 30分以内の処理
-									params['order_passcode_flg'] = 'safe';
-								}
-							} else {
-							// 初回注文
-								params['order_passcode_flg'] = 'over';
-								// 暗証番号入力ページの表示
-								show_enter_passcode(params);
-							}
-						}
-					// 通信エラー
-					} else {
-						button = 'OK';
-						navigator.notification.alert('商品情報の更新ができませんでした。', function() {
-						}, '通信エラー', button);
-					}
-				});
+			// ファイル操作　error処理
+			function fail(error) {
+				console.log("設定ファイルの読み込み失敗: " + error.code);
 			}
 			
-			// 注文時の暗証番号入力ページ表示
-			function show_enter_passcode(params){
-				
-			}
-
-			// 基本注文情報の保存
-			function save_order_detail(params) {
-				// 注文情報の保存
-				var fname = 'order_detail';
-				var orders = new Array();
-				if (text != "") {
-					// 注文情報あり
-					console.log("注文情報あり・追加");
-					orders = JSON.parse(text);
-					delFile(fname);
+			// キャンセルについてのAttention
+			function attentionCallBack(buttonIndex){
+				if (buttonIndex == 1){
+					window.location.href = 'show_order.html';
 				} else {
-					// 注文情報なし
-					console.log("注文情報なし・新規登録");
-				}
-				orders.push(params);
-				setFile(fname, orders);
-			}
-
-			// 商品ごとの注文情報の保存
-			function save_order_item(params) {
-				// 注文情報の保存
-				var fname = 'order_item';
-				var orders = new Array();
-				
-				if (text != "") {
-					// 注文情報あり
-					console.log("注文情報あり・追加");
-					orders = JSON.parse(text);
+					fname = 'order_attention';
 					delFile(fname);
-				} else {
-					// 注文情報なし
-					console.log("注文情報なし・新規登録");
+					jsonObj = {order_attention: 'disable'};
+					setFile(fname, jsonObj);
+					window.location.href = 'show_order.html';
 				}
-				orders.push(params);
-				setFile(fname, orders);
-			}
-
-			// サーバに送る注文データの生成
-			function create_order(params) {
-				// 注文商品
-				// item = ItemInfoApp.find(item_id)
-				var item = params;
-				
-				// 注文者情報の取得
-				var ordering = {};
-				// row = ordering.birth_row
-				// hash = self.getTimeStamp(row)
-				// birthday = hash['tstamp']
-				// age = hash['age']
-				
-				// お届け先の取得
-				var addressee = {};
-				// addressee = Addressee.find(:first, :conditions => {:recipient_main_flg => 'primary'})
-				
-				// クレジットカード情報の取得
-				var card = {};
-				// card = Card.find(:first)
-				
-				// 注文情報obj
-				var order = {};
-				
-				// 基本注文情報の代入
-				var order_time = parseInt( new Date() /1000 );
-				order['order_time'] = order_time;
-				order['item_name'] = item.item_name;
-				order['item_id'] = item.item_id;
-				order['company_id'] = item.company_id;
-				order['item_version'] = item.item_version;
-				order['item_price'] = item.item_price;
-				order['tax_kbn'] = item.tax_kbn;
-				order['order_carriage'] = item.order_carriage;
-				order['qr_id'] = item.qr_id;
-				order['order_amount'] = item['amount'];
-				
-				// 位置情報
-				// order['order_latitude']     = item.latitude
-				// order['order_longitude']  = item.longitude
-				
-				// 販売業者
-				order['company_name'] = item.company_name;
-				order['company_liaise'] = item.company_liaise;
-				order['company_president'] = item.company_president;
-				order['company_address1'] = item.company_address1;
-				order['company_address2'] = item.company_address2;
-				order['company_address3'] = item.company_address3;
-				order['company_phone'] = item.company_phone;
-				order['company_charge'] = item.company_charge;
-				order['company_report_time'] = item.company_report_time;
-				order['company_returned'] = item.company_returned;
-				var shop_id = item.qr_id.substring(6, 12);
-				order['shop_id'] = shop_id;
-				
-				// 発注者情報
-				order['customer_id']          = ordering.customer_id;
-				order['customer_name']        = ordering.customer_name;
-				order['customer_sex']         = ordering.customer_sex;
-				var tsBirthday = ordering.customer_birthday;
-				// var age = 
-				order['customer_birthday']    = tsBirthday;
-				// order['customer_age']         = age;
-				order['customer_phone']       = ordering.customer_phone;
-				order['customer_mail_1']      = ordering.mail_1;
-				order['customer_mail_2']      = ordering.mail_2;
-				order['customer_mail_3']      = ordering.mail_3;
-				order['customer_mail_4']      = ordering.mail_4;
-				
-				// お届け先情報
-				order['recipient_name']       = addressee.recipient_name;
-				order['recipient_pref']       = addressee.recipient_pref;
-				order['recipient_address1']   = addressee.recipient_address1;
-				order['recipient_address2']   = addressee.recipient_address2;
-				order['recipient_zipcode']    = addressee.recipient_zipcode;
-				order['recipient_phone']      = addressee.recipient_phone;
-				
-				// 支払い情報
-				order['order_account']        = 'card'
-				order['card_number']          = card.card_number;
-				order['card_validity_month']  = card.card_validity_month;
-				order['card_validity_year']   = card.card_validity_year;
-				order['card_holder']          = card.card_holder;
-				order['card_security_code']   = card.card_security_code;
-				
-				return order
-			}
-
-			// 送料の変更
-			function getCarriage(price, carriage, non_carriage) {
-
 			}
 
 		</script>
