@@ -55,15 +55,17 @@
 				console.log("scannerSuccess: qr_id: " + qr_id);
 				
 				// Geolocation
-				navigator.geolocation.getCurrentPosition(onSuccess, onError);
-				function onError(error) {
+				console.log('::before onGeoSuccess::');
+				navigator.geolocation.getCurrentPosition(onGeoSuccess, onGeoError);
+				function onGeoError(error) {
 				    alert('code: '    + error.code    + '\n' +
 				          'message: ' + error.message + '\n');
 				}
-				var onSuccess = function(position) {
+				var onGeoSuccess = function(position) {
+					console.log('::onGeoSuccess::');
 				    var order_latitude  = position.coords.latitude;
 				    var order_longitude = position.coords.longitude;
-					
+					console.log('緯度: ' + order_latitude + ', 経度:' + order_longitude);
 					// customer_id の読み込み
 					fname = 'ordering';
 					window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, read, fail);
@@ -91,6 +93,7 @@
 												var area_name = data.customer_pref;
 												//test
 												// var area_name = '北海道';
+												console.log(area_name);
 												var url = 'http://gs850.ggsv.jp/~w850033/class/json/send_item_info.php';
 												var params = {
 													qr_id : qr_id,
