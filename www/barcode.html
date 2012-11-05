@@ -46,36 +46,71 @@
 			function scannerSuccess(result) {
 
 				// test
-				result = 'http://www.speed-order.jp/2001010000040000028101';
+				result = 'http://speed-order.jp/2001010000040000028101';
 				// console.log("scannerSuccess: result: " + result);
 
 				// qr_id抽出
 				cutProtocole = result.replace(/http:\/\/|https:\/\//, "");
-				console.log("scannerSuccess: cutProtocole: " + cutProtocole);
-
-				cutUrl = cutProtocole.replace(/www.speed-order.jp\/|speed-order.jp\//, "");
-				console.log("scannerSuccess: cutUrl: " + cutUrl);
-
-				// qr_idを取得
-				var qr_id = cutUrl;
-
-				// 設定・お届け先がある場合に取得
-				var area_name = '';
-				// var addressee = JSON.parse(window.localStorage.getItem('addressee'));
-				var addressee = {};addressee.recipient_pref = '北海道';
-				if (addressee){
-					var area_name = addressee.recipient_pref;
-				}
+				var qr_id = cutProtocole.replace(/www.speed-order.jp\/|speed-order.jp\//, "");
+				console.log("scannerSuccess: qr_id: " + qr_id);
 				
-				var url = 'http://speed-order.jp/class/json_pg/send_item_info.php';
-
-				var params = {
-					qr_id : qr_id,
-					area_name : area_name
-				};
-
-				// サーバ通信
-				sendPost(url, params);
+				// Geolocation
+				navigator.geolocation.getCurrentPosition(onSuccess, onError);
+				function onError(error) {
+				    alert('code: '    + error.code    + '\n' +
+				          'message: ' + error.message + '\n');
+				}
+				var onSuccess = function(position) {
+				    var order_latitude  = position.coords.latitude;
+				    var order_longitude = position.coords.longitude;
+					
+					// customer_id の読み込み
+					fname = 'ordering';
+					window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, read, fail);
+					function read(fileSystem) {
+						fileSystem.root.getFile(fname, {}, function(fileEntry) {
+							fileEntry.file(function(file) {
+								var reader = new FileReader();
+								reader.onloadend = function(evt) {
+									// ここに読み込み完了後の処理を書く
+									jsonText = evt.target.result;
+									json = JSON.parse(jsonText);
+									
+									// 顧客IDの保存
+									customer_id = json['customer_id'];
+									
+									// 都道府県の取得
+									var area_name = '';
+									url = 'https://gs850.ggsv.jp/~w850033/class/json/get_addressee.php';
+									params = {customer_id : '00000000001'};
+									$.post(
+										url,
+										params,
+										function(data, status, XHR) {
+											if (status == 'success') {
+												var area_name = data.customer_pref;
+												//test
+												// var area_name = '北海道';
+												var url = 'http://gs850.ggsv.jp/~w850033/class/json/send_item_info.php';
+												var params = {
+													qr_id : qr_id,
+													area_name : area_name
+												};
+												// サーバ通信
+												sendPost(url, params);
+											} else {
+												
+												// お届け先情報の取得に失敗
+												alert('仮メッセージ：お届け先情報の取得に失敗');
+											}
+										}
+									);
+								};
+								reader.readAsText(file, "utf-8");
+							}, fail)
+						}, fail);
+					}
+				}
 			}
 
 			// Barcode 読み込み失敗　---------------------------------------------------------------
