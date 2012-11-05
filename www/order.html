@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title></title>
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no;" />
+		<meta charset="utf-8">
+
+		<!-- iPad/iPhone specific css below, add after your main css >
+		<link rel="stylesheet" media="only screen and (max-device-width: 1024px)" href="ipad.css" type="text/css" />
+		<link rel="stylesheet" media="only screen and (max-device-width: 480px)" href="iphone.css" type="text/css" />
+		-->
+
+		<!--<link rel="stylesheet" href="css/jqmobile-patch.css" type="text/css" />-->
+        <link rel="stylesheet" href="js/jquery.mobile-1.2.0.min.css" type="text/css" />
+
+		<script type="text/javascript" charset="utf-8" src="js/jquery-1.8.2.min.js"></script>
+
+		<script src="http://localhost:8080/target/target-script-min.js#speed"></script>
+
+		<script type="text/javascript" charset="utf-8" src="js/base64.js"></script>
+		<script type="text/javascript" charset="utf-8" src="js/aes.js"></script>
+
+		<script type="text/javascript" charset="utf-8" src="js/main.js"></script>
+
+		<script type="text/javascript" charset="utf-8" src="js/cordova-1.5.0.js"></script>
+
+		<link rel="stylesheet" href="css/iphone.css" type="text/css" />
+
+		<script type="text/javascript">
+		
+            $( document ).bind( "mobileinit", function() {
+                               // jQuery Mobile フレームワークの設定変更は、ここで行なってください！
+                               $.support.cors = true;
+                               $.mobile.allowCrossDomainPages = true;
+            });
+            
+			function onBodyLoad() {
+				document.addEventListener("deviceready", onDeviceReady, false);
+			}
+
+			function onDeviceReady() {
+
+				// Alert -----------------------------------------------------------------------
+				navigator.notification.alert("order.html");
+
+				// GETでJSON取得
+				var get = getQuery();
+				var params = JSON.parse(get['item']);
+				console.log("get[item]: " + get['item']);
+				
+				params['order_time'] = parseInt( new Date() /1000 );
+				params['order_amount'] = document.getElementById('order_amount').value;
+				params['order_carriage'] = document.getElementById('carriage').value;
+				params['total_price'] = document.getElementById('total_price').value;
+				params['recipient_subject'] = document.getElementById('recipient_subject').value;
+		
+				console.log('order::params :' + params);
+				
+				// customer_id の読み込み
+				var fname = 'ordering';
+				
+				//test --------------------------------------------------------------
+				delFile(fname);
+				var jsonObj = {customer_id: 00000000001};
+				setFile(fname, jsonObj);
+				//test --------------------------------------------------------------
+				
+				window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, read, fail);
+				function read(fileSystem) {
+					fileSystem.root.getFile(fname, {}, function(fileEntry) {
+						fileEntry.file(function(file) {
+							var reader = new FileReader();
+							reader.onloadend = function(evt) {
+								// ここに読み込み完了後の処理を書く
+								
+								jsonText = evt.target.result;
+								json = JSON.parse(jsonText);
+								// 顧客IDの保存
+								customer_id = json['customer_id'];
+								
+								url = 'https://gs850.ggsv.jp/~w850033/class/json/send_setup.php';
+								hash = {
+									customer_id: customer_id
+								};
+								$.post(
+									url,
+									hash,
+									function(data, status, XHR) {
+										// 通信OK
+										if (status == 'success') {
+											// 設定OK
+											if (data.setup_ok == 1){
+												
+												url = 'https://gs850.ggsv.jp/~w850033/class/json/receive_order.php';
+												// 注文商品
+												var item = params;
+												// 注文情報obj
+												var order = {};
+												// 位置情報
+												// order['order_latitude']     = item.latitude
+												// order['order_longitude']  = item.longitude
+												// 基本注文情報の代入
+												var order_time = parseInt( new Date() /1000 );
+												order['order_time'] = order_time;
+												order['item_name'] = item.item_name;
+												order['item_id'] = item.item_id;
+												order['company_id'] = item.company_id;
+												order['company_partner_id'] = item.company_partner_id;
+												order['item_version'] = item.item_version;
+												order['item_price'] = item.item_price;
+												order['tax_kbn'] = item.tax_kbn;
+												order['order_carriage'] = item.order_carriage;
+												order['qr_id'] = item.qr_id;
+												order['order_amount'] = item['order_amount'];
+												order['total_price'] = item['total_price'];
+												// 販売業者
+												order['company_name'] = item.company_name;
+												var shop_id = item.qr_id.substring(6, 12);
+												order['shop_id'] = shop_id;
+												// お届け先情報
+												order['recipient_subject']	= item.recipient_subject;
+												
+												hash = {
+													customer_id : customer_id,
+													order: JSON.stringify(order)
+												};
+												$.post(
+													url,
+													hash,
+													function(data, status, XHR) {
+														if (status == 'success') {
+															// 注文情報処理OK
+															if(data.order_id && data.order_id != ''){
+																// order_attention キャンセルについてのイントロ　有無
+																fname = 'order_attention';
+																window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, read, fail);
+																function read(fileSystem) {
+																	console.log('::order_attention:read:');
+																	fileSystem.root.getFile(fname, {}, function(fileEntry) {
+																		fileEntry.file(function(file) {
+																			var reader = new FileReader();
+																			reader.onloadend = function(evt) {
+																				// ここに読み込み完了後の処理を書く
+																				jsonText = evt.target.result;
+																				json = JSON.parse(jsonText);
+																				if(json.order_attention == 'enable'){
+																					// キャンセルについてアラート表示
+																					var message = '30分以内は購入履歴からキャンセル可能です。ご注文確定メールが届きます。しばらくお待ちください。';
+																					var title = 'ありがとうございました';
+																					var button = "閉じる,次回から表示しない";
+																					navigator.notification.confirm(message, attentionCallBack, title, button);
+																				}
+																				// 購入商品一覧の表示
+																				window.location.href = 'show_order.html';
+																			}
+																			reader.readAsText(file, "utf-8");
+																		}, fail)
+																	}, fail);
+																}
+															} else {
+																// アラート
+																alert('仮メッセージ：注文の受付に失敗しました');
+															}
+																
+														} else {
+															// 注文手続きに失敗
+															alert('仮メッセージ：注文手続きに失敗');
+														}
+													}
+												);
+											} else{
+												// アラート
+												alert('仮メッセージ：設定を行ってください');
+												// 設定画面へ
+												window.location.href = "setting.html?item=" + paramsText;
+											}
+										} else {
+											// アラート
+											alert('仮メッセージ：設定を行ってください');
+											// 設定画面へ
+											window.location.href = "setting.html?item=" + paramsText;
+										}
+									}
+								);
+							};
+							// 設定ファイルの不備
+							reader.onerror = function(evt) {
+								// アラート
+								alert('仮メッセージ：設定を行ってください');
+								// 設定画面へ
+								window.location.href = "setting.html?item=" + paramsText;
+							};
+							reader.readAsText(file, "utf-8");
+						}, fail)
+					}, fail);
+				}
+			}
+
+			// ファイル操作　error処理
+			function fail(error) {
+				console.log("設定ファイルの読み込み失敗: " + error.code);
+			}
+			
+			// キャンセルについてのAttention
+			function attentionCallBack(buttonIndex){
+				if (buttonIndex == 1){
+					window.location.href = 'show_order.html';
+				} else {
+					fname = 'order_attention';
+					delFile(fname);
+					jsonObj = {order_attention: 'disable'};
+					setFile(fname, jsonObj);
+					window.location.href = 'show_order.html';
+				}
+			}
+            
+            function changePrice(){
+                var tototo2 = $('#order_amount option:selected').attr('rel') + '円(税込)';
+                $("#total").text(tototo2);
+            }
+
+		</script>
+        <script type="text/javascript" charset="utf-8" src="js/jquery.mobile-1.2.0.min.js"></script>
+    </head>
+
+	<body onload="onBodyLoad()">
+
+		<!-- 注文時の暗証番号入力 -->
+		<div id="order_pass" data-role="page" data-add-back-btn="false">
+			<div data-role="header" data-position="inline">
+				<h1>暗証番号の入力</h1>
+			</div>
+			<div class="cont_passcode_edit" data-role="content">
+				<div class="page_description">
+					<div class="txt">
+						登録された暗証番号を入力してください。
+					</div>
+				</div>
+				<form method="POST" action="<%= url_for :action => :create %>">
+					<div data-role="fieldcontain" >
+						<ul class="setup_list" data-role="listview">
+							<li class="passcode">
+								<label for="order_pass_number" class="fieldLabel">暗証番号<span class="form_note">(数字４桁)</span></label>
+								<input type="password" id="order_pass_number" name="order_pass_number" <%= placeholder("例）1234") %> />
+							</li>
+							<li>
+								暗証番号を忘れた場合は秘密の質問に答えることで、パスワードの再登録ができるようになります。
+							</li>
+							<li class="passcode">
+								<label for="order_pass_question" class="fieldLabel">秘密の質問<span class="form_note">(自分だけにわかる質問)</span></label>
+								<div id="order_pass_question"></div>
+							</li>
+							<li class="passcode">
+								<label for="order_pass_answer" class="fieldLabel">質問の回答</label>
+								<input type="text" id="order_pass_answer" name="order_pass_answer" value=""> />
+							</li>
+							<li class="item_buy_1btn btn_txt_ow">
+								<div>
+									<button class="btn_next" type="button" onClick="">注文を続ける</button>
+								</div>
+							</li>
+						</ul>
+					</div>
+				</form>
+			</div>
+			<div class="footer" data-role="footer" data-position="fixed" data-id="tabber">
+				<ul>
+					<li class="tab01">
+						<a href="show_order.html"> <span>注文履歴</span> </a>
+					</li>
+					<li class="tab02 current">
+						<a href="barcode.html" target="_blank"> <span>読み取り</span> </a>
+					</li>
+					<li class="tab03">
+						<a href="index.html"> <span>設定</span> </a>
+					</li>
+				</ul>
+			</div><!-- /dr-footer -->
+		</div>
+
+	</body>
+</html>
+
