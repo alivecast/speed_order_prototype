@@ -11,25 +11,25 @@
 		<link rel="stylesheet" media="only screen and (max-device-width: 480px)" href="iphone.css" type="text/css" />
 		-->
 
-		<link rel="stylesheet" href="js/jquery.mobile-1.0.1.min.css" type="text/css" />
 		<!--<link rel="stylesheet" href="css/jqmobile-patch.css" type="text/css" />-->
+		<link rel="stylesheet" href="js/jquery.mobile-1.2.0.min.css" type="text/css" />
 
-		<script type="text/javascript" charset="utf-8" src="js/jquery-1.6.4.min.js"></script>
-		<script type="text/javascript" charset="utf-8" src="js/jquery.mobile-1.0.1.min.js"></script>
-
+		<script type="text/javascript" charset="utf-8" src="js/jquery-1.8.2.min.js"></script>
 		<script src="http://localhost:8080/target/target-script-min.js#speed"></script>
-
 		<script type="text/javascript" charset="utf-8" src="js/base64.js"></script>
 		<script type="text/javascript" charset="utf-8" src="js/aes.js"></script>
-
 		<script type="text/javascript" charset="utf-8" src="js/main.js"></script>
-
 		<script type="text/javascript" charset="utf-8" src="js/cordova-1.5.0.js"></script>
-		<script type="text/javascript" charset="utf-8" src="js/barcodescanner.js"></script>
-
 		<link rel="stylesheet" href="css/iphone.css" type="text/css" />
 
 		<script type="text/javascript">
+		
+			$(document).bind("mobileinit", function() {
+				// jQuery Mobile フレームワークの設定変更は、ここで行なってください！
+				$.support.cors = true;
+				$.mobile.allowCrossDomainPages = true;
+			});
+
 			function onBodyLoad() {
 				document.addEventListener("deviceready", onDeviceReady, false);
 			}
@@ -37,376 +37,362 @@
 			function onDeviceReady() {
 
 				// Alert -----------------------------------------------------------------------
-				navigator.notification.alert("show_item.html");
-
+				// navigator.notification.alert("show_item.html");
+				
 				// GETでJSON取得
 				var get = getQuery();
-				var params = JSON.parse(get['item']);
-				console.log("get[item]: " + get['item']);
-				// 値をセット -----------------------------------------------------------------------
-
-				// 商品名
-				document.getElementById("item_name").innerText = params['item_name'];
-
-				// 商品画像
-				var item_image = '<img src="' + params['item_image'] + '" width="150" height="150" alt="商品画像" />';
-				document.getElementById("item_image").innerHTML = item_image;
-
-				// 商品価格
-				item_price = '無料';
-				if (parseInt(params['item_price']) > 0) {
-					var item_price = currency(String(params['item_price'])) + '円';
+				console.log("getQuery: " + JSON.stringify(get));
+				
+				// orderファイルに保存
+				fname = 'order';
+				window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function(fileSystem) {
+					fileSystem.root.getFile(fname, {
+						create : false
+					}, 
+					function(fileEntry) {
+						fileEntry.remove(function() {
+							console.log('File removed:' + fname);
+						}, error);
+					}, error);
+				}, error);
+				function error(error){
+					console.log("ファイル処理失敗: " + error.code);
+					var get = getQuery();
+					fname = 'order';
+					setFile(fname, get);
 				}
-				document.getElementById("item_price").innerText = item_price;
-
-				// 商品情報更新
-				if (params['item_update_flg'] == 'enable' && parseInt(params['item_create_time']) != parseInt(params['item_update_time'])) {
-					var data_change = '<div class="data_change"><div class="tl">' + getDate(params['item_update_time']) + 'に商品情報が変更されました</div></div>';
-					document.getElementById("data_change").innerHTML = data_change;
-				}
-
-				// １個の送料
-				// if (is_pref_flg == 'enable') {
-				var shippingCost = '<dl class="shippingCost"><dt>送料</dt><dd id="order_carriage"><span id="carriage">';	
-				// var shippingCost = '<dl class="shippingCost"><dt>送料</dt><dd><span id="carriage">';
-				if (parseInt(params['order_carriage']) > 0) {
-					shippingCost += currency(params['order_carriage']) + '円</span></dd></dl>';
-				} else {
-					shippingCost += '無料</span></dd></dl>';
-				}
-				document.getElementById("shippingCost").innerHTML = shippingCost
-				// }
-
-				// 送料無料金額
-				// params['non_carriage_price'] = 500; // test
-				if (parseInt(params['non_carriage_price']) > 0) {
-					var non_carriage_price = '<dl class="shippingCost"><dd id="order_carriage"><span>';
-					non_carriage_price = non_carriage_price + currency(params['non_carriage_price']) + '円以上は送料無料</span></dd></dl>';
-					document.getElementById("non_carriage_price").innerHTML = non_carriage_price;
-				}
-
-				// 在庫状況
-				item_stock_sts = '';
-				// params.item_stock_sts = 'discontinued'; // test
-				// if (params['item_is_activate_flg'] == 'enable' || params['item_is_ready_flg'] == 'enable'){ // test
-				if (params['item_is_activate_flg'] == 'disable' || params['item_is_ready_flg'] == 'disable') {
-					item_stock_sts = '<p class="ico ico_backOrder">販売準備中</p>';
-				} else if (params.item_stock_sts == 'backstock') {
-					item_stock_sts = '<p class="ico ico_backOrder">入荷待ち</p>';
-				} else if (params.item_stock_sts == 'discontinued' || params.item_is_stop_flg == 'disable') {
-					item_stock_sts = '<p class="ico ico_discontinued">販売中止</p>';
-				} else if (params.item_stock_sts == 'nostock' || parseInt(params.item_stock_sts) < 1) {
-					item_stock_sts = '<p class="ico ico_backOrder">在庫切れ</p>';
-				} else if (parseInt(params.item_stock_sts) < 3 && parseInt(params.item_stock_sts) > 0) {
-					item_stock_sts = '<p class="ico ico_onlyRemaining">残りわずか</p>';
-				}
-				if (item_stock_sts != '') {
-					document.getElementById("item_stock_sts").innerHTML = item_stock_sts;
-				}
-
-				// 合計金額
-				// params.is_sales_flg = 'diable' // test
-				if (params.is_sales_flg == 'enable') {
-					total_price = '<div class="item_buy_price"><span>ご購入合計金額：</span><span id="total">';
-					total_price = total_price + currency(String(parseInt(params.item_price) + parseInt(params.order_carriage))) + '円(税込)';
-					total_price = total_price + '</span></div>';
-					document.getElementById("total_price").innerHTML = total_price;
-				} else {
-					$('#total_price').css('display', 'none');
-				}
-
-				// 数量
-				if (params.is_sales_flg == 'enable') {
-					var amount = '<div class="box2"><div class="box2_01 item_quantity"><div class="inner"><div date-role="fieldcontain"><p>';
-					amount += '数量：';
-					amount += '<select class="itemValue" id="order_amount" name="order_amount" onChange="getCarriage(parseInt(params.item_price), parseInt(params.order_carriage), parseInt(params.non_carriage_price))">';
-					var max = 1;
-					if (parseInt(params.item_stock_sts) > parseInt(params.item_max_sales)) {
-						max = parseInt(params.item_max_sales);
-					} else {
-						max = parseInt(params.item_stock_sts);
-					}
-					for (var i = 1; i <= max; i++) {
-						amount += '<option value="' + String(i) + '">' + String(i) + '</option>';
-					}
-					amount += '</select></p></div></div></div>';
-					amount += '<div class="box2_02 item_buy btn_txt_ow"><button class="btn_next" type="submit">購入する</button></div></div>';
-					document.getElementById("item_quantity_buy").innerHTML = amount;
-				} else {
-					$('#item_quantity_buy').css('display', 'none');
-				}
-
-				// 現在のお届け先
-				var fname = 'addressee';
-				window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, gotFS_read, noAddressee);
-				function gotFS_read(fileSystem) {
-					fileSystem.root.getFile(fname, {create : true}, function(fileEntry) {
+				setFile(fname, get);
+				
+				// お届け先
+				fname = 'ordering';
+				window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, read, noOrdering);
+				function read(fileSystem) {
+					fileSystem.root.getFile(fname, {}, function(fileEntry) {
 						fileEntry.file(function(file) {
 							var reader = new FileReader();
 							reader.onloadend = function(evt) {
-								console.log("evt.target.result: " + evt.target.result);
-								if (evt.target.result && evt.target.result != ''){
-									var jsonText = evt.target.result;
-									// ここに処理を書く
-									var addressee = {};
-									var addressees = JSON.parse(jsonText);
-									for (var i = 0; i < addressees.length; i++){
-										if (addressees[i].recipient_main_flg == 'primary'){
-											addressee = addressees[i];
-											break;
-										}
-									}
-									if (addressee != {} && addressee.recipient_subject){
-										var recipient_subject = '<a href="#"><li id="item_shippingAddress" class="item_shippingAddress">';
-										recipient_subject += '現在のお届け先：<span id="recipient_subject">' + String(addressee.recipient_subject) + '</span></p>';
-										recipient_subject += '<p class="txt">お届け先の変更はこちら</p>';
-										recipient_subject += '</a></li>';
-										document.getElementById("addressee").innerHTML = recipient_subject;
-									} else {
-										noAddressee();
-									}
-								} else {
-									noAddressee();
-								}
+								text = evt.target.result;
+								json = JSON.parse(text);
+								get['customer_id'] = json.customer_id;
+								// 商品情報を取得
+								sendData(get);
+							};
+							reader.readAsText(file, "utf-8");
+						}, noOrdering)
+					}, noOrdering);
+				}
+				function noOrdering(error){
+					get['customer_id'] = '';
+					// 商品情報を取得
+					sendData(get);
+				}
+
+				// 商品情報を取得 -----------------------------------------------------------------------
+				function sendData(get) {
+					console.log("sendData: " + JSON.stringify(get));
+					var url = 'http://gs850.ggsv.jp/~w850033/class/json/send_item_info.php';
+					var hash = {
+						qr_id: get.qr_id,
+						customer_id: get.customer_id
+					};
+					$.post(url, // アクセスするURL
+					hash, // 送信データ
+					function(data, status, XHR) {// 処理結果
+						if (status == 'success') {
+							// 商品詳細
+							if (data != {} && data != null) {
+								// 商品情報をセット
+								setData(data);
+							} else {
+								var message = 'もう一度QRコードを撮影してください';
+								var title = '商品情報を取得できませんでした';
+								var button = 'OK';
+								navigator.notification.alert(message, alertCallBack(), title, button);
 							}
-							reader.readAsText(file);
-						}, noAddressee);
-					}, noAddressee);
-				}
-				function noAddressee(){
-					$("#addressee").removeClass();
-					$("#addressee").css("display", "none");
-					//test
-					// addressee.recipient_subject = '自宅';
-					// var recipient_subject = '<a href="#"><li id="item_shippingAddress" class="item_shippingAddress">';
-					// recipient_subject += '現在のお届け先：<span>' + String(addressee.recipient_subject) + '</span></p>';
-					// recipient_subject += '<p class="txt">お届け先の変更はこちら</p>';
-					// recipient_subject += '</a></li>';
-					// $('#addressee').html(recipient_subject);
+						} else {
+							var message = 'もう一度QRコードを撮影してください';
+							var title = '商品情報を取得できませんでした';
+							var button = 'OK';
+							navigator.notification.alert(message, alertCallBack(), title, button);
+						}
+					});
 				}
 
-				// 商品説明
-				var shop_contact = '<div class="txt" style="font-weight:bold;">' + params.item_name + '</div><div class="txt">';
-				shop_contact = shop_contact + params.item_short_desc + '</div>';
-				document.getElementById("shop_contact").innerHTML = shop_contact;
-
-				// 販売社名
-				document.getElementById("company_name").innerText = String(params['company_name']);
-				document.getElementById("company_name_2").innerText = String(params['company_name']);
-				// 営業時間
-				if (params['company_liaise'] && params['company_liaise'] != "") {
-					var company_liaise = '（営業時間: ' + params['company_liaise'] + '）';
-					document.getElementById("company_liaise").innerText = company_liaise;
-				}
-				// 代表者
-				document.getElementById("company_president").innerText = params['company_president'];
-				// 電話番号　商品詳細ページ
-				var company_phone = '<a class="btn_prev" href="tel:' + params['company_phone'] + '" data-role="button">電話で問い合わせる</a>';
-				document.getElementById("company_phone").innerHTML = company_phone;
-				// 住所
-				var zipcode = "";
-				if (params['company_zip'] && params['company_zip'] != "") {
-					zipcode = "〒" + params.company_zip + " ";
-				}
-				document.getElementById("company_address").innerText = String(zipcode + params['company_address1']) + String(params['company_address2']) + String(params['company_address3']);
-				// 電話　特商
-				var company_phone2 = '<a class="btn_prev" href="tel:' + params['company_phone'] + '" data-role="button">電話で問い合わせる</a>';
-				document.getElementById("company_phone2").innerHTML = company_phone2;
-				// 商品代金以外に必要な金額
-				if (params['company_charge'] && params['company_charge'] != "") {
-					document.getElementById("company_charge").innerText = params['company_charge'];
-				} else {
-					document.getElementById("company_charge").innerText = '商品代金以外の必要料金はありません。';
-				}
-				// 商品引き渡し
-				if (params['company_report_time'] && params['company_report_time'] != "") {
-					document.getElementById("company_report_time").innerText = params['company_report_time'];
-				} else {
-					document.getElementById("company_report_time").innerText = 'ご入金確認後のお届けになります。詳しい到着日はお尋ね下さい。';
-				}
-				// 返品
-				if (params['company_returned'] && params['company_returned'] != "") {
-					document.getElementById("company_returned").innerText = params['company_returned'];
-				} else {
-					document.getElementById("company_returned").innerText = 'お届けした商品がお申し込みと異なっていた場合は交換させて頂きます。';
+				// alertCallBack -----------------------------------------------------------------------
+				function alertCallBack() {
+					window.location.href = 'barcode.html';
 				}
 
-				// var shop_contact = '<div class="txt" style="font-weight:bold;">' + params['item_name'] %> + '</div><div class="txt">' + params['item_short_desc'] + '</div>';'
-				// document.getElementById("shop_contact").innerHTML = shop_contact;
-				// document.getElementById("company_fax").innerText = params['company_fax'];
-			}
+				// 商品情報をセット
+				function setData(params) {
+					console.log(params);
+					window.localStorage.removeItem('order_params');
+					window.localStorage.setItem('order_params', JSON.stringify(params));
+					// 商品名
+					//document.getElementById("item_name").innerText = params['item_name'];
+					$("#item_name").text(params['item_name']);
 
-			// 注文・購入ボタンクリック
-			// 設定状況の確認
-			function checkSetting() {
-				return true;
+					// 商品画像
+					//var item_image = '<img src="' + params['item_image'] + '" width="150" height="150" alt="商品画像" />';
+					//document.getElementById("item_image").innerHTML = item_image;
+
+					$("#item_image1").attr("src", params['item_image']);
+
+					// 商品価格
+					item_price = '無料';
+					if (parseInt(params['item_price']) > 0) {
+						var item_price = currency(String(params['item_price'])) + '円';
+					}
+					//document.getElementById("item_price").innerText = item_price;
+					$("#item_price").text(item_price);
+
+					// 商品情報更新
+					if (params['item_update_flg'] == 'enable' && parseInt(params['item_create_time']) != parseInt(params['item_update_time'])) {
+						var data_change = '<div class="data_change"><div class="tl">' + getDate(params['item_update_time']) + 'に商品情報が変更されました</div></div>';
+						document.getElementById("data_change").innerHTML = data_change;
+					}
+
+					// １個の送料
+					// if (params.area_name != '') {
+					var shippingCost = '<dl class="shippingCost"><dt>送料</dt><dd id="order_carriage"><span id="carriage">';
+					// var shippingCost = '<dl class="shippingCost"><dt>送料</dt><dd><span id="carriage">';
+					if (parseInt(params['order_carriage']) > 0) {
+						shippingCost += currency(params['order_carriage']) + '円</span></dd></dl>';
+					} else {
+						shippingCost += '無料</span></dd></dl>';
+					}
+					document.getElementById("shippingCost").innerHTML = shippingCost;
+					// }
+
+					// 送料無料金額
+					// params['non_carriage_price'] = 500; // test
+					if (parseInt(params['non_carriage_price']) > 0) {
+						var non_carriage_price = '<dl class="shippingCost"><dd id="order_carriage"><span>';
+						non_carriage_price = non_carriage_price + currency(params['non_carriage_price']) + '円以上は送料無料</span></dd></dl>';
+						document.getElementById("non_carriage_price").innerHTML = non_carriage_price;
+					}
+
+					// 在庫状況
+					item_stock_sts = '';
+					// params.item_stock_sts = 'discontinued'; // test
+					// if (params['item_is_activate_flg'] == 'enable' || params['item_is_ready_flg'] == 'enable'){ // test
+					if (params['item_is_activate_flg'] == 'disable' || params['item_is_ready_flg'] == 'disable') {
+						item_stock_sts = '<p class="ico ico_backOrder">販売準備中</p>';
+					} else if (params.item_stock_sts == 'backstock') {
+						item_stock_sts = '<p class="ico ico_backOrder">入荷待ち</p>';
+					} else if (params.item_stock_sts == 'discontinued' || params.item_is_stop_flg == 'disable') {
+						item_stock_sts = '<p class="ico ico_discontinued">販売中止</p>';
+					} else if (params.item_stock_sts == 'nostock' || parseInt(params.item_stock_sts) < 1) {
+						item_stock_sts = '<p class="ico ico_backOrder">在庫切れ</p>';
+					} else if (parseInt(params.item_stock_sts) < 3 && parseInt(params.item_stock_sts) > 0) {
+						item_stock_sts = '<p class="ico ico_onlyRemaining">残りわずか</p>';
+					}
+					if (item_stock_sts != '') {
+						document.getElementById("item_stock_sts").innerHTML = item_stock_sts;
+					}
+
+					// 合計金額
+					// params.is_sales_flg = 'diable' // test
+					if (params.is_sales_flg == 'enable') {
+						var total_price = currency(String(parseInt(params.item_price) + parseInt(params.order_carriage))) + '円(税込)';
+						// document.getElementById("total_price").innerHTML = total_price;
+						$("#total").text(total_price);
+					} else {
+						$('#total_price').css('display', 'none');
+					}
+
+					// 数量
+					if (params.is_sales_flg == 'enable') {
+						var amount = '';
+						var max = 1;
+						if (parseInt(params.item_stock_sts) > parseInt(params.item_max_sales)) {
+							max = parseInt(params.item_max_sales);
+						} else {
+							max = parseInt(params.item_stock_sts);
+						}
+						// 合計金額をrelに持たせる
+						for (var i = 1; i <= max; i++) {
+							var toto = parseInt(params.item_price) * i + parseInt(params.order_carriage);
+							amount += '<option value="' + String(i) + '" rel="' + toto + '">' + String(i) + '</option>';
+						}
+						$('#order_amount').html(amount).selectmenu('refresh', true);
+
+					} else {
+						$('#item_quantity_buy').css('display', 'none');
+					}
+
+					// 現在のお届け先
+					if (params.customer_id != '') {
+						fname = 'ordering';
+						window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, read, noAddressee);
+						function read(fileSystem) {
+							fileSystem.root.getFile(fname, {}, function(fileEntry) {
+								fileEntry.file(function(file) {
+									var reader = new FileReader();
+									reader.onloadend = function(evt) {
+										// ここに読み込み完了後の処理を書く
+										console.log("text: " + evt.target.result);
+										var text = evt.target.result;
+										var json = JSON.parse(text);
+										var customer_id = json.customer_id;
+										var url = 'https://gs850.ggsv.jp/~w850033/class/json/get_addressee.php';
+										var params = {
+											customer_id : customer_id
+										};
+										$.post(url, params, function(data, status, XHR) {
+											console.log("addressee::data: " + evt.target.result);
+											if (status == 'success') {
+												var recipient_subject = '<a href="addressee_index.html?customer_id=' + customer_id + '"><li id="item_shippingAddress" class="item_shippingAddress">';
+												recipient_subject += '現在のお届け先：<span id="recipient_subject">' + String(data.address_name) + '</span></p>';
+												recipient_subject += '<p class="txt">お届け先の変更はこちら</p>';
+												recipient_subject += '</a></li>';
+												document.getElementById("addressee").innerHTML = recipient_subject;
+											} else {
+												noAddressee();
+											}
+										});
+									};
+									reader.readAsText(file, "utf-8");
+								}, noAddressee)
+							}, noAddressee);
+						}
+						function noAddressee(error) {
+							// console.log('noAdrressee: ' + error);
+							$("#addressee").removeClass();
+							$("#addressee").css("display", "none");
+						}
+					}
+
+					// 商品説明
+					var shop_contact = '<div class="txt" style="font-weight:bold;">' + params.item_name + '</div><div class="txt">';
+					shop_contact = shop_contact + params.item_short_desc + '</div>';
+					document.getElementById("shop_contact").innerHTML = shop_contact;
+
+					// 販売社名
+					document.getElementById("company_name").innerText = String(params['company_name']);
+					document.getElementById("company_name_2").innerText = String(params['company_name']);
+					// 営業時間
+					if (params['company_liaise'] && params['company_liaise'] != "") {
+						var company_liaise = '（営業時間: ' + params['company_liaise'] + '）';
+						document.getElementById("company_liaise").innerText = company_liaise;
+					}
+					// 代表者
+					document.getElementById("company_president").innerText = params['company_president'];
+					// 電話番号　商品詳細ページ
+					//				var company_phone = '<a class="btn_prev" href="tel:' + params['company_phone'] + '" data-role="button">電話で問い合わせる</a>';
+					//				document.getElementById("company_phone").innerHTML = company_phone;
+					$("#company_phone_go").attr("href", "tel:" + params['company_phone']);
+					// 住所
+					var zipcode = "";
+					if (params['company_zip'] && params['company_zip'] != "") {
+						zipcode = "〒" + params.company_zip + " ";
+					}
+					document.getElementById("company_address").innerText = String(zipcode + params['company_address1']) + String(params['company_address2']) + String(params['company_address3']);
+					// 電話　特商
+					//				var company_phone2 = '<a class="btn_prev" href="tel:' + params['company_phone'] + '" data-role="button">電話で問い合わせる</a>';
+					//				document.getElementById("company_phone2").innerHTML = company_phone2;
+					$("#company_phone2").text(params['company_phone']);
+					$("#company_phone2_go").attr("href", "tel:" + params['company_phone']);
+					// 商品代金以外に必要な金額
+					if (params['company_charge'] && params['company_charge'] != "") {
+						document.getElementById("company_charge").innerText = params['company_charge'];
+					} else {
+						document.getElementById("company_charge").innerText = '商品代金以外の必要料金はありません。';
+					}
+					// 商品引き渡し
+					if (params['company_report_time'] && params['company_report_time'] != "") {
+						document.getElementById("company_report_time").innerText = params['company_report_time'];
+					} else {
+						document.getElementById("company_report_time").innerText = 'ご入金確認後のお届けになります。詳しい到着日はお尋ね下さい。';
+					}
+					// 返品
+					if (params['company_returned'] && params['company_returned'] != "") {
+						document.getElementById("company_returned").innerText = params['company_returned'];
+					} else {
+						document.getElementById("company_returned").innerText = 'お届けした商品がお申し込みと異なっていた場合は交換させて頂きます。';
+					}
+				}
+
+			} // onDeviceReady
+
+			function changePrice() {
+				var tototo2 = $('#order_amount option:selected').attr('rel') + '円(税込)';
+				$("#total").text(tototo2);
+				// 送料無料の反映
+				var amount = parseInt(document.getElementById('#order_amount').value);
+				var total = parseInt(document.getElementById('#total').value);
+				var neoCarriage = carriage;
+				if (total >= params.non_carriage_price) {
+					neoCarriage = 0;
+					var str = String(neoCarriage);
+					var num = new String(str).replace(/,/g, "");
+					while (num != ( num = num.replace(/^(-?\d+)(\d{3})/, "$1,$2")));
+					if ( num = '0') {
+						num = '無料';
+					} else {
+						num + '円';
+					}
+					document.getElementById('#carriage').innerHTML = String(num);
+				}
 			}
 
 			// 注文へ
-			function order(params) {
+			function order() {
 				console.log('::order::');
-				
-				params['order_time'] = parseInt( new Date() /1000 );
+				// GETでJSON取得
+				var params = getQuery();
+
+				params['order_time'] = parseInt(new Date() / 1000);
 				params['order_amount'] = document.getElementById('order_amount').value;
-				params['order_carriage'] = document.getElementById('carriage').value;
-				params['total_price'] = document.getElementById('total_price').value;
-				params['recipient_subject'] = document.getElementById('recipient_subject').value;
-				
-				
-				// customer_id の読み込み
-				fname = 'ordering';
-				window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, read, fail);
+				itemText = window.localStorage.getItem('order_params');
+				item = JSON.parse(itemText);
+				params['item_version'] = item['item_version'];
+				console.log('order params :' + JSON.stringify(params));
+				var fname = 'ordering';
+				window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, read, orderError);
 				function read(fileSystem) {
 					fileSystem.root.getFile(fname, {}, function(fileEntry) {
 						fileEntry.file(function(file) {
 							var reader = new FileReader();
 							reader.onloadend = function(evt) {
 								// ここに読み込み完了後の処理を書く
-								
-								// jsonText = evt.target.result;
-								// json = JSON.parse(jsonText);
-								// 顧客IDの保存
-								// customer_id = json['customer_id'];
-								
-								// test 
-								customer_id = '00000000001';
-								
-								url = 'https://gs850.ggsv.jp/~w850033/class/json/send_setup.php';
-								hash = {
-									customer_id: customer_id
-								};
-								$.post(
-									url,
-									hash,
-									function(data, status, XHR) {
-										// 通信OK
-										if (status == 'success') {
-											// 設定OK
-											if (data.setup_ok == 1){
-												
-												url = 'https://gs850.ggsv.jp/~w850033/class/json/receive_order.php';
-												// 注文商品
-												var item = params;
-												// 注文情報obj
-												var order = {};
-												// 位置情報
-												// order['order_latitude']     = item.latitude
-												// order['order_longitude']  = item.longitude
-												// 基本注文情報の代入
-												var order_time = parseInt( new Date() /1000 );
-												order['order_time'] = order_time;
-												order['item_name'] = item.item_name;
-												order['item_id'] = item.item_id;
-												order['company_id'] = item.company_id;
-												order['company_partner_id'] = item.company_partner_id;
-												order['item_version'] = item.item_version;
-												order['item_price'] = item.item_price;
-												order['tax_kbn'] = item.tax_kbn;
-												order['order_carriage'] = item.order_carriage;
-												order['qr_id'] = item.qr_id;
-												order['order_amount'] = item['order_amount'];
-												order['total_price'] = item['total_price'];
-												// 販売業者
-												order['company_name'] = item.company_name;
-												var shop_id = item.qr_id.substring(6, 12);
-												order['shop_id'] = shop_id;
-												// お届け先情報
-												order['recipient_subject']	= item.recipient_subject;
-												
-												hash = {
-													customer_id : customer_id,
-													order: JSON.stringify(order)
-												};
-												$.post(
-													url,
-													hash,
-													function(data, status, XHR) {
-														if (status == 'success') {
-															// 注文情報処理OK
-															if(data.order_id && data.order_id != ''){
-																// order_attention キャンセルについてのイントロ　有無
-																fname = 'order_attention';
-																window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, read, fail);
-																function read(fileSystem) {
-																	fileSystem.root.getFile(fname, {}, function(fileEntry) {
-																		fileEntry.file(function(file) {
-																			var reader = new FileReader();
-																			reader.onloadend = function(evt) {
-																				// ここに読み込み完了後の処理を書く
-																				jsonText = evt.target.result;
-																				json = JSON.parse(jsonText);
-																				if(json.order_attention == 'enable'){
-																					// キャンセルについてアラート表示
-																					var message = '30分以内は購入履歴からキャンセル可能です。ご注文確定メールが届きます。しばらくお待ちください。';
-																					var title = 'ありがとうございました';
-																					var button = "閉じる,次回から表示しない";
-																					navigator.notification.confirm(message, attentionCallBack, title, button);
-																				}
-																				// 購入商品一覧の表示
-																				window.location.href = 'show_order.html';
-																			}
-																			reader.readAsText(file, "utf-8");
-																		}, fail)
-																	}, fail);
-																}
-															} else {
-																// アラート
-																alert('仮メッセージ：注文の受付に失敗しました');
-															}
-																
-														} else {
-															// 注文手続きに失敗
-															alert('仮メッセージ：注文手続きに失敗');
-														}
-													}
-												);
-											} else{
-												// アラート
-												alert('仮メッセージ：設定を行ってください');
-												// 設定画面へ
-												window.location.href = "setting.html?item=" + paramsText;
-											}
-										} else {
-											// アラート
-											alert('仮メッセージ：設定を行ってください');
-											// 設定画面へ
-											window.location.href = "setting.html?item=" + paramsText;
-										}
-									}
-								);
-							};
-							// 設定ファイルの不備
-							reader.onerror = function(evt) {
-								// アラート
-								alert('仮メッセージ：設定を行ってください');
-								// 設定画面へ
-								window.location.href = "setting.html?item=" + paramsText;
+								console.log("text: " + evt.target.result);
+								var text = evt.target.result;
+								var json = JSON.parse(text);
+
+								params['customer_id'] = json.customer_id;
+								fname = 'order';
+								delFile(fname);
+								setFile(fname, params);
+
+								console.log('order::params :' + JSON.stringify(params));
+
+								// リダイレクト
+								window.location.href = "order.html?order=" + JSON.stringify(params);
 							};
 							reader.readAsText(file, "utf-8");
-						}, fail)
-					}, fail);
+						}, orderError)
+					}, orderError);
 				}
-			}
-
-			// ファイル操作　error処理
-			function fail(error) {
-				console.log("設定ファイルの読み込み失敗: " + error.code);
+				function orderError(error){
+					console.log('orderError: ' + JSON.stringify(params));
+					fname = 'order';
+					delFile(fname);
+					setFile(fname, params);
+					// リダイレクト
+					window.location.href = "order.html?order=" + JSON.stringify(params);
+				}
 			}
 			
-			// キャンセルについてのAttention
-			function attentionCallBack(buttonIndex){
-				if (buttonIndex == 1){
-					window.location.href = 'show_order.html';
-				} else {
-					fname = 'order_attention';
-					delFile(fname);
-					jsonObj = {order_attention: 'disable'};
-					setFile(fname, jsonObj);
-					window.location.href = 'show_order.html';
-				}
+			// alertCallBack -----------------------------------------------------------------------
+			function alertCallBack() {
+				window.location.href = 'barcode.html';
 			}
-
+			
 		</script>
+		
+		<script type="text/javascript" charset="utf-8" src="js/jquery.mobile-1.2.0.min.js"></script>
+
 	</head>
 
 	<body onload="onBodyLoad()">
@@ -414,10 +400,13 @@
 		<div data-role="page" id="page_itemDetail" data-add-back-btn="false">
 			<div data-role="header" data-position="inline">
 				<h1>商品情報</h1>
-				<a href="barcode.html" class="ui-btn-left" data-icon="arrow-l" data-direction="reverse"> 戻る </a>
+				<a href="barcode.html" class="ui-btn-left" data-icon="arrow-l" data-direction="reverse" data-ajax="false"> 戻る </a>
 			</div>
 			<div class="cont_itemDetail" data-role="content">
+				
 				<form method="POST" action="show_order.html" onSubmit="return false;">
+					<div id="item_version_tete" ></div>
+					
 					<!-- 商品情報変更 -->
 					<div id="data_change"></div>
 					<ul class="item_summary" data-role="listview">
@@ -429,7 +418,9 @@
 							<div class="box2">
 								<!-- 商品画像 -->
 								<div class="box2_01 item_img">
-									<div class="inner" id="item_image"></div>
+									<div class="inner" id="item_image">
+										<img src="#" width="150" height="150" alt="商品画像" id="item_image1"/>
+									</div>
 								</div>
 								<div class="box2_02 item_price">
 									<!-- 価格 -->
@@ -450,9 +441,32 @@
 						</li>
 						<!--<% if @item_info_app.is_sales_flg == 'enable' %><% if @is_pref_flg == 'enable' %>	-->
 						<!-- 合計金額 -->
-						<li id="total_price" class="item_quantity_buy"></li>
+						<li id="total_price" class="total_price">
+							<div class="item_buy_price">
+								<span>ご購入合計金額：</span>
+								<span id="total"></span>
+							</div>
+						</li>
 						<!-- 数量-->
-						<li class="item_quantity_buy" id="item_quantity_buy"></li>
+						<li class="item_quantity_buy" id="item_quantity_buy">
+							<div class="box2">
+								<div class="box2_01 item_quantity">
+									<div class="inner">
+										<div date-role="fieldcontain">
+											<p>
+												数量：
+												<select class="itemValue" id="order_amount" name="order_amount" onChange="changePrice();">
+													<option value=1 id="item_quantity_sel">1</option>
+												</select>
+											</p>
+										</div>
+									</div>
+								</div>
+								<div class="box2_02 item_buy btn_txt_ow">
+									<input class="btn_next" type="button" onClick="order();return false;" value="購入する" />
+								</div>
+							</div>
+						</li>
 						<!--<% end %>-->
 					</ul>
 					<!-- お届け先 -->
@@ -474,15 +488,15 @@
 								<div class="box2_01 contact_link">
 									<a class="btn_prev" href="contact.html" data-role="button">フォームはこちら</a>
 								</div>
-								<div class="box2_02 tel_link" id="company_phone" ></div>
+								<div class="box2_02 tel_link" id="company_phone" >
+									<a class="btn_prev" href="#" data-role="button" id="company_phone_go">電話で問い合わせる</a>
+								</div>
 							</div>
 						</li>
 						<!-- <% if @item_info_app.is_sales_flg == 'enable' %>-->
 						<li class="item_buy_1btn">
 							<div class="item_buy btn_txt_ow">
-								<button class="btn_next" type="button" onClick="order(); return false">
-									購入する
-								</button>
+								<input class="btn_next" type="button" value="購入する" onClick="order(); return false"/>
 							</div>
 						</li>
 						<!--<% end %>-->
@@ -492,13 +506,13 @@
 			<div class="footer" data-role="footer" data-position="fixed" data-id="tabber">
 				<ul>
 					<li class="tab01">
-						<a href="show_order.html"> <span>注文履歴</span> </a>
+						<a href="show_order.html"  data-ajax="false"> <span>注文履歴</span> </a>
 					</li>
 					<li class="tab02 current">
-						<a href="barcode.html" target="_blank"> <span>読み取り</span> </a>
+						<a href="barcode.html"  data-ajax="false"> <span>読み取り</span> </a>
 					</li>
 					<li class="tab03">
-						<a href="index.html"> <span>設定</span> </a>
+						<a href="index.html" data-ajax="false"> <span>設定</span> </a>
 					</li>
 				</ul>
 			</div><!-- /dr-footer -->
@@ -514,23 +528,49 @@
 			<!-- コンテンツここから-->
 			<div data-role="content" class="cont_shopProfile">
 				<dl>
-					<dt>販売業者</dt>
-					<dd><span id="company_name_2"></span><br/><span id="company_liaise"></span></dd>
-					<dt>運営責任者</dt>
+					<dt>
+						販売業者
+					</dt>
+					<dd>
+						<span id="company_name_2"></span>
+						<br/>
+						<span id="company_liaise"></span>
+					</dd>
+					<dt>
+						運営責任者
+					</dt>
 					<dd id="company_president"></dd>
-					<dt>所在地</dt>
+					<dt>
+						所在地
+					</dt>
 					<dd id="company_address"></dd>
-					<dt>電話番号</dt>
+					<dt>
+						電話番号
+					</dt>
 					<dd id="company_phone2"></dd>
-					<dt>商品代金以外の必要料金</dt>
+					<dt>
+						商品代金以外の必要料金
+					</dt>
 					<dd id="company_charge"></dd>
-					<dt>お支払方法</dt>
-					<dd>クレジットカード決済</dd>
-					<dt>お支払い期限</dt>
-					<dd>即時決済</dd>
-					<dt>商品の引き渡し時期</dt>
+					<dt>
+						お支払方法
+					</dt>
+					<dd>
+						クレジットカード決済
+					</dd>
+					<dt>
+						お支払い期限
+					</dt>
+					<dd>
+						即時決済
+					</dd>
+					<dt>
+						商品の引き渡し時期
+					</dt>
 					<dd id="company_report_time"></dd>
-					<dt>返品・交換について</dt>
+					<dt>
+						返品・交換について
+					</dt>
 					<dd id="company_returned">
 				</dl>
 				<ul data-role="listview">
@@ -543,7 +583,7 @@
 								<a class="btn_prev" href="contact.html" data-role="button"> フォームはこちら </a>
 							</div>
 							<div class="box2_02 tel_link">
-								<a class="btn_prev" href="tel:<%= @item_info_app.company_phone %>" data-role="button"> 電話で問い合わせる </a>
+								<a class="btn_prev" href="#" data-role="button" id="company_phone2_go">電話で問い合わせる</a>
 							</div>
 						</div>
 					</li>
@@ -551,13 +591,19 @@
 			</div>
 			<div class="footer" data-role="footer" data-position="fixed" data-id="tabber">
 				<ul>
-					<li class="tab01"><a href="show_order.html"> <span>注文履歴</span> </a></li>
-					<li class="tab02 current"><a href="barcode.html" target="_blank"> <span>読み取り</span> </a></li>
-					<li class="tab03"><a href="index.html"> <span>設定</span> </a></li>
+					<li class="tab01">
+						<a href="show_order.html"> <span>注文履歴</span> </a>
+					</li>
+					<li class="tab02 current">
+						<a href="barcode.html" target="_blank"> <span>読み取り</span> </a>
+					</li>
+					<li class="tab03">
+						<a href="index.html"> <span>設定</span> </a>
+					</li>
 				</ul>
 			</div><!-- /dr-footer -->
 		</div>
-		
+
 		<!-- 注文時の暗証番号入力 -->
 		<div id="order_pass" data-role="page" data-add-back-btn="false">
 			<div data-role="header" data-position="inline">
@@ -585,11 +631,14 @@
 							</li>
 							<li class="passcode">
 								<label for="order_pass_answer" class="fieldLabel">質問の回答</label>
-								<input type="text" id="order_pass_answer" name="order_pass_answer" value=""> />
+								<input type="text" id="order_pass_answer" name="order_pass_answer" value="">
+								/>
 							</li>
 							<li class="item_buy_1btn btn_txt_ow">
 								<div>
-									<button class="btn_next" type="button" onClick="">注文を続ける</button>
+									<button class="btn_next" type="button" onClick="">
+										注文を続ける
+									</button>
 								</div>
 							</li>
 						</ul>
@@ -605,7 +654,7 @@
 						<a href="barcode.html" target="_blank"> <span>読み取り</span> </a>
 					</li>
 					<li class="tab03">
-						<a href="index.html"> <span>設定</span> </a>
+						<a href="setting.html"> <span>設定</span> </a>
 					</li>
 				</ul>
 			</div><!-- /dr-footer -->
