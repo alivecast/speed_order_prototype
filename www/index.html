@@ -11,9 +11,9 @@
 		<link rel="stylesheet" media="only screen and (max-device-width: 480px)" href="iphone.css" type="text/css" />
 		-->
             
-        <link rel="stylesheet" href="js/jquery.mobile-1.0.1.min.css" type="text/css" />
-        <script type="text/javascript" charset="utf-8" src="js/jquery-1.6.4.min.js"></script>
-        <script type="text/javascript" charset="utf-8" src="js/jquery.mobile-1.0.1.min.js"></script>
+        <link rel="stylesheet" href="js/jquery.mobile-1.2.0.min.css" type="text/css" />
+        <script type="text/javascript" charset="utf-8" src="js/jquery-1.8.2.min.js"></script>
+        <script type="text/javascript" charset="utf-8" src="js/jquery.mobile-1.2.0.min.js"></script>
             
         <script type="text/javascript" charset="utf-8" src="js/base64.js"></script>
         <script type="text/javascript" charset="utf-8" src="js/aes.js"></script>
@@ -22,7 +22,6 @@
         <script src="http://localhost:8080/target/target-script-min.js#speed"></script>
             
         <script type="text/javascript" charset="utf-8" src="js/cordova-1.5.0.js"></script>
-        <script type="text/javascript" charset="utf-8" src="js/main.js"></script>
         
         <link rel="stylesheet" href="css/iphone.css" type="text/css" />
         
@@ -34,85 +33,135 @@
 
 			function onDeviceReady() {
 				// Alert -----------------------------------------------------------------------
-				navigator.notification.alert("index.html実際には初期処理をしてbarcodeへリダイレクトする");
+				//navigator.notification.alert("index.html実際には初期処理をしてbarcodeへリダイレクトする");
 				
-				// 注文時のキャンセル案内　初期設定
-				jsonObj = {order_attention: 'enable'};
-				setFile('order_attention', jsonObj);
+				// 注文時のキャンセルについてのアラート
+				fname = 'order_attention';
+				window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, read, fail);
+				function read(fileSystem) {
+					fileSystem.root.getFile(fname, {}, function(fileEntry) {
+						fileEntry.file(function(file) {
+							var reader = new FileReader();
+							reader.onloadend = function(evt) {
+								// ここに読み込み完了後の処理を書く
+								text = evt.target.result;
+								json = JSON.parse(text);
+								if(json && json.order_attention && (json.order_attention != '' || json.order_attention != null)){
+									jsonObj = {order_attention: 'enable'};
+									setFile(fname, jsonObj);
+								}
+							};
+							reader.readAsText(file, "utf-8");
+						}, fail)
+					}, fail);
+				}
+				
+				// 設定情報の初期化
+				
+				// 個人情報
+				fname = 'ordering';
+				window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, read, fail_ordering);
+				function read(fileSystem) {
+					fileSystem.root.getFile(fname, {}, function(fileEntry) {
+						fileEntry.file(function(file) {
+							var reader = new FileReader();
+							reader.onloadend = function(evt) {
+								// ここに読み込み完了後の処理を書く
+								text = evt.target.result;
+								console.log(text);
+								json = JSON.parse(text);
+								if(json.customer_id == null){
+									jsonObj = {start: 'app'};
+									setFile(fname, jsonObj);
+								}
+							};
+							reader.readAsText(file, "utf-8");
+						}, fail_ordering)
+					}, fail_ordering);
+				}
+				// お届け先
+				fname = 'address';
+				window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, read, fail_address);
+				function read(fileSystem) {
+					fileSystem.root.getFile(fname, {}, function(fileEntry) {
+						fileEntry.file(function(file) {
+							var reader = new FileReader();
+							reader.onloadend = function(evt) {
+								// ここに読み込み完了後の処理を書く
+								text = evt.target.result;
+								json = JSON.parse(text);
+								if(json.address_id == null){
+									jsonObj = {start: 'app'};
+									setFile(fname, jsonObj);
+								}
+							};
+							reader.readAsText(file, "utf-8");
+						}, fail_address)
+					}, fail_address);
+				}
+				
+				window.location.href = 'barcode.html';
+
+			}
+			function fail_ordering(){
+				fname = 'ordering';
+				jsonObj = {start: 'app'};
+				setFile(fname, jsonObj);
+			}
+			function fail_address(){
+				fname = 'address';
+				jsonObj = {start: 'app'};
+				setFile(fname, jsonObj);
 			}
 			
-			
-			function getSetting(){
-				
-			}
 
 		</script>
     
 	</head>
 
 	<body onload="onBodyLoad()">
-        
         <div data-role="page" data-add-back-btn="false">
-            
-			<div data-role="header" data-position="inline">
-				<h1>index.html</h1>
-			</div>
-            
-			<div data-role="content">
-                
-                <ul>
-                	<li><a href="_test_geo.html" target="_blank" >geo</a></li>
-                	<li><a href="_test_child.html" target="_blank" >ChildBrowser</a></li>
-                	<li><a href="_test_html.html" target="_blank" >HTML取得</a></li>
-                	<li><a href="_test_websql.html" target="_blank" >WebSql</a></li>
-                	<li><a href="_test.html" target="_blank" >test</a></li>
-                	<li><a href="_test_file.html" target="_blank" >testfile</a></li>
-                	<li><a href="_test_file_2.html" target="_blank" >testfile2</a></li>
-                    <li><a href="barcode.html" target="_blank" >Barcode</a></li>
-                    <li><a href="setting.html">設定</a></li>
-                    <li><a href="ordering_new.html" >個人情報・新規</a></li>
-                    <li><a href="ordering_edit.html" >個人情報・編集</a></li>
-                    <li><a href="addressee_new.html" target="_blank" >お届け先・新規</a></li>
-                    <li><a href="addressee_edit.html" target="_blank" >お届け先・編集</a></li>
-                    <li><a href="addressee_index.html" target="_blank" >お届け先・一覧</a></li>
-                    <li><a href="card_new.html" target="_blank" >クレジットカード・新規</a></li>
-                    <li><a href="card_show.html" target="_blank" >クレジットカード・確認</a></li>
-                    <li><a href="passcode_new" target="_blank" >暗証番号・新規</a></li>
-                    <li><a href="passcode_edit" target="_blank" >暗証番号・編集</a></li>
-                    <li><a href="passcode_hint" target="_blank" >暗証番号・ヒント</a></li>
-                    <li><a href="contact.html" target="_blank" >お問い合わせ</a></li>
-                    <li><a href="report.html" >違反報告</a></li>
-                    <li><a href="show_order.html" >購入履歴</a></li>
-                    <li><a href="show_order_item.html" >購入商品</a></li>
-                    <li><a href="show_qrcode.html" >QRコード紹介</a></li>
-                    <li><a href="_memo.html" target="_blank" >memo</a></li>
-                    <li><a href="_test.html" >test</a></li>
-                </ul>
-                                
-			</div>
-			
-			<div class="footer" data-role="footer" data-position="fixed" data-id="tabber">
-				<ul>
-					<li class="tab01">
-						<a href="show_order.html">
-							<span>注文履歴</span>
-						</a>
-					</li>
-					<li class="tab02">
-						<a href="barcode.html" target="_blank">
-							<span>読み取り</span>
-						</a>
-					</li>
-					<li class="tab03 current">
-						<a href="setting.html">
-							<span>設定</span>
-						</a>
-					</li>
-				</ul>
-			</div><!-- /dr-footer -->
-            
-		</div>
 
+  <div data-role="header" data-position="inline" style="background:none #999;">
+    <h1>Please wait...</h1>
+  </div>
+
+  <div data-role="content">
+    <script src="/public/jquery/jquery-1.8.2.min.js" type="text/javascript"></script>
+    <script src="/public/jquery/jquery.activity-indicator-1.0.0.js"></script>
+
+  <style type="text/css">
+  body {
+    color: #fff;
+    background: #00406c;
+  }
+  .square {
+    width: 320px;
+    height: 360px;
+    color: #999;
+    background: #fff;
+    opacity: 0.2;
+    font-family: Helvetica, Arial, Sans-Serif;
+  }
+  </style>
+
+  <div data-role="content">
+    <div id="busy4" class="square">
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function() {
+    // $('#busy1').activity();
+    // $('#busy2').activity({segments: 8, steps: 3, opacity: 0.3, width: 4, space: 0, length: 5, color: '#0b0b0b', speed: 1.5});
+    // $('#busy3').activity({segments: 8, width:2, space: 0, length: 3, color: '#fff', speed: 1.5});
+//    $('#busy4').activity({segments: 12, width: 5.5, space: 6, length: 13, color: '#252525', speed: 1.5});
+    $('#busy4').activity({segments: 32, width: 6, space: 3, length: 72, color: '#252525', speed: 1.5,  align: 'center', valign: 'center'});
+    // $('#busy5').activity({segments: 12, align: 'left', valign: 'top', steps: 3, width:2, space: 1, length: 3, color: '#030303', speed: 1.5});
+    // $('#busy6').activity({outside: true, align: 'right', segments: 10, steps: 3, width:2, space: 0, length: 3, color: '#000', speed: 1.5});
+  });
+</script>
 	</body>
 </html>
 
