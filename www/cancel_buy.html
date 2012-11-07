@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title></title>
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no;" />
+		<meta charset="utf-8">
+
+		<!-- iPad/iPhone specific css below, add after your main css >
+		<link rel="stylesheet" media="only screen and (max-device-width: 1024px)" href="ipad.css" type="text/css" />
+		<link rel="stylesheet" media="only screen and (max-device-width: 480px)" href="iphone.css" type="text/css" />
+		-->
+        <!--
+        <link rel="stylesheet" href="js/jquery.mobile-1.2.0.min.css" type="text/css" />
+        <script type="text/javascript" charset="utf-8" src="js/jquery-1.8.2.min.js"></script>
+        <script type="text/javascript" charset="utf-8" src="js/jquery.mobile-1.2.0.min.js"></script>
+        -->
+            
+        <script type="text/javascript" charset="utf-8" src="js/base64.js"></script>
+        <script type="text/javascript" charset="utf-8" src="js/aes.js"></script>
+        <script type="text/javascript" charset="utf-8" src="js/main.js"></script>
+        
+        <script src="http://localhost:8080/target/target-script-min.js#speed"></script>
+            
+        <script type="text/javascript" charset="utf-8" src="js/cordova-1.5.0.js"></script>
+        
+        <link rel="stylesheet" href="css/iphone.css" type="text/css" />
+        
+        <script type="text/javascript">
+            
+			function onBodyLoad() {
+				document.addEventListener("deviceready", onDeviceReady, false);
+			}
+
+			function onDeviceReady() {
+				// Alert -----------------------------------------------------------------------
+				navigator.notification.alert("cancel_buy.html");
+
+				// GETでJSON取得
+				var get = getQuery();
+				var hash = get;
+				console.log("op: " + JSON.stringify(hash.op));
+				console.log("params: " + JSON.stringify(hash.params));
+				
+							// // キャンセル
+			// function moveCancel(params){
+				// var params = JSON.parse(paramsText);
+				// var url = 'https://gs850.ggsv.jp/~w850033/class/json/receive_cancel.php';
+				// var now = parseInt( new Date() /1000 );
+				// params = {
+					// cancel: 'cancel',
+					// cancel_time: parseInt( new Date() /1000 ),
+					// order_id: params.order_id
+				// };
+				// $.post(
+					// url,
+					// params,
+					// function(data, status, XHR) {
+						// if (status == 'success') {
+							// var cancel_time = data.cancel_time;
+							// console.log("cancel_time: " + cancel_time);
+							// // 購入履歴一覧に戻る
+							// window.location.href = 'show_order.html';
+						// } else {
+							// // お届け先情報の取得に失敗
+							// alert('仮メッセージ：キャンセル処理に失敗しました');
+						// }
+					// }
+				// );
+			// }
+
+			// // 再購入
+			// function moveBuy(){
+				// // 都道府県の取得
+				// var area_name = '';
+				// url = 'https://gs850.ggsv.jp/~w850033/class/json/get_addressee.php';
+				// params = {customer_id : customer_id};
+				// $.post(
+					// url,
+					// params,
+					// function(data, status, XHR) {
+						// if (status == 'success') {
+							// console.log("get_area_name::data: " + data);
+							// var area_name = data.customer_pref;
+							// console.log(area_name);
+							// var url = 'http://gs850.ggsv.jp/~w850033/class/json/send_item_info.php';
+							// var params = {
+								// qr_id : qr_id,
+								// area_name : area_name
+							// };
+							// // サーバ通信
+							// sendPost(url, params);
+						// } else {
+							// // お届け先情報の取得に失敗
+							// alert('仮メッセージ：お届け先情報の取得に失敗');
+						// }
+					// }
+				// );
+			// }
+// 		
+			// function sendPost(url, params) {
+				// console.log('::sendPost::');
+				// $.post(url, // アクセスするURL
+                    // params, // 送信データ
+                    // function(data, status, XHR) {// 処理結果
+	                    // if (status == 'success') {
+							// // 商品詳細
+	                        // item = utf.URLencode(JSON.stringify(data));
+	                        // // console.log("JSON.data " + JSON.stringify(data));
+	                        // // console.log("item " + item);
+	                        // // console.log("item.utf " + utf.URLdecode(item));
+							// window.location.href = "show_item.html?item=" + item;
+						// } else {
+							// message = '商品情報を取得できませんでした';
+							// title = '通信エラー';
+							// button = 'OK';
+							// navigator.notification.alert(message, alertCallBack(), title, button);
+						// }
+					// }
+				// );
+			// }
+
+			}
+
+		</script>
+    
+	</head>
+
+	<body onload="onBodyLoad()">
+        <div data-role="page" data-add-back-btn="false">
+
+  <div data-role="header" data-position="inline" style="background:none #999;">
+    <h1>Please wait...</h1>
+  </div>
+
+  <div data-role="content">
+    <script src="/public/jquery/jquery-1.8.2.min.js" type="text/javascript"></script>
+    <script src="/public/jquery/jquery.activity-indicator-1.0.0.js"></script>
+    
+
+  <style type="text/css">
+  body {
+    color: #fff;
+    background: #00406c;
+  }
+  .square {
+    width: 320px;
+    height: 360px;
+    color: #999;
+    background: #fff;
+    opacity: 0.2;
+    font-family: Helvetica, Arial, Sans-Serif;
+  }
+  </style>
+
+  <div data-role="content">
+    <div id="busy4" class="square">
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function() {
+    // $('#busy1').activity();
+    // $('#busy2').activity({segments: 8, steps: 3, opacity: 0.3, width: 4, space: 0, length: 5, color: '#0b0b0b', speed: 1.5});
+    // $('#busy3').activity({segments: 8, width:2, space: 0, length: 3, color: '#fff', speed: 1.5});
+//    $('#busy4').activity({segments: 12, width: 5.5, space: 6, length: 13, color: '#252525', speed: 1.5});
+    $('#busy4').activity({segments: 32, width: 6, space: 3, length: 72, color: '#252525', speed: 1.5,  align: 'center', valign: 'center'});
+    // $('#busy5').activity({segments: 12, align: 'left', valign: 'top', steps: 3, width:2, space: 1, length: 3, color: '#030303', speed: 1.5});
+    // $('#busy6').activity({outside: true, align: 'right', segments: 10, steps: 3, width:2, space: 0, length: 3, color: '#000', speed: 1.5});
+  });
+</script>
+	</body>
+</html>
+
