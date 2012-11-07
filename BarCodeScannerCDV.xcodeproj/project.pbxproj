@@ -8,10 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		0C046615163E37F200349A2A /* iphone.css in Resources */ = {isa = PBXBuildFile; fileRef = 0C046614163E37F200349A2A /* iphone.css */; };
-		0C0CA50D1643645A00DDACE4 /* ChildBrowser.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 0C0CA5071643645A00DDACE4 /* ChildBrowser.bundle */; };
-		0C0CA50E1643645A00DDACE4 /* ChildBrowserCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = 0C0CA5091643645A00DDACE4 /* ChildBrowserCommand.m */; };
-		0C0CA50F1643645A00DDACE4 /* ChildBrowserViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0C0CA50B1643645A00DDACE4 /* ChildBrowserViewController.m */; };
-		0C0CA5101643645A00DDACE4 /* ChildBrowserViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0C0CA50C1643645A00DDACE4 /* ChildBrowserViewController.xib */; };
+		0C1BF2351648AFE6002D2A62 /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = 0C1BF2341648AFE6002D2A62 /* Default.png */; };
+		0CAB13B91648C3A300861CDB /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 0CAB13B31648C26600861CDB /* Icon.png */; };
+		0CAB13BA1648C3A900861CDB /* icon114.png in Resources */ = {isa = PBXBuildFile; fileRef = 0CAB13B71648C2C300861CDB /* icon114.png */; };
 		48967ABB15084B2800F4D66A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 48967ABA15084B2800F4D66A /* Foundation.framework */; };
 		48967ABD15084B2800F4D66A /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 48967ABC15084B2800F4D66A /* UIKit.framework */; };
 		48967ABF15084B2800F4D66A /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 48967ABE15084B2800F4D66A /* CoreGraphics.framework */; };
@@ -54,12 +53,12 @@
 
 /* Begin PBXFileReference section */
 		0C046614163E37F200349A2A /* iphone.css */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.css; name = iphone.css; path = www/css/iphone.css; sourceTree = "<group>"; };
-		0C0CA5071643645A00DDACE4 /* ChildBrowser.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = ChildBrowser.bundle; sourceTree = "<group>"; };
-		0C0CA5081643645A00DDACE4 /* ChildBrowserCommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChildBrowserCommand.h; sourceTree = "<group>"; };
-		0C0CA5091643645A00DDACE4 /* ChildBrowserCommand.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChildBrowserCommand.m; sourceTree = "<group>"; };
-		0C0CA50A1643645A00DDACE4 /* ChildBrowserViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChildBrowserViewController.h; sourceTree = "<group>"; };
-		0C0CA50B1643645A00DDACE4 /* ChildBrowserViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChildBrowserViewController.m; sourceTree = "<group>"; };
-		0C0CA50C1643645A00DDACE4 /* ChildBrowserViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ChildBrowserViewController.xib; sourceTree = "<group>"; };
+		0C1BF2341648AFE6002D2A62 /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = "<group>"; };
+		0C1BF2361648AFF1002D2A62 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
+		0C1BF2381648AFFE002D2A62 /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default@2x.png"; sourceTree = "<group>"; };
+		0CAB13B31648C26600861CDB /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon.png; sourceTree = "<group>"; };
+		0CAB13B51648C2BE00861CDB /* icon57.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon57.png; sourceTree = "<group>"; };
+		0CAB13B71648C2C300861CDB /* icon114.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon114.png; sourceTree = "<group>"; };
 		48967AB615084B2800F4D66A /* BarCodeScannerCDV.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BarCodeScannerCDV.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		48967ABA15084B2800F4D66A /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		48967ABC15084B2800F4D66A /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
@@ -145,6 +144,12 @@
 		48967AA815084B2800F4D66A = {
 			isa = PBXGroup;
 			children = (
+				0CAB13B71648C2C300861CDB /* icon114.png */,
+				0CAB13B51648C2BE00861CDB /* icon57.png */,
+				0CAB13B31648C26600861CDB /* Icon.png */,
+				0C1BF2381648AFFE002D2A62 /* Default@2x.png */,
+				0C1BF2361648AFF1002D2A62 /* Default-568h@2x.png */,
+				0C1BF2341648AFE6002D2A62 /* Default.png */,
 				0C046614163E37F200349A2A /* iphone.css */,
 				48967B7415084E8A00F4D66A /* www */,
 				48967AD415084B2800F4D66A /* BarCodeScannerCDV */,
@@ -289,12 +294,6 @@
 		48967B0915084B2800F4D66A /* Plugins */ = {
 			isa = PBXGroup;
 			children = (
-				0C0CA5071643645A00DDACE4 /* ChildBrowser.bundle */,
-				0C0CA5081643645A00DDACE4 /* ChildBrowserCommand.h */,
-				0C0CA5091643645A00DDACE4 /* ChildBrowserCommand.m */,
-				0C0CA50A1643645A00DDACE4 /* ChildBrowserViewController.h */,
-				0C0CA50B1643645A00DDACE4 /* ChildBrowserViewController.m */,
-				0C0CA50C1643645A00DDACE4 /* ChildBrowserViewController.xib */,
 				48967B1215084B5100F4D66A /* BarcodeScanner */,
 				48967B0A15084B2800F4D66A /* README */,
 			);
@@ -386,8 +385,9 @@
 				48967B4915084B5100F4D66A /* README.md in Resources */,
 				48967B7515084E8A00F4D66A /* www in Resources */,
 				0C046615163E37F200349A2A /* iphone.css in Resources */,
-				0C0CA50D1643645A00DDACE4 /* ChildBrowser.bundle in Resources */,
-				0C0CA5101643645A00DDACE4 /* ChildBrowserViewController.xib in Resources */,
+				0C1BF2351648AFE6002D2A62 /* Default.png in Resources */,
+				0CAB13B91648C3A300861CDB /* Icon.png in Resources */,
+				0CAB13BA1648C3A900861CDB /* icon114.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -419,8 +419,6 @@
 				48967B0615084B2800F4D66A /* MainViewController.m in Sources */,
 				48967B4815084B5100F4D66A /* CDVBarcodeScanner.mm in Sources */,
 				48967B6D15084B5100F4D66A /* zxing-all-in-one.cpp in Sources */,
-				0C0CA50E1643645A00DDACE4 /* ChildBrowserCommand.m in Sources */,
-				0C0CA50F1643645A00DDACE4 /* ChildBrowserViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

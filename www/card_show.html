@@ -26,34 +26,90 @@
 
 		<script type="text/javascript" charset="utf-8" src="js/main.js"></script>
 
-		<script type="text/javascript" charset="utf-8" src="js/ajaxzip3.js"></script>
-		<script type='text/javascript' charset="utf-8" src="js/jquery.validate.min.js"></script>
-
 		<script type="text/javascript">
+            $( document ).bind( "mobileinit", function() {
+                // jQuery Mobile フレームワークの設定変更は、ここで行なってください！
+                $.support.cors = true;
+                $.mobile.allowCrossDomainPages = true;
+            });
+
 			function onBodyLoad() {
-
 				document.addEventListener("deviceready", onDeviceReady, false);
-
 			}
 
-			function onDeviceReady() {
+            function onDeviceReady(){
+                     console.log("START");
+                    if(location.search.length > 1) {
+                        var get = new Object();
+                        var ret = location.search.substr(1).split("&");
+                        for(var i = 0; i < ret.length; i++) {
+                            var r = ret[i].split("=");
+                            get[r[0]] = r[1];
+                        }
+                        console.log("get:"+get['kbn']);
+                    }
+                onReadyFile();
+            }
+            
+			function onReadyFile() {
+				// ファイルの読み込み
+                var fname = 'ordering';
+                var text = {};
+                window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, read, fail);
+                function read(fileSystem) {
+                    fileSystem.root.getFile(fname, {}, function(fileEntry) {
+                        fileEntry.file(function(file) {
+                            var reader = new FileReader();
+                            reader.onloadend = function(evt) {
+                            // ここに読み込み完了後の処理を書く
+console.log("text: " + evt.target.result);
+                                text = evt.target.result;
+                                json = JSON.parse(text);
+                                
+console.log("正常にテキストを読み込みました。:cid "+json.customer_id);
+console.log("正常にテキストを読み込みました。:key "+json.customer_key);
+                                 getCard(json);
+                            };
+                            reader.readAsText(file, "utf-8");
+                            // Data URL として読み込む
+                            // reader.readAsDataURL(file);
+                        }, fail)
+                    }, fail);
+                }
+            }
 
-				// Alert -----------------------------------------------------------------------
-				navigator.notification.alert("index.html");
-			}
-
-			// POST通信 ---------------------------------------------------------------------
-			function sendPost(url, params) {
+            // ファイルがある場合は、サーバー通信を行い値を取得する。
+            function getCard(params){
+                console.log("Start:"+params);
+                
+                var url = 'https://gs850.ggsv.jp/~w850033/class/json/send_card.php';
+                
 				$.post(url, // アクセスするURL
-				params, // 送信データ
-				function(data, status, XHR) {// 処理結果
-					resultSpan.innerText = status + JSON.stringify(data);
-				});
+                    params, // 送信データ
+                    function(data, status, XHR) {// 処理結果
+                    if (status == 'success') {
+                       // 戻り値の保存
+                      // $("#card_company").text(data.card_company);
+                       $("#card_number").text(data.card_number);
+                       $("#card_validity").text(data.card_validity);
+                       
+                    } else {
+                       message = 'お客様情報の登録に失敗しました';
+                       title = 'サーバーと通信できませんでした';
+                       button = 'OK';
+                       navigator.notification.alert(message, alertCallBack(), title, button);
+                       return false;
+                    }
+                    }
+                );
+            }
+			// alertCallBack -----------------------------------------------------------------------
+			function alertCallBack() {
+				// window.location.href = 'barcode.html';
 			}
-
 		</script>
 
-	<script type="text/javascript" charset="utf-8" src="js/jquery.mobile-1.2.0.min.js"></script>
+		<script type="text/javascript" charset="utf-8" src="js/jquery.mobile-1.2.0.min.js"></script>
 
 	</head>
 
@@ -74,13 +130,13 @@
 
 						<li class="shop_neme">
 							<p class="txt">
-								ご登録いただいているクレジットカード番号
+								登録しているカード番号
 							</p>
-							<span>************<%= hide_card_number(@card.card_number) %></span>
+							<span id="card_number"></span>
 							<p class="txt">
 								有効期限
 							</p>
-							<span>xx月/xx年</span>
+							<span id="card_validity"></span>
 
 						</li>
 
@@ -89,7 +145,7 @@
 								クレジットカードの再登録はこちら。<br />（安全の為、登録している情報の確認・変更は出来ません。変更を行いたい場合は、再登録をお願い致します）
 							</div>
 							<div class="report_btn">
-								<a class="btn_prev" href="card_new.html" data-role="button"> クレジットカードを再登録する </a>
+								<a class="btn_prev" href="card_new.html" data-role="button" data-ajax="false"> クレジットカードを再登録する </a>
 							</div>
 						</li>
 

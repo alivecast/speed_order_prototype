@@ -81,6 +81,7 @@
    </AnalyzeAction>
    <ArchiveAction
       buildConfiguration = "Debug"
+      customArchiveName = "SpeedOrder"
       revealArchiveInOrganizer = "YES">
    </ArchiveAction>
 </Scheme>

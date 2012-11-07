@@ -11,130 +11,79 @@
 		<link rel="stylesheet" media="only screen and (max-device-width: 480px)" href="iphone.css" type="text/css" />
 		-->
 
-		<link rel="stylesheet" href="js/jquery.mobile-1.0.1.min.css" type="text/css" />
+		<link rel="stylesheet" href="js/jquery.mobile-1.2.0.min.css" type="text/css" />
 		<link rel="stylesheet" href="css/iphone.css" type="text/css" />
-		<script type="text/javascript" charset="utf-8" src="js/jquery-1.6.4.min.js"></script>
-		<script type="text/javascript" charset="utf-8" src="js/jquery.mobile-1.0.1.min.js"></script>
+		<script type="text/javascript" charset="utf-8" src="js/jquery-1.8.2.min.js"></script>
 
 		<script type="text/javascript" charset="utf-8" src="js/base64.js"></script>
 		<script type="text/javascript" charset="utf-8" src="js/aes.js"></script>
 
 		<script type="text/javascript" charset="utf-8" src="js/cordova-1.5.0.js"></script>
-		<script type="text/javascript" charset="utf-8" src="js/barcodescanner.js"></script>
-		<script type="text/javascript" charset="utf-8" src="js/ChildBrowser.js"></script>
-		<script type="text/javascript" charset="utf-8" src="js/NativeControls.js"></script>
+		
+		<link rel="stylesheet" href="css/iphone.css" type="text/css" />
 
 		<script type="text/javascript">
+		
 			function onBodyLoad() {
 
 				document.addEventListener("deviceready", onDeviceReady, false);
-
 			}
 
 			function onDeviceReady() {
-				// Alert -----------------------------------------------------------------------
-				navigator.notification.alert("index.html");
-			}
 
-			// サンプル データ ----------------------------------------------------------------
-			function sampleItem() {
-				var qr_id = '2001010000160000038101';
-				var area_name = '北海道';
-				var url = 'http://speed-order.jp/class/json_pg/send_item_info.php';
-				var params = {
-					qr_id : qr_id,
-					area_name : area_name
-				};
-				var sample = {
-					url : url,
-					params : params
-				};
-				return sample;
-			}
-
-			// POST通信 ---------------------------------------------------------------------
-			function sendPost(url, params) {
-				$.post(url, // アクセスするURL
-				params, // 送信データ
-				function(data, status, XHR) {// 処理結果
-					resultSpan.innerText = status + JSON.stringify(data);
-				});
-			}
-
-			// GET通信 ---------------------------------------------------------------------
-			function sendGet(url, params) {
-				$.get(url, // アクセスするURL
-				params, // 送信データ
-				function(data, status, XHR) {// 処理結果
-					if (status == 'success') {
-						resultSpan.innerText = status + JSON.stringify(data);
-					} else {
-						resultSpan.innerText = status + JSON.stringify('NG');
+				function onClickButton(){
+					// Alert -----------------------------------------------------------------------
+					// navigator.notification.alert("contact_order.html");
+					
+					var get = getQuery();
+					// 内容の取得
+					var body = document.getElementById('contact_text').value;
+					// 送信者情報：customer_id
+					var customer_id = get.customer_id;
+					// 販売者・商品 情報：qr_id, item_version
+					var qr_id = get.qr_id;
+					var item_version = get.item_version;
+					var order_id = get.order_id;
+					// 送信処理
+					var url = 'https://gs850.ggsv.jp/~w850033/class/json/receive_contact.php';
+					var params = {contact: 
+						{
+							body: body,
+							customer_id: customer_id,
+							qr_id: qr_id,
+							item_version: item_version,
+							order_id: order_id
+						}
 					}
-				});
-			}
-
-			// base64 encode ---------------------------------------------------------------
-			function encBase64(str) {
-				b64_str = base64.encode(str, 1);
-				return b64_str;
-			}
-
-			// base64 decode ----------------------------------------------------------------
-			function decBase64(b64_str) {
-				str = base64.decode(b64_str, 1);
-				return str;
-			}
-
-			// JSON encode ------------------------------------------------------------------
-			function encJson(obj) {
-				json = JSON.stringify(obj);
-				return json;
-			}
-
-			// JSON decode ------------------------------------------------------------------
-			function decJson(json) {
-				obj = JSON.parse(json);
-				return obj;// obj.params = value
-			}
-
-			// AES128 encrypt CBC -------------------------------------------------------------
-			function encAes(plaintext) {
-				var key = CryptoJS.enc.Hex.parse(randPass(32));
-				var iv = CryptoJS.enc.Hex.parse(randPass(32));
-				var encrypted = CryptoJS.AES.encrypt(plaintext, key, {
-					iv : iv
-				});
-				var enc = {};
-				enc['key'] = encrypted.key;
-				enc['iv'] = encrypted.iv;
-				enc['enc'] = encrypted;
-				return enc;
-			}
-
-			// AES128 decrypt CBC -------------------------------------------------------------
-			function decAes(str, key, iv) {
-				var decrypted = CryptoJS.AES.decrypt(str, key, {
-					iv : iv
-				});
-				var plaintext = decrypted.toString(CryptoJS.enc.Utf8);
-				return plaintext;
-			}
-
-			// ランダム文字列 -------------------------------------------------------------
-			function randPass(length) {
-				length = length || '';
-				// var rand = 'abcdefghijklmnopqrstuvwxyz' + 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' + '0123456789';
-				var rand = 'abcdef' + '0123456789';
-				rand = rand.split('');
-				var pass = '';
-				for (var i = 0; i < length; i++) {
-					pass += rand[Math.floor(Math.random() * rand.length)];
+					$.post(
+						url, // アクセスするURL
+						params, // 送信データ
+						function(data, status, XHR) {// 処理結果
+							if (status == 'success') {
+								var message = 'お問い合わせ内容を送信しました';
+								var title = '送信完了';
+								var button = 'OK';
+								navigator.notification.alert(message, alertCallBack(), title, button);
+							} else {
+								var message = 'お問い合わせ内容の送信ができませんでした';
+								var title = '送信失敗';
+								var button = 'OK';
+								navigator.notification.alert(message, alertCallBack(), title, button);
+							}
+						}
+					);
 				}
-				return pass;
+			}
+			
+			// alertCallBack -----------------------------------------------------------------------
+			function alertCallBack() {
+				window.location.href = 'show_order_index.html';
 			}
 
 		</script>
+		
+		<script type="text/javascript" charset="utf-8" src="js/jquery.mobile-1.2.0.min.js"></script>
+		
 	</head>
 
 	<body onload="onBodyLoad()">
@@ -142,7 +91,7 @@
 		<div data-role="page" data-add-back-btn="false">
 
 			<div data-role="header" data-position="inline">
-				<h1>original.html</h1>
+				<h1>お問い合わせ</h1>
 			</div>
 
 			<div class="cont_contact" data-role="content">
@@ -153,23 +102,19 @@
 					</div>
 				</div>
 
-				<form method="POST" action="<%= url_for :controller => :OrderInfoApp, :action => :sended %>">
-					<input type="hidden" name="id" value="<%= @order_info_app.object %>" />
+				<form method="POST" action="" onsubmit="return false;">
 					<div data-role="fieldcontain" >
 
 						<ul class="contact_list" data-role="listview">
 							<li>
 								<label for="#" class="fieldLabel">お問い合わせ内容</label>
 								<br />
-								<textarea cols="20" rows="5" name="contact"></textarea>
+								<textarea id="contact_text" cols="20" rows="5" name="contact"></textarea>
 							</li>
 						</ul>
 
 						<div class="check_btn">
-							<!-- <a href="" class="btn_next" data-role="button">送信内容を確認する</a> -->
-							<button class="btn_next" type="submit">
-								送信する
-							</button>
+							<input class="btn_next" type="button" value="送信する" onclick="onClickButton();" />
 						</div>
 
 					</div>
@@ -177,51 +122,19 @@
 
 			</div>
 
-			<div data-role="footer" data-position="fixed">
-
-				<nav id="custom" data-role="navbar">
-					<ul>
-						<li>
-							<a href="#" id="bercode" data-icon="custom">QRコード</a>
-						</li>
-						<li>
-							<a href="#" id="order" data-icon="custom">購入履歴</a>
-						</li>
-						<li>
-							<a href="#" id="setting" data-icon="custom">設定</a>
-						</li>
-					</ul>
-				</nav>
-
-				<style>
-					.ui-btn-inner {
-						padding-top: 40px !important;
-					}
-					.ui-btn .ui-icon {
-						width: 30px !important;
-						height: 30px !important;
-						margin-left: -15px !important;
-						box-shadow: none !important;
-						-moz-box-shadow: none !important;
-						-webkit-box-shadow: none !important;
-						-webkit-border-radius: 0 !important;
-						border-radius: 0 !important;
-					}
-					#bercode .ui-icon {
-						background: url(icon/barcode.png) 50% 50% no-repeat !important;
-						background-size: 20px 24px !important;
-					}
-					#order .ui-icon {
-						background: url(icon/shopping.png) 50% 50% no-repeat !important;
-						background-size: 20px 24px !important;
-					}
-					#setting .ui-icon {
-						background: url(icon/gear2.png) 50% 50% no-repeat !important;
-						background-size: 20px 24px !important;
-					}
-				</style>
-
-			</div>
+			<div class="footer" data-role="footer" data-position="fixed" data-id="tabber">
+				<ul>
+					<li class="tab01" current>
+						<a href="show_order.html" data-ajax="false"> <span>注文履歴</span> </a>
+					</li>
+					<li class="tab02">
+						<a href="barcode.html" data-ajax="false"> <span>読み取り</span> </a>
+					</li>
+					<li class="tab03">
+						<a href="setting.html" data-ajax="false"> <span>設定</span> </a>
+					</li>
+				</ul>
+			</div><!-- /dr-footer -->
 
 		</div>
 

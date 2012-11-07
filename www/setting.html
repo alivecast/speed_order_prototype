@@ -29,39 +29,211 @@
 		<script type="text/javascript" charset="utf-8" src="js/ajaxzip3.js"></script>
 		<script type='text/javascript' charset="utf-8" src="js/jquery.validate.min.js"></script>
 		<script type="text/javascript">
+            $( document ).bind( "mobileinit", function() {
+                // jQuery Mobile フレームワークの設定変更は、ここで行なってください！
+                $.support.cors = true;
+                $.mobile.allowCrossDomainPages = true;
+            });
+
 			function onBodyLoad() {
-
 				document.addEventListener("deviceready", onDeviceReady, false);
-
 			}
 
 			function onDeviceReady() {
-
-				// Alert -----------------------------------------------------------------------
-				navigator.notification.alert("setting.html");
-
-				//JSONデータに戻して取得する
-				console.log("::setting::");
-				
-
+                    if(location.search.length > 1) {
+                        var get = new Object();
+                        var ret = location.search.substr(1).split("&");
+                        for(var i = 0; i < ret.length; i++) {
+                            var r = ret[i].split("=");
+                            get[r[0]] = r[1];
+                        }
+                        console.log("get:"+get['kbn']);
+                    }
+                onReadyFile();
 			}
 
-			// 個人設定（新規・編集）切り替え
-			function changeOrdering(){
-				console.log("::changeOrdering::");
-				var ordering_setting = '';
-				var ordering = JSON.parse(window.localStorage.getItem('ordering'));
-				console.log('changeOrdering: ' + window.localStorage.getItem('ordering'));
-				if (ordering == null && ordering.customer_name){
-					ordering_setting = '<a href="ordering_new.html"><span class="ico_check">';
-				} else {
-					ordering_setting = '<a href="ordering_edit.html"><span class="ico_check">';
-					ordering_setting += '<img src="images/speedorder/ico_check_r.png" width="16" height="15" alt=""  />';
-				}
-				ordering_setting += '</span> <span class="tl"> 個人設定（利用者情報） </span></a>';
-				document.getElementById('ordering_setting').innerHTML = ordering_setting;
-			}
+			function onReadyFile() {
+				// ファイルの読み込み
+console.log("start Setting");
 
+                var fname = 'order';
+                var text = {};
+                window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, read, noItem);
+                function read(fileSystem) {
+                    fileSystem.root.getFile(fname, {}, function(fileEntry) {
+                        fileEntry.file(function(file) {
+                            var reader = new FileReader();
+                            reader.onloadend = function(evt) {
+                            // ここに読み込み完了後の処理を書く
+                                console.log("text: " + evt.target.result);
+                                text = evt.target.result;
+                                json = JSON.parse(text);
+                                console.log("正常にorderテキストを読み込みました。");
+                                if(json.qr_id.length > 1) {
+                          	      $("#order").css("display","block");
+                          	      $("#itemName").attr("href","show_item.html?qr_id="+json.qr_id);
+                          	      // $("#itemName").text(json.item_name);
+                                }
+                            	onReadyFile2();
+                            };
+                            reader.readAsText(file, "utf-8");
+                        }, noItem)
+                    }, noItem);
+                }
+            }
+
+            function noItem(error){
+console.log("start Setting err");
+            	onReadyFile2();
+            }
+            
+			function onReadyFile2() {
+				// ファイルの読み込み
+console.log("start");
+
+                var fname = 'ordering';
+                var text = {};
+                window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, read, fail);
+                function read(fileSystem) {
+                    fileSystem.root.getFile(fname, {}, function(fileEntry) {
+                        fileEntry.file(function(file) {
+                            var reader = new FileReader();
+                            reader.onloadend = function(evt) {
+                            // ここに読み込み完了後の処理を書く
+                                console.log("text: " + evt.target.result);
+                                text = evt.target.result;
+                                json = JSON.parse(text);
+                                console.log("正常にテキストを読み込みました。");
+                                getCustomers(json);
+                            };
+                            reader.readAsText(file, "utf-8");
+                            // Data URL として読み込む
+                            // reader.readAsDataURL(file);
+                        }, fail)
+                    }, fail);
+                }
+            }
+
+            // ファイルがある場合は、サーバー通信を行い値を取得する。
+            function getCustomers(params){
+                console.log("Start:"+params['customer_id']);
+                
+                var url = 'https://gs850.ggsv.jp/~w850033/class/json/send_setup.php';
+                
+				$.post(url, // アクセスするURL
+                    params, // 送信データ
+                    function(data, status, XHR) {// 処理結果
+                    if (status == 'success') {
+
+console.log("customer_id:"+params.customer_id);
+console.log("password_ck:"+data.password_ck);
+console.log("customer_ck:"+data.customer_ck);
+console.log("address_ck:"+data.address_ck);
+console.log("card_ck:"+data.card_ck);
+console.log("password_ck:"+data.password_ck);
+                       
+                       // 個人情報の設定
+                       if(data.password_ck == 1){
+                            $("#ico4").css("display","block");
+                            $("#href4").attr("href","passcode_edit.html");
+                            $('#ordering_ok').css("display","block");
+                            $('#ordering_ng').css("display","none");
+                       }else{
+                            $('#ordering_ok').css("display","none");
+                            $('#ordering_ng').css("display","block");
+                       }
+                       
+						if(data.customer_ck == 1){
+                            $("#ico1").css("display","block");
+                            $('#address_ok').css("display","block");
+                            $('#address_ng').css("display","none");
+                        }else{
+                            $('#address_ok').css("display","none");
+                            $('#address_ng').css("display","block");
+						}
+
+						if(data.address_ck == 1){
+                            $("#ico2").css("display","block");
+                            $('#card_ok').css("display","block");
+                            $('#card_ng').css("display","none");
+						}else{
+                            $('#card_ok').css("display","none");
+                            $('#card_ng').css("display","block");
+                        }
+
+						if(data.card_ck == 1){
+                            $("#ico3").css("display","block");
+							$("#href3").attr("href","card_show.html");
+						}
+
+
+                       if(data.setup_ok == 1){
+                            $("#setup_ok").css("display","block");
+                            $("#setup_no").css("display","none");
+                       }else{
+                            $("#setup_ok").css("display","none");
+                            $("#setup_no").css("display","block");
+                       }
+
+						if(data.password_ck == 1){
+							if(data.customer_ck == 1 || data.card_ck == 1){
+								ckPassTime();
+							}
+						}
+
+                       
+                    } else {
+                       message = 'お客様情報の登録に失敗しました';
+                       title = 'サーバーと通信できませんでした';
+                       button = 'OK';
+                       navigator.notification.alert(message, alertCallBack(), title, button);
+                       return false;
+                    }
+                    }
+                );
+            }
+
+			function ckPassTime() {
+				// ファイルの読み込み
+                var fname = 'passtime';
+                var text = {};
+                window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, read, fail);
+                function read(fileSystem) {
+                    fileSystem.root.getFile(fname, {}, function(fileEntry) {
+                        fileEntry.file(function(file) {
+                            var reader = new FileReader();
+                            reader.onloadend = function(evt) {
+                            // ここに読み込み完了後の処理を書く
+                                console.log("text: " + evt.target.result);
+                                text = evt.target.result;
+                                json = JSON.parse(text);
+                                
+                                console.log("正常にテキストを読み込みました。:passtime "+json.pass_time);
+
+								var cktime   = json.pass_time+(60*60);
+								var nowtime  = parseInt( new Date() /1000 );
+								if(cktime < nowtime){
+									location.href="passcode_input.html";
+                                }else{
+                                    // 暗証番号をもとめるリミット
+                                    var psstime = {};
+                                    psstime['pass_time'] = parseInt( new Date() /1000 );
+                                    var fname2 = 'passtime';
+                                    console.log("fname2: " + fname2);
+                                    setFile(fname2, psstime);
+                                }
+                            };
+                            reader.readAsText(file, "utf-8");
+                            // Data URL として読み込む
+                            // reader.readAsDataURL(file);
+                        }, goErr)
+                    }, goErr);
+                }
+            }
+
+			function goErr(error) {
+				location.href="passcode_input.html";
+			}
 		</script>
 
 	<script type="text/javascript" charset="utf-8" src="js/jquery.mobile-1.2.0.min.js"></script>
@@ -74,9 +246,13 @@
 
 			<div data-role="header" id="header" data-position="fixed">
 				<h1>設定</h1>
+<!--
 				<a data-rel="back" href="#" class="ui-btn-left" data-icon="arrow-l" data-direction="reverse" data-ajax="false">
 					戻る
 				</a>
+ -->
+                <a href="website_all.html?page=tr.html" class="ui-btn-right" data-icon="info" data-ajax="false">
+                </a>
 			</div>
 
 			<div data-role="content">
@@ -93,17 +269,15 @@
 				</ul>
 				<% end %>
 -->
+<!--
 				<div class="setup_no">
-
-					<!--% if !@setting && !@is_item %-->
-
 					<div class="tl">
 						ご注文いただくには下記の設定を行ってください。
 					</div>
 					<div class="txt">
 						<img src="images/speedorder/ico_check_r.png" width="16" height="15" alt="" />表示がない項目の設定を行ってください。
 					</div>
-<!--
+
 					<% elsif !@setting && @is_item %>
 					<div class="tl">
 						下記の設定をすると購入手続きが完了いたします。
@@ -120,35 +294,75 @@
 						</div>
 					</div>
 					<% end %>
+				</div>
 -->
+                <div id="order" style="display:none">
+				<div class="setup_no">
+					<div class="tl">
+						未購入の商品があります。
+					</div>
 				</div>
 				<ul data-role="listview">
-					<li id="ordering_setting">
-						<a data-ajax="false" href="ordering_new.html"> 
-							<span class="ico_check"> 
-							<!--% models = Ordering.find(:last)[0] %>
-							<% if models && models.error != 'disable' %-->
-								<img src="images/speedorder/ico_check_r.png" width="16" height="15" alt=""  /> 
-							<!--% end %--> 
-							</span> <span class="tl"> 個人設定（利用者情報） </span> 
+					<li style="background-color:#ccc;">
+						<a id="itemName" href="#" data-ajax="false">商品を見る</a>
+					</li>
+				</ul>
+                </div>
+
+
+				<div class="setup_no" id="setup_no" style="display:block">
+					<div class="tl">
+						ご注文いただくには下記の設定を行ってください。
+					</div>
+					<div class="txt">
+						<img src="images/speedorder/ico_check_r.png" width="16" height="15" alt="" />表示がない項目の設定を行ってください。
+					</div>
+                </div>
+
+				<div class="setup_ok" id="setup_ok" style="display:none">
+					<div class="tl">
+						ご注文いただけます。
+					</div>
+				</div>
+
+
+				<ul data-role="listview">
+					<li>
+						<a data-ajax="false" href="passcode_new.html" id="href4">
+							<span class="ico_check"><img id="ico4" src="images/speedorder/ico_check_r.png" width="16" height="15" alt="" style="display:none;" /></span>
+							<span class="tl"> 暗証番号 </span>
 						</a>
 					</li>
 
-					<li>
-						<a data-ajax="false" href="addressee_edit.html"> <span class="ico_check">
-<!-- % models = Addressee.find(:last, :conditions => {:recipient_main_flg => 'primary'})[0] % -->
-							<!--% if models && models.error != 'disable' %--> <img src="images/speedorder/ico_check_r.png" width="16" height="15" alt=""  /> <!--% end %--> </span> <span class="tl"> お届け先 </span> </a>
+					<li id="ordering_ok" style="display:none;">
+						<a data-ajax="false" href="#" onclick="location.href='ordering_new.html'"> 
+							<span class="ico_check"><img id="ico1" src="images/speedorder/ico_check_r.png" width="16" height="15" alt="" style="display:none;"/></span>
+							<span class="tl"> 個人設定（利用者情報） </span> 
+						</a>
+					</li>
+					<li id="ordering_ng">
+							<span class="tl"> 個人設定（利用者情報） </span> 
 					</li>
 
-					<li>
-						<!--% if @card %-->
-						<a data-ajax="false" href="card_new.html"> <!--% else %> <a href="<%= url_for :controller => :Card, :action => :new %>"> <% end %--> <span class="ico_check"> <!--% models = Card.find(:last)[0] %-->
-							<!--% if models && models.error != 'disable' %--> <img src="images/speedorder/ico_check_r.png" width="16" height="15" alt=""  /> <!--% end %--> </span> <span class="tl"> クレジットカード </span> </a>
+					<li id="address_ok" style="display:none;">
+						<a data-ajax="false" href="addressee_index.html" >
+							<span class="ico_check"><img id="ico2" src="images/speedorder/ico_check_r.png" width="16" height="15" alt="" style="display:none;" /></span>
+							<span class="tl"> お届け先 </span>
+						</a>
+					</li>
+					<li id="address_ng">
+							<span class="tl"> お届け先 </span> 
 					</li>
 
-					<li>
-						<a data-ajax="false" href="passcode_new.html"> <span class="ico_check"> <!--% models = Passcode.find(:all) %>
-							<% if models && models.size > 0 %--> <img src="images/speedorder/ico_check_r.png" width="16" height="15" alt=""  /> <!--% end %--> </span> <span class="tl"> 暗証番号 </span> </a>
+
+					<li id="card_ok" style="display:none;">
+						<a id="href3" data-ajax="false" href="card_new.html">
+							<span class="ico_check"><img id="ico3" src="images/speedorder/ico_check_r.png" width="16" height="15" alt="" style="display:none;" /></span>
+							<span class="tl"> クレジットカード </span>
+						</a>
+					</li>
+					<li id="card_ng">
+							<span class="tl"> クレジットカード </span> 
 					</li>
 
 				</ul>

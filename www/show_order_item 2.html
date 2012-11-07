@@ -200,11 +200,8 @@
 				// QRコード
 				var qr_id = params.qr_id;
 				new_qr_id = qr_id.substr(0, 18) + '00' + qr_id.substr(20,2);
-				var show_qr = '<a class="btn_prev" href="show_qrcode.html';
-				show_qr += '?qr_id=' + new_qr_id + '&item_price=' + params.item_price;
-				show_qr += '&order_carriage=' + params.order_carriage + '&item_image=' + params.item_image;
-				show_qr += '" data-role="button" target="_blank">この商品を友人に薦める</a>';
-				document.getElementById("show_qr").innerHTML = show_qr;
+				var show_qr = 'show_qrcode.html?item_name=' + params.item_name + '&qr_id=' + new_qr_id + '&item_price=' + params.item_price + '&order_carriage=' + params.order_carriage + '&item_image=' + params.item_image + '"';
+				$("#qr_view").attr("href",show_qr);
 
 				// キャンセル・再購入
 				var buttons = '';
@@ -237,7 +234,6 @@
 				
 				var qr_id = params.qr_id;
 				var order_id = params.order_id;
-				var item_name = params.item_name;
 				var item_version = params.item_version;
 				fname = 'ordering'
 				window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, read, errorContact);
@@ -251,7 +247,7 @@
 							var text = evt.target.result;
 							var json = JSON.parse(text);
 							var customer_id = json.customer_id;
-							window.location.href = 'contact.html?item_name=' + item_name + 'qr_id=' + qr_id + '&order_id=' + order_id + '&item_version=' + item_version + '&customer_id=' + customer_id;
+							window.location.href = 'contact_order.html?qr_id=' + qr_id + '&order_id=' + order_id + '&item_version=' + item_version + '&customer_id=' + customer_id;
 							console.log("正常にテキストを読み込みました。:" + fname);
 						};
 						reader.readAsText(file, "utf-8");
@@ -260,39 +256,7 @@
 				}
 			}
 			function errorContact(error){
-				window.location.href = 'contact.html?item_name=' + item_name + 'qr_id=' + qr_id + '&order_id=' + order_id + '&item_version=' + item_version + '&customer_id=' + null;
-			}
-			
-			// 違反報告フォーム
-			function report(){
-				var paramsText = window.localStorage.getItem('paramsData');
-				var params = JSON.parse(paramsText);
-				
-				var qr_id = params.qr_id;
-				var order_id = params.order_id;
-				var item_version = params.item_version;
-				fname = 'ordering'
-				window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, read, errorContact);
-				function read(fileSystem) {
-				fileSystem.root.getFile(fname, {}, function(fileEntry) {
-					fileEntry.file(function(file) {
-						var reader = new FileReader();
-						reader.onloadend = function(evt) {
-							// ここに読み込み完了後の処理を書く
-							console.log("text: " + evt.target.result);
-							var text = evt.target.result;
-							var json = JSON.parse(text);
-							var customer_id = json.customer_id;
-							window.location.href = 'report.html?qr_id=' + qr_id + '&order_id=' + order_id + '&item_version=' + item_version + '&customer_id=' + customer_id;
-							console.log("正常にテキストを読み込みました。:" + fname);
-						};
-						reader.readAsText(file, "utf-8");
-					}, errorContact)
-				}, errorContact);
-				}
-			}
-			function errorContact(error){
-				window.location.href = 'report.html?qr_id=' + qr_id + '&order_id=' + order_id + '&item_version=' + item_version + '&customer_id=' + null;
+				window.location.href = 'contact_order.html?qr_id=' + qr_id + '&order_id=' + order_id + '&item_version=' + item_version + '&customer_id=' + null;
 			}
 
 		</script>
@@ -377,7 +341,9 @@
 				          <div class="txt">
 				            QRコードを表示して商品を紹介できます
 				          </div>
-				          <div class="report_btn" id="show_qr"></div>
+				          <div class="report_btn" id="show_qr">
+                              <a id="qr_view" class="btn_prev" href="#" data-role="button" target="_blank">この商品を友人に薦める</a>
+                          </div>
 				        </li>
      					<li class="item_buy_1btn">
 							<div class="item_buy btn_txt_ow" id="cancel_button">
@@ -387,16 +353,6 @@
 								<input class="btn_next" type="button" value="この商品を再購入する" onclick="cancel_buy('repeat');" />
 							</div>
 						</li>
-						<li class="report">
-				          <div class="txt">
-				            商品が届かないなど、ご注文のトラブルがありましたら、お手数ですが以下のボタンよりSpeed Orderサービス管理会社までご連絡ください。
-				          </div>
-				          <div class="report_btn">
-				            <a class="btn_prev" href="" data-role="button" onclick="report();" >
-				              違反報告する
-				            </a>
-				          </div>
-				        </li>
 					</ul>
 				</form>
 

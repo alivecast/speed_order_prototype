@@ -31,34 +31,191 @@
 
 
 		<script type="text/javascript">
+            $( document ).bind( "mobileinit", function() {
+                // jQuery Mobile フレームワークの設定変更は、ここで行なってください！
+                $.support.cors = true;
+                $.mobile.allowCrossDomainPages = true;
+            });
 			function onBodyLoad() {
-
 				document.addEventListener("deviceready", onDeviceReady, false);
-
 			}
 
-			function onDeviceReady() {
+            function onDeviceReady(){
+                    var get = new Object();
+                    if(location.search.length > 1) {
+                        var ret = location.search.substr(1).split("&");
+                        for(var i = 0; i < ret.length; i++) {
+                            var r = ret[i].split("=");
+                            get[r[0]] = r[1];
+                        }
+                        console.log("get:"+get['id']);
+						$("#kbn").val(get['kbn']);
+                        if(get['kbn'] == "buy"){
+                            $("#backb").attr("href","addressee_index.html?kbn=buy");
+                            $("#tab3a").attr("href","order.html");
+                        }
+                    }
+                    onReadyFile(get['id']);
+            }
+            
+			function onReadyFile(addressID) {
+				// ファイルの読み込み
+                var fname = 'ordering';
+                var text = {};
+                window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, read, fail);
+                function read(fileSystem) {
+                    fileSystem.root.getFile(fname, {}, function(fileEntry) {
+                        fileEntry.file(function(file) {
+                            var reader = new FileReader();
+                            reader.onloadend = function(evt) {
+                            // ここに読み込み完了後の処理を書く
+                                console.log("text: " + evt.target.result);
+                                text = evt.target.result;
+                                json = JSON.parse(text);
+                                
+                                $("#customer_id").val(json.customer_id);
+                                $("#customer_mail_1").val(json.customer_mail_1);
+                                $("#customer_key").val(json.customer_key);
+                                $("#customer_pass").val(json.customer_pass);
+                                $("#iv").val(json.iv);
+                                       
+                                console.log("正常にテキストを読み込みました。:cid "+json.customer_id);
+                                console.log("正常にテキストを読み込みました。:key "+json.customer_key);
+                                       
+                                json['address_id'] = addressID;
+                                       
+                                console.log("正常にテキストを読み込みました。:aid "+json.address_id);
+                            // アドレスの取得
+                                getAddress(json);
+                                                           
+                            };
+                            reader.readAsText(file, "utf-8");
+                            // Data URL として読み込む
+                            // reader.readAsDataURL(file);
+                        }, fail)
+                    }, fail);
+                }
+            }
 
-				// Alert -----------------------------------------------------------------------
-				navigator.notification.alert("index.html");
-			}
-
-			// POST通信 ---------------------------------------------------------------------
-			function sendPost(url, params) {
-
+            // ファイルがある場合は、サーバー通信を行い値を取得する。
+            function getAddress(params){
+                console.log("Start:"+params);
+                
+                var url = 'https://gs850.ggsv.jp/~w850033/class/json/send_address.php';
+                
 				$.post(url, // アクセスするURL
-				params, // 送信データ
-				function(data, status, XHR) {// 処理結果
-					resultSpan.innerText = status + JSON.stringify(data);
+                    params, // 送信データ
+                    function(data, status, XHR) {// 処理結果
+                    if (status == 'success') {
+                       // 戻り値の保存
+                       $("#address_id").val(data.address_id);
+                       $("#address_name_sel").val(data.address_name).selectmenu('refresh');
+                       $("#address_name").val(data.address_name);
+                       $("#customer_name").val(data.customer_name);
+                       $("#customer_zipcode").val(data.customer_zipcode);
+                       $("#customer_pref").val(data.customer_pref).selectmenu('refresh');
+                       $("#customer_address1").val(data.customer_address1);
+                       $("#customer_address2").val(data.customer_address2);
+                       $("#customer_phone").val(data.customer_phone);
+                       if(data.address_main_flg == 1){
+                         $("#address_main_flg").attr("checked",true).checkboxradio("refresh");
+                       }
+                       if(data.address_customer_flg == 1){
+                            $("#address_name2").css("display","block");
+                       }else{
+                            $("#address_name1").css("display","block");
+                       }
+                    } else {
+                       message = 'お客様情報の登録に失敗しました';
+                       title = 'サーバーと通信できませんでした';
+                       button = 'OK';
+                       navigator.notification.alert(message, alertCallBack(), title, button);
+                       return false;
+                    }
+                    }
+                );
+            }
+            
 
-				});
+			// 新規登録
+			function saveAddress(){
+                
+                var result = $("#form_address").validate().form();				// 入力値
+                if(result == false){
+                    return false;
+                }
+	
+console.log("::saveOrdering::");
+				
+				// 入力値
+				var ordering = {};
+                ordering['customer_id']   = $("#customer_id").val();
+                ordering['customer_key']   = $("#customer_key").val();
+                ordering['customer_pass']   = $("#customer_pass").val();
+                
+                ordering['address_id']    = $("#address_id").val();
+				ordering['address_name']  = $("#address_name").val();
+                ordering['address_name_sel'] = $("#address_name_sel").val();
+				ordering['customer_name'] = $("#customer_name").val();
+                
+console.log("customer_id: "+ ordering['customer_id']);
+console.log("customer_name: "+ ordering['customer_name']);
+                
+				ordering['customer_zipcode']  = $("#customer_zipcode").val();
+                ordering['customer_pref']     = $("#customer_pref").val();
+				ordering['customer_address1'] = $("#customer_address1").val();
+				ordering['customer_address2'] = $("#customer_address2").val();
+				ordering['customer_phone']    = $("#customer_phone").val();
+				
+                ordering['address_main_flg'] = $("#address_main_flg:checked").val();
+                
+				// 送信
+				var url = 'https://gs850.ggsv.jp/~w850033/class/json/receive_address.php';
+
+				var params = ordering;
+				$.post(url, // アクセスするURL
+					params, // 送信データ
+					function(data, status, XHR) {// 処理結果
+		     	       if (status == 'success') {
+							// 戻り値の保存
+							var customer_id = data.customer_id;
+							var address_id  = data.address_id;
+console.log("customer_id: " + data.customer_id);
+console.log("address_id: " + data.address_id);
+console.log("customer_name=>: " + data.customer_name);
+                       
+                            var kbn = $("#kbn").val();
+                            if(kbn == "buy"){
+                                location.href="order.html";
+                            }else{
+                                location.href="setting.html";
+                            }
+
+								
+						} else {
+							message = 'お客様情報の登録に失敗しました';
+							title = 'サーバーと通信できませんでした';
+							button = 'OK';
+							navigator.notification.alert(message, alertCallBack(), title, button);
+                            return false;
+                        }
+                       
+					}
+
+				);
+                return false;
 			}
-
+			
+			// alertCallBack -----------------------------------------------------------------------
+			function alertCallBack() {
+				// window.location.href = 'barcode.html';
+			}
+				
 			// 住所取得 -------------------------------------------------------------
 			function onAddress(){
-				AjaxZip3.zip2addr('addressee[recipient_zipcode]','','addressee[recipient_pref]','addressee[recipient_address1]','','addressee[recipient_address2]');
+				AjaxZip3.zip2addr('customer_zipcode','','customer_pref','customer_address1','','customer_address2');
+                $('#customer_pref').selectmenu('refresh', true);
 			}
-
 
 		</script>
 
@@ -86,8 +243,6 @@ em { color: red; font-weight: bold; padding-right: .25em; }
 jQuery.extend(jQuery.validator.messages, {
 	required: "必須項目です",
 	number: "数値のみで入力してください",
-	email: "メールアドレスを入力してください",
-	url: "URLを入力してください",
 });
 
   $(window).load(function(){
@@ -113,40 +268,49 @@ jQuery.extend(jQuery.validator.messages, {
 
 			<div class="cont_addressEdit" data-role="content">
 
-				<form method="get" action="<!-- %= url_for :action => :create % -->" id="form_address">
-					<input type="hidden" name="id" value="<!-- %= @addressee.object % -->"/>
+				<form method="post" action="#" id="form_address" >
+					<input type="hidden" id="customer_id" name="customer_id" value=""/>
+					<input type="hidden" id="address_id" name="address_id" value=""/>
 
+                    <input type="hidden" id="customer_key" name="customer_key" />
+                    <input type="hidden" id="customer_pass" name="customer_pass" />
+                    <input type="hidden" id="iv" name="iv" />
+                    <input type="hidden" id="kbn" name="kbn" />
+                    
 					<div data-role="fieldcontain">
 						<ul class="address_edit" data-role="listview">
 							<li class="address_subject">
-								<!--<label for="addressee[recipient_subject]" class="fieldLabel">お届け先名称の設定</label>-->
-								<div class="txt">
-									お届け先名称の設定
-								</div>
-								<br />
-								<select id="addressee[recipient_subject]" name="addressee[recipient_subject]">
+								<label for="address_name1" class="fieldLabel">お届け先名称の設定</label>
+								<div id="address_name1" style="display:none;">
+                                    <select id="address_name_sel" name="address_name_sel">
 									<option value="" >お届け先の選択</option>
 									<option value="自宅" >自宅</option>
 									<option value="会社" >会社</option>
 									<option value="実家" >実家</option>
-								</select>
-								<br />
-								<div class="txt">
+                                    </select>
+                                    <br />
+                                    <div class="txt">
 									任意の名称も可能です。下記に入力ください。
-								</div>
-								<input type="text" id="addressee[recipient_subject_ext]" name="addressee[recipient_subject_ext]" value="" placeholder="友人の名前など" />
+                                    </div>
+                                    <input type="text" id="address_name" name="address_name" value="" placeholder="友人の名前など" />
+                                </div>
+                                <div id="address_name2" style="display:none;">
+                                    <div class="text">個人設定の住所</div>
+                                    <input type="hidden" id="address_name" id="address_name" value=""/>
+                                    <input type="hidden" id="address_name_sel" id="address_name_sel" value=""/>'
+                                </div>
 							</li>
-
+                            
 							<li class="address_name">
 								<label for="addressee[recipient_name]" class="fieldLabel">お届け先氏名（受取人）</label>
 								<br />
-								<input type="text" id="addressee[recipient_name]" name="addressee[recipient_name]" value="" class="required" placeholder="受取人氏名を入力" />
+								<input type="text" id="customer_name" name="customer_name" value="" class="required" placeholder="受取人氏名を入力" />
 							</li>
 
 							<li class="address_phone">
-								<label for="addressee[recipient_phone]" class="fieldLabel">電話番号</label>
+								<label for="customer_phone" class="fieldLabel">電話番号</label>
 								<br />
-								<input type="tel" id="addressee[recipient_phone]" name="addressee[recipient_phone]" value="" maxlength='11' class="required" placeholder="例）0123456789(ハイフンなし)" />
+								<input type="tel" id="customer_phone" name="customer_phone" value="" maxlength='11' class="required" placeholder="例）0123456789(ハイフンなし)" />
 							</li>
 
 							<li class="address_zipcode">
@@ -154,7 +318,7 @@ jQuery.extend(jQuery.validator.messages, {
 								<br />
 								<div class="box2">
 									<div class="box2_01">
-										<input type="tel" id="addressee[recipient_zipcode]" name="addressee[recipient_zipcode]" value="" maxlength='7' class="required" placeholder="例）1234567" />
+										<input type="tel" id="customer_zipcode" name="customer_zipcode" maxlength=7 value="" class="required number" placeholder="例）1234567" onchange="onAddress();"/>
 										<!-- /box2_01 -->
 									</div>
 									<div class="box2_02">
@@ -164,9 +328,9 @@ jQuery.extend(jQuery.validator.messages, {
 							</li>
 
 							<li class="address_pref">
-								<label for="addressee[recipient_pref]">住所</label>
+								<label for="customer_pref">住所</label>
 								<br />
-								<select id="addressee[recipient_pref]" name="addressee[recipient_pref]" >
+								<select id="customer_pref" class="required" name="customer_pref">
 									<option value="">都道府県</option>
 									<option value="北海道">北海道</option>
 									<option value="青森県">青森県</option>
@@ -217,20 +381,24 @@ jQuery.extend(jQuery.validator.messages, {
 									<option value="沖縄県">沖縄県</option>
 								</select>
 								<br />
-								<input type="text" id="addressee[recipient_address1]" name="addressee[recipient_address1]" value="" class="required"  placeholder="〇〇市〇〇町"/>
+								<input type="text" id="customer_address1" name="customer_address1" class="required" value=""  placeholder="〇〇市〇〇町" />
 								<br />
-								<input type="text" id="addressee[recipient_address2]" name="addressee[recipient_address2]" value="" class="required" placeholder="１-２-３　〇〇マンション101"/>
+								<input type="text" id="customer_address2" name="customer_address2" class="required" value=""  placeholder="１-２-３　〇〇マンション101" />
 							</li>
 
 							<li class="address_main_check">
 								<fieldset data-role="controlgroup">
-									<input type="checkbox" id="addressee[recipient_main_flg]" name="addressee[recipient_main_flg]" value='primary' />
-									<label for="addressee[recipient_main_flg]">通常のお届け先に設定</label>
+									<input type="checkbox" id="address_main_flg" value='1' />
+									<label for="address_main_flg">ここに届ける</label>
 								</fieldset>
 							</li>
 
 							<li class="address_submit">
-								<input type="submit" value="登録する" class="btn_next" />
+
+								<input type="button" value="登録する" class="btn_next" onclick="saveAddress();"/>
+                                <!--
+                                <input type="submit" value="登録する" class="btn_next"/>
+                                 -->
 							</li>
 
 						</ul>
@@ -253,7 +421,7 @@ jQuery.extend(jQuery.validator.messages, {
 						</a>
 					</li>
 					<li class="tab03 current">
-						<a href="setting.html" data-ajax="false">
+						<a id="tab3a" href="setting.html" data-ajax="false">
 							<span>設定</span>
 						</a>
 					</li>

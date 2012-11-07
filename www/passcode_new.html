@@ -26,60 +26,147 @@
 
 		<script type="text/javascript" charset="utf-8" src="js/main.js"></script>
 
-		<script type="text/javascript" charset="utf-8" src="js/ajaxzip3.js"></script>
 		<script type='text/javascript' charset="utf-8" src="js/jquery.validate.min.js"></script>
 
 		<script type="text/javascript">
-		
+            $( document ).bind( "mobileinit", function() {
+                // jQuery Mobile フレームワークの設定変更は、ここで行なってください！
+                $.support.cors = true;
+                $.mobile.allowCrossDomainPages = true;
+            });
+
 			function onBodyLoad() {
 				document.addEventListener("deviceready", onDeviceReady, false);
 			}
 
-			function onDeviceReady() {
+            function onDeviceReady(){
+                    if(location.search.length > 1) {
+                        var get = new Object();
+                        var ret = location.search.substr(1).split("&");
+                        for(var i = 0; i < ret.length; i++) {
+                            var r = ret[i].split("=");
+                            get[r[0]] = r[1];
+                        }
+                        console.log("get:"+get['kbn']);
+						$("#kbn").val(get['kbn']);
+                        if(get['kbn'] == "buy"){
+                            $("#backb").attr("href","order.html");
+                            $("#tab3a").attr("href","order.html");
+                        }
+                    }
+                onReadyFile();
+            }
+            
+			function onReadyFile() {
+				// ファイルの読み込み
+                var fname = 'ordering';
+                var text = {};
+                window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, read, fail);
+                function read(fileSystem) {
+                    fileSystem.root.getFile(fname, {}, function(fileEntry) {
+                        fileEntry.file(function(file) {
+                            var reader = new FileReader();
+                            reader.onloadend = function(evt) {
+                            // ここに読み込み完了後の処理を書く
+                                console.log("text: " + evt.target.result);
+                                text = evt.target.result;
+                                json = JSON.parse(text);
+                                
+                                $("#customer_id").val(json.customer_id);
+                                $("#customer_key").val(json.customer_key);
+                                $("#customer_email_1").val(json.customer_email_1);
+                                $("#iv").val(json.iv);
 
-				// Alert -----------------------------------------------------------------------
-				navigator.notification.alert("index.html");
-			}
+                                console.log("正常にテキストを読み込みました。:cid "+json.customer_id);
+                                console.log("正常にテキストを読み込みました。:key "+json.customer_key);
+                                                           
+                            };
+                            reader.readAsText(file, "utf-8");
+                            // Data URL として読み込む
+                            // reader.readAsDataURL(file);
+                        }, fail)
+                    }, fail);
+                }
+            }
 
-			// サンプル データ ----------------------------------------------------------------
-			function sampleItem() {
-				var qr_id = '2001010000160000038101';
-				var area_name = '北海道';
-				var url = 'http://speed-order.jp/class/json_pg/send_item_info.php';
-				var params = {
-					qr_id : qr_id,
-					area_name : area_name
-				};
-				var sample = {
-					url : url,
-					params : params
-				};
 
-				return sample;
-			}
+			// 新規登録
+			function savePass(){
+                var result = $("#form_password").validate().form();				// 入力値
+                if(result == false){
+                    console.log("customer_id: "+ $("#customer_key").val());
+                    return false;
+                }
+                
+				var ordering = {};
+				ordering['customer_id']        = $("#customer_id").val();
+				ordering['customer_key']       = $("#customer_key").val();
+                ordering['customer_email_1']   = $("#customer_email_1").val();
+                ordering['iv']                 = $("#iv").val();
+                
+				ordering['customer_pass']      = $("#customer_pass").val();
+				ordering['customer_qes']       = $("#customer_qes").val();
+				ordering['customer_ans']       = $("#customer_ans").val();
 
-			// POST通信 ---------------------------------------------------------------------
-			function sendPost(url, params) {
+console.log("customer_pass: "+ ordering['customer_pass']);
+console.log("customer_qes: "+ ordering['customer_qes']);
+console.log("customer_ans: "+ ordering['customer_ans']);
 
+				// 送信
+				var url = 'https://gs850.ggsv.jp/~w850033/class/json/receive_pass.php';
+
+				var params = ordering;
 				$.post(url, // アクセスするURL
-				params, // 送信データ
-				function(data, status, XHR) {// 処理結果
-					resultSpan.innerText = status + JSON.stringify(data);
-				});
-			}
+					params, // 送信データ
+					function(data, status, XHR) {// 処理結果
+						if (status == 'success') {
+							// 戻り値の保存
+console.log("customer_id: " + data.customer_id);
+console.log("customer_pass: " + data.customer_pass);
+							// ファイル登録
+							//json
+							var datalist = {
+                                customer_pass: data.customer_pass,
+                                customer_id: data.customer_id,
+                                customer_key: data.customer_key,
+                                customer_email_1: ordering.customer_email_1,
+								iv: ordering.iv
+							}
+							// ファイル登録
+							var fname = 'ordering';
+							setFile(fname, datalist);
 
-			// GET通信 ---------------------------------------------------------------------
-			function sendGet(url, params) {
+                       // 暗証番号をもとめるリミット
+                       var psstime = {};
+                       psstime['pass_time'] = parseInt( new Date() /1000 );
+                       var fname2 = 'passtime';
+                       console.log("fname2: " + fname2);
+                       setFile(fname2, psstime);
 
-				$.get(url, // アクセスするURL
-				params, // 送信データ
-				function(data, status, XHR) {// 処理結果
-					if (status == 'success') {
-						resultSpan.innerText = status + JSON.stringify(data);
-					} else {
-						resultSpan.innerText = status + JSON.stringify('NG');
+                       
+                            var kbn = $("#kbn").val();
+                            if(kbn == "buy"){
+                                location.href="order.html";
+                            }else{
+                                location.href="setting.html";
+                            }
+
+						} else {
+							message = 'お客様情報の登録に失敗しました';
+							title = 'サーバーと通信できませんでした';
+							button = 'OK';
+							navigator.notification.alert(message, alertCallBack(), title, button);
+							return false;
+						}
+                       console.log("status: " + status);
 					}
-				});
+				);
+                return false;
+			}
+			
+			// alertCallBack -----------------------------------------------------------------------
+			function alertCallBack() {
+				// window.location.href = 'barcode.html';
 			}
 
 		</script>
@@ -117,26 +204,26 @@ $(function(){
 	$('#form_password').validate({
 		// それぞれの項目に適用される検証ルール 
 		rules: { 
-			passcode_number: { 
+			customer_pass: { 
 				required: true,    // 必須検証 
-				number:   true,    // 必須検証 
-				rangelength: [4, 4]    // 文字列長検証 (2～10文字) 
+                number: true,
+				rangelength: [4, 16]    // 文字列長検証 (2～10文字) 
 			},
-			re_number: { 
-				equalTo: '[name=passcode_number]'
+			re_pass: { 
+				equalTo: '[name=customer_pass]'
 			}
 
 		},
 
 		// 検証エラー時に表示されるエラー メッセージ 
 		messages: { 
-			passcode_number: { 
-				required: 'パスワードは必ず入力してください。',
-				number: 'パスワードは数字４桁で入力してください。', 
-				rangelength: $.format('パスワードは{0}文字で入力してください。') // xxは{0}から{1}文字で入力してください。
+			customer_pass: { 
+				required: '暗証番号は必ず入力してください。',
+				number: '暗証番号は数字で入力してください。', 
+				rangelength: $.format('パスワードは{0}から{1}文字で入力してください。')
 			},
-			re_number: { 
-				equalTo: '上と同じパスワードを入力してください'
+			re_pass: { 
+				equalTo: '上と同じ暗証番号を入力してください'
 			}
 
 		},
@@ -165,7 +252,7 @@ $(function(){
 
 			<div data-role="header" id="header" data-position="fixed">
 				<h1>暗証番号の設定</h1>
-				<a data-rel="back" href="#" class="ui-btn-left" data-icon="arrow-l" data-direction="reverse" data-ajax="false">
+				<a id="backb" href="setting.html" class="ui-btn-left" data-icon="arrow-l" data-ajax="false">
 					戻る
 				</a>
 			</div>
@@ -185,21 +272,24 @@ $(function(){
 					</div>
 				</div>
 
-				<form method="POST" action="<%= url_for :action => :create %>" id="form_password">
-					<input type="hidden" name="id" value="<%= @passcode.object %>"/>
-					<input type="hidden" name="item_object" value="<%= @item_object %>"/>
+				<form method="post" action="#" id="form_password">
+					<input type="hidden" id="customer_id" name="customer_id" value=""/>
+					<input type="hidden" id="customer_key" name="customer_key" value=""/>
+                    <input type="hidden" id="customer_email_1" name="customer_email_1" value=""/>
+                    <input type="hidden" id="iv" name="iv" value=""/>
+                    <input type="hidden" id="kbn" name="kbn" />
 
 					<div data-role="fieldcontain" >
 						<ul class="setup_list" data-role="listview">
 
 							<li class="passcode">
-								<label for="passcode[passcode_number]" class="fieldLabel">暗証番号<span class="form_note">(数字４桁)</span></label>
-								<input type="password" id="passcode_number" name="passcode_number" class="" value="" maxlength=4 placeholder="例）1234" />
+								<label for="customer_pass" class="fieldLabel">暗証番号<span class="form_note">(数字4～16桁)</span></label>
+								<input type="password" id="customer_pass" name="customer_pass" class="" value="" maxlength=16 placeholder="数字4～16桁" />
 							</li>
 
 							<li class="passcode">
-								<label for="re_number" class="fieldLabel">確認のため再入力<span class="form_note">(数字４桁)</span></label>
-								<input type="password" id="re_number" name="re_number" class="password_confirm" value="" maxlength=4 placeholder="例）1234" />
+								<label for="re_pass" class="fieldLabel">確認のため再入力<span class="form_note">(数字4～16桁)</span></label>
+								<input type="password" id="re_pass" name="re_pass" class="password_confirm" value="" maxlength=16 placeholder="上とと同じ値を入力" />
 							</li>
 
 							<li>
@@ -207,20 +297,19 @@ $(function(){
 							</li>
 
 							<li class="passcode">
-								<label for="passcode[question]" class="fieldLabel">秘密の質問<span class="form_note">(自分だけにわかる質問)</span></label>
-								<input type="text" id="passcode[question]" name="passcode[question]" class="required" value="" placeholder="例）ペットの名前は？" />
+								<label for="customer_qes" class="fieldLabel">秘密の質問<span class="form_note">(自分だけにわかる質問)</span></label>
+								<input type="text" id="customer_qes" name="customer_qes" class="required" value="" placeholder="例）ペットの名前は？" />
 								</li>
 
-								<li class="passcode">
-								<label for="passcode[answer]" class="fieldLabel">質問の回答</label>
-								<input type="text" id="passcode[answer]" name="passcode[answer]" class="required" value="" placeholder="例）ポチ" />
+                            <li class="passcode">
+								<label for="customer_ans" class="fieldLabel">質問の回答</label>
+								<input type="text" id="customer_ans" name="customer_ans" class="required" value="" placeholder="例）ポチ" />
 							</li>
 
 							<li class="item_buy_1btn btn_txt_ow">
 								<div>
-									<button class="btn_next" type="submit">
-										登録する
-									</button>
+                                    <!--<input type="submit" value="登録する" class="btn_next"/>-->
+									<input type="button" class="btn_next" value="登録する" onclick="savePass();"/>
 								</div>
 							</li>
 						</ul>
@@ -242,7 +331,7 @@ $(function(){
 						</a>
 					</li>
 					<li class="tab03 current">
-						<a href="setting.html" data-ajax="false">
+						<a id="tab3a" href="setting.html" data-ajax="false">
 							<span>設定</span>
 						</a>
 					</li>

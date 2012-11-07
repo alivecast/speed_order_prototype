@@ -31,8 +31,21 @@ function onBodyLoad() {
 
 function onDeviceReady() {
 	getSetting();
+    
+//    var params = {};
+//    getOrder(params);
 }
 
+    
+function goSET(error) {
+    console.log("正常にテキストを読み込まない。:cid ");
+    message = '１．暗証番号を設定してください。';
+    title = '情報の初期設定';
+    button = 'OK';
+    navigator.notification.alert(message, alertCallBack(), title, button);
+    location.href="passcode_new.html?kbn=buy";
+}
+    
 // 情報ファイルを読み込み
 function getSetting(){
 	window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, read, fail);
@@ -54,49 +67,114 @@ console.log("text: " + evt.target.result);
 					text = evt.target.result;
 					ordering = JSON.parse(text);
 
-console.log("正常にテキストを読み込みました。:cid "+ordering.customer_id);
-console.log("正常にテキストを読み込みました。:key "+ordering.customer_key);
+console.log("正常にテキストを読み込みましたよ。:cid "+ordering.customer_id);
+console.log("正常にテキストを読み込みましたよ。:key "+ordering.customer_key);
 
-					// アドレスの取得
-					setSetting(ordering);
+					if(ordering.customer_pass){
+						// パスワードのチェック
+						ckPassTime(ordering);
+					}else{
+						// ★メイン処理
+						setSetting(ordering);
+					}
 
+				};
+					reader.readAsText(file, "utf-8");
+            }, goSET)
+		}, goSET);
+	}
+}
+
+function ckPassTime(ordering) {
+	// ファイルの読み込み
+	var fname = 'passtime';
+	var text = {};
+	window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, read, fail);
+	function read(fileSystem) {
+		fileSystem.root.getFile(fname, {}, function(fileEntry) {
+			fileEntry.file(function(file) {
+				var reader = new FileReader();
+				reader.onloadend = function(evt) {
+					// ここに読み込み完了後の処理を書く
+					console.log("text: " + evt.target.result);
+					text = evt.target.result;
+					json = JSON.parse(text);
+
+					console.log("正常にテキストを読み込みました。:passtime "+json.pass_time);
+
+					var cktime   = json.pass_time+(60*60);
+					var nowtime  = parseInt( new Date() /1000 );
+					if(cktime < nowtime){
+						location.href="passcode_input.html?kbn=buy";
+					}else{
+						// ★メイン処理
+						setSetting(ordering);
+					}
 				};
 				reader.readAsText(file, "utf-8");
 				// Data URL として読み込む
 				// reader.readAsDataURL(file);
-			}, fail)
-		}, fail);
-
+			}, goErr)
+		}, goErr);
 	}
 }
 
+function goErr(error) {
+	location.href="passcode_input.html?kbn=buy";
+}
+    
 // サーバー通信を行い値を設定を行なう
 function setSetting(params){
 	console.log("Start:"+params);
 
-	var url = 'https://gs850.ggsv.jp/~w850033/class/json/send_setup.php';
+    title = '情報の初期設定';
+    button = 'OK';
+	
+    var url = 'https://gs850.ggsv.jp/~w850033/class/json/send_setup.php';
 
 	$.post(url, // アクセスするURL
 		params, // 送信データ
 		function(data, status, XHR) {// 処理結果
 			if (status == 'success') {
 				// 戻り値により処理を振り分ける
+
 				if(data.setup_ok == 1){
 console.log("-- 注文処理 --");
 					getOrder(params);
+
+                }else if(data.password_ck == 0){
+console.log("-- 暗証番号--");
+                    message = '１．暗証番号を設定してください。';
+                    navigator.notification.alert(message, alertCallBack(), title, button);
+                    location.href="passcode_new.html?kbn=buy";
+           
 				}else if(data.customer_ck == 0){
 console.log("-- 個人設定・お届け先 --");
+                    message = '２．あなた様のお名前やご住所を設定してください。';
+                    navigator.notification.alert(message, alertCallBack(), title, button);
 					location.href="ordering_new.html?kbn=buy";
+
+                }else if(data.address_ck == 0){
+console.log("-- お届け先 --");
+                    message = '３．お届け先のお名前やご住所を設定してください。';
+                    navigator.notification.alert(message, alertCallBack(), title, button);
+                    location.href="addressee_new.html?kbn=buy";
+           
 				}else if(data.card_ck == 0){
 console.log("-- カード--");
+                    message = '４．お支払いに使うクレジットカード情報を設定してください。クレジットカードはご本人様（個人設定にて設定したお名前・ご住所）のカード以外はご利用いただけません。';
+                    navigator.notification.alert(message, alertCallBack(), title, button);
 					location.href="card_new.html?kbn=buy";
-				}else if(data.password_ck == 0){
-console.log("-- 暗証番号--");
-					location.href="passcode_new.html?kbn=buy";
+           
 				}else{
 console.log("-- エラー１--");
-					errMsg();
+                    message = '１．暗証番号を設定してください。';
+                    navigator.notification.alert(message, alertCallBack(), title, button);
+                    navigator.notification.alert(message, alertCallBack(), title, button);
+					location.href="ordering_new.html?kbn=buy";
+
 				}
+                
 			} else {
 console.log("-- エラー２--");
 				errMsg();
@@ -119,45 +197,40 @@ function getOrder(params){
 
         postg['customer_id']   = params.customer_id;
         postg['customer_key']  = params.customer_key;
-        postg['item_id']      = "2";
-        postg['company_id']   = "200101";
-        postg['item_version']      = "3";
-        postg['order_amount']      = "2";
-        postg['qr_id']           = "2001010000040000028101";
         
         // アドレスの取得
-        setOrder(postg);
-//		fileSystem.root.getFile(fname, {}, function(fileEntry) {
-//			fileEntry.file(function(file) {
-//				var text = {};
-//				var reader = new FileReader();
-//				reader.onloadend = function(evt) {
-//					// ここに読み込み完了後の処理を書く
-//
-//console.log("text: " + evt.target.result);
-//
-//					text = evt.target.result;
-//					order = JSON.parse(text);
-//
-//console.log("正常にテキストを読み込みました。order");
-//                    postg['custome_id']   = params.custome_id;
-//                    postg['custome_key']  = params.custome_key;
-//                    postg['item_id']      = order.item_id;
-//                    postg['company_id']   = order.company_id;
-//                    postg['item_version']      = order.item_version;
-//                    postg['order_amount']      = order.order_amount;
-//                    postg['qr_id']           = order.qr_id;
-//                           
-//
-//                           // アドレスの取得
-//					setOrder(postg);
-//
-//				};
-//				reader.readAsText(file, "utf-8");
-//				// Data URL として読み込む
-//				// reader.readAsDataURL(file);
-//			}, fail)
-//		}, fail);
+		fileSystem.root.getFile(fname, {}, function(fileEntry) {
+			fileEntry.file(function(file) {
+				var text = {};
+				var reader = new FileReader();
+				reader.onloadend = function(evt) {
+					// ここに読み込み完了後の処理を書く
+
+console.log("text: " + evt.target.result);
+
+					text = evt.target.result;
+					order = JSON.parse(text);
+
+console.log("正常にテキストを読み込みました。order_amount: "+order.order_amount);
+console.log("正常にテキストを読み込みました。item_version: "+order.item_version);
+console.log("正常にテキストを読み込みました。qr_id: "+order.qr_id);
+                           
+                    postg['item_version']      = order.item_version;
+                    postg['order_amount']      = order.order_amount;
+                    postg['qr_id']             = order.qr_id;
+                    postg['latitude']          = order.latitude;
+                    postg['longitude']         = order.longitude;
+                           
+
+                    // 発注処理
+					setOrder(postg);
+return false;
+				};
+				reader.readAsText(file, "utf-8");
+				// Data URL として読み込む
+				// reader.readAsDataURL(file);
+			}, fail)
+		}, fail);
         
 	}
 }
@@ -166,7 +239,7 @@ function getOrder(params){
 function setOrder(order){
 	console.log("Start:"+order);
 
-	var url = 'https://gs850.ggsv.jp/~w850033/class/json/receive_order_it.php';
+	var url = 'https://gs850.ggsv.jp/~w850033/class/json/receive_order.php';
 
 	$.post(url, // アクセスするURL
 		order, // 送信データ
@@ -174,9 +247,17 @@ function setOrder(order){
 			if (status == 'success') {
 				// 戻り値により処理を振り分ける
 				if(data.order_id > 0 && data.order_id < 99999999999){
+					if(data.errmsg.length > 1){
+						var msg = {};
+						msg['title'] = data.errtitle;
+						msg['msg']   = data.errmsg;
+						cardErrMsg(msg);
+                    	return false;
+					}else{
 console.log("-- 注文完了--");
-					okMsg();
-                    return false;
+						okMsg();
+                    	return false;
+					}
 				}else{
 console.log("-- エラー１--");
 					errMsg();
@@ -193,26 +274,36 @@ console.log("-- END--");
 }
 
 function okMsg() {
+    // オーダーを削除    
 	message = 'キャンセルは30分以内にお願いいたします。';
 	title = 'ご注文が完了いたしました。';
 	button = 'OK';
 	navigator.notification.alert(message, alertCallBackOk(), title, button);
 	location.href = 'show_order.html';
 }
-    function alertCallBackOk() {
-//        location.href = 'show_order.html';
-    }
-    
-    function errMsg() {
-        message = '時間をおいてやり直してください';
-        title = 'サーバーと通信できませんでした';
-        button = 'OK';
-        navigator.notification.alert(message, alertCallBack(), title, button);
-        location.href = 'setting.html';
-    }
+function cardErrMsg(msg) {
+    // カードエラー   
+	button = 'OK';
+	navigator.notification.alert(msg.msg, alertCallBack(), msg.title, button);
+	location.href = 'setting.html';
+}
+function alertCallBackOk() {
+    fname = 'order';
+    var order = {};
+    order['qr_id'] = "";
+    setFile(fname,order);
+}
+
+function errMsg() {
+    message = '時間をおいてやり直してください';
+    title = 'サーバーと通信できませんでした';
+    button = 'OK';
+    navigator.notification.alert(message, alertCallBack(), title, button);
+    location.href = 'setting.html';
+}
     
 function alertCallBack() {
-//	location.href = 'show_item.html';
+//	location.href = 'setting.html';
 }
 
 </script>

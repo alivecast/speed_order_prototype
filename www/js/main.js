@@ -114,7 +114,7 @@ function currency(str) {
 
 // ファイル書込処理
 function setFile(fname, jsonObj) {
-	window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, write, fail);
+	window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, write, setError1);
 	function write(fileSystem) {
 		fileSystem.root.getFile(fname, {
 			create : true,
@@ -130,9 +130,18 @@ function setFile(fname, jsonObj) {
 				// 内容を書き込み
 				var jsonText = JSON.stringify(jsonObj);
 				writer.write(jsonText);
-			}, fail);
-		}, fail);
+			}, setError2);
+		}, setError3);
 	}
+}
+function setError1(error){
+	console.log('setError1: ' + error);
+}
+function setError2(error){
+	console.log('setError2: ' + JSON.stringify(error));
+}
+function setError3(error){
+	console.log('setErro3r: ' + error);
 }
 
 // // ファイル読込処理
@@ -164,7 +173,7 @@ function delFile(fname) {
 			create : false
 		}, function(fileEntry) {
 			fileEntry.remove(function() {
-				console.log('File removed.');
+				console.log('File removed:' + fname);
 			}, fail);
 		}, fail);
 	}, fail);
@@ -173,6 +182,24 @@ function delFile(fname) {
 // ファイル操作　error処理
 function fail(error) {
 	console.log("ファイル処理失敗: " + error.code);
+}
+
+// ネットワーク状態を調べる
+function check_network(){
+	var domain = 'speed-order.jp';
+	navigator.network.isReachable(domain, reachableCallback);
+}
+// ネットワーク状態を受け取るlコールバック
+function reachableCallback(reachability) {
+    // 現状では各プラットフォーム間でのreachabilityのフォーマットに関しての一貫性はありません
+    var networkState = reachability.code || reachability;
+
+    var states = {};
+    states[NetworkStatus.NOT_REACHABLE]                      = '接続可能なネットワークが見つかりません';
+    states[NetworkStatus.REACHABLE_VIA_CARRIER_DATA_NETWORK] = 'データ接続';
+    states[NetworkStatus.REACHABLE_VIA_WIFI_NETWORK]         = 'WiFi接続';
+
+    alert('接続の形式: ' + states[networkState]);
 }
 
 // 郵便番号の取得 //////////////////////////////////////////////////////////////////////
@@ -196,7 +223,7 @@ function getCarriage(price, carriage, non_carriage_price) {
 	var total = (price * amount) + carriage;
 	var neoCarriage = carriage;
 	if (total >= non_carriage_price){
-		total = (price * amount)
+		total = (price * amount);
 		neoCarriage = 0;
 	}
 	// 桁区切り
@@ -205,20 +232,20 @@ function getCarriage(price, carriage, non_carriage_price) {
 	while(num != (num = num.replace(/^(-?\d+)(\d{3})/, "$1,$2")));
 //	return num;
 	// 送料無料を反映
-	setCarriage(neoCarriage)
+	setCarriage(neoCarriage);
 	document.getElementById('#total').innerHTML = num + '円(税込)';
 }
 
 function setCarriage(carriage) {
 	// 桁区切り
-	str = String(carriage);
+	var str = String(carriage);
 	var num = new String(str).replace(/,/g, "");
 	while(num != (num = num.replace(/^(-?\d+)(\d{3})/, "$1,$2")));
 	if (num = '0' ){
-		num = '無料'
+		num = '無料';
 	} else {
-		num + '円'
+		num + '円';
 	}
-	document.getElementById('#shippingCost').innerHTML = String(num);
+	document.getElementById('#carriage').innerHTML = String(num);
 }
 

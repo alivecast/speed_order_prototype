@@ -26,49 +26,127 @@
 
 		<script type="text/javascript" charset="utf-8" src="js/main.js"></script>
 
-		<script type="text/javascript" charset="utf-8" src="js/ajaxzip3.js"></script>
 		<script type='text/javascript' charset="utf-8" src="js/jquery.validate.min.js"></script>
 
 		<script type="text/javascript">
-		
+            $( document ).bind( "mobileinit", function() {
+                // jQuery Mobile フレームワークの設定変更は、ここで行なってください！
+                $.support.cors = true;
+                $.mobile.allowCrossDomainPages = true;
+            });
+
 			function onBodyLoad() {
 				document.addEventListener("deviceready", onDeviceReady, false);
 			}
 
-			function onDeviceReady() {
-				// Alert -----------------------------------------------------------------------
-				navigator.notification.alert("index.html");
-			}
+            function onDeviceReady(){
+                    if(location.search.length > 1) {
+                        var get = new Object();
+                        var ret = location.search.substr(1).split("&");
+                        for(var i = 0; i < ret.length; i++) {
+                            var r = ret[i].split("=");
+                            get[r[0]] = r[1];
+                        }
+                        console.log("get:"+get['kbn']);
+						$("#kbn").val(get['kbn']);
+                        if(get['kbn'] == "buy"){
+                            $("#backb").attr("href","addressee_index.html?kbn=buy");
+                            $("#tab3a").attr("href","order.html");
+                        }
+                    }
+                onReadyFile();
+            }
+            
+			function onReadyFile() {
+				// ファイルの読み込み
+                var fname = 'ordering';
+//test               delFile(fname);
+                var text = {};
+                window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, read, fail);
+                function read(fileSystem) {
+                    fileSystem.root.getFile(fname, {}, function(fileEntry) {
+                        fileEntry.file(function(file) {
+                            var reader = new FileReader();
+                            reader.onloadend = function(evt) {
+                            // ここに読み込み完了後の処理を書く
+                                console.log("text: " + evt.target.result);
+                                text = evt.target.result;
+                                json = JSON.parse(text);
+                                
+                                       $("#customer_id").val(json.customer_id);
+                                       $("#customer_mail_1").val(json.customer_mail_1);
+                                       $("#customer_key").val(json.customer_key);
+                                       $("#customer_pass").val(json.customer_pass);
+                                       $("#iv").val(json.iv);
+                                       
+                                console.log("正常にテキストを読み込みました。:cid "+json.customer_id);
+                                console.log("正常にテキストを読み込みました。:key "+json.customer_key);
+                                       
+                                                           
+                            };
+                            reader.readAsText(file, "utf-8");
+                            // Data URL として読み込む
+                            // reader.readAsDataURL(file);
+                        }, fail)
+                    }, fail);
+                }
+            }
 
-			// サンプル データ ----------------------------------------------------------------
-			function sampleItem() {
 
-				var qr_id = '2001010000160000038101';
-				var area_name = '北海道';
+			// 新規登録
+			function saveCard(){
+                var result = $("#form_card").validate().form();				// 入力値
+                if(result == false){
+                    return false;
+                }
+                
+				var ordering = {};
+                ordering['customer_id']   = $("#customer_id").val();
+                ordering['customer_key']   = $("#customer_key").val();
+                ordering['customer_pass']   = $("#customer_pass").val();
+                ordering['card_company']    = $("#card_company").val();
+				ordering['card_number']  = $("#card_number").val();
+                ordering['card_validity'] = $("#card_validity").val();
+				ordering['card_holder'] = $("#card_holder").val();
+				ordering['card_security_code'] = $("#card_security_code").val();
 
-				var url = 'http://speed-order.jp/class/json_pg/send_item_info.php';
-				var params = {
-					qr_id : qr_id,
-					area_name : area_name
-				};
+console.log("customer_id: "+ ordering['customer_id']);
+console.log("card_company: "+ ordering['card_company']);
+console.log("card_validity: "+ ordering['card_validity']);
 
-				var sample = {
-					url : url,
-					params : params
-				};
+				// 送信
+				var url = 'https://gs850.ggsv.jp/~w850033/class/json/receive_card.php';
 
-				return sample;
-			}
-
-			// POST通信 ---------------------------------------------------------------------
-			function sendPost(url, params) {
-
+				var params = ordering;
 				$.post(url, // アクセスするURL
-				params, // 送信データ
-				function(data, status, XHR) {// 処理結果
-					resultSpan.innerText = status + JSON.stringify(data);
+					params, // 送信データ
+					function(data, status, XHR) {// 処理結果
+		     	       if (status == 'success') {
+							// 戻り値の保存
+console.log("customer_id: " + data.customer_id);
 
-				});
+                       var kbn = $("#kbn").val();
+                       if(kbn == "buy"){
+                            location.href="order.html";
+                        }else{
+                            location.href="setting.html";
+                        }
+
+						} else {
+							message = 'お客様情報の登録に失敗しました';
+							title = 'サーバーと通信できませんでした';
+							button = 'OK';
+							navigator.notification.alert(message, alertCallBack(), title, button);
+							return false;
+						}
+					}
+				);
+                return false;
+			}
+			
+			// alertCallBack -----------------------------------------------------------------------
+			function alertCallBack() {
+				// window.location.href = 'barcode.html';
 			}
 
 		</script>
@@ -92,20 +170,18 @@ em { color: red; font-weight: bold; padding-right: .25em; }
  
  
   </style> 
-<script type='text/javascript'> 
-  //<![CDATA[ 
-jQuery.extend(jQuery.validator.messages, {
-	required: "必須項目です",
-	number: "数値のみで入力してください",
-	email: "メールアドレスを入力してください",
-	url: "URLを入力してください",
-});
-
-  $(window).load(function(){
-  $("#form_card").validate();
-  });
-  //]]> 
-  </script>
+            <script type='text/javascript'>
+                //<![CDATA[
+                jQuery.extend(jQuery.validator.messages, {
+                              required: "必須項目です",
+                              number: "数値のみで入力してください",
+                              });
+                
+                $(window).load(function(){
+                               $("#form_card").validate();
+                               });
+                //]]> 
+                </script>
 
 	<script type="text/javascript" charset="utf-8" src="js/jquery.mobile-1.2.0.min.js"></script>
 
@@ -117,7 +193,7 @@ jQuery.extend(jQuery.validator.messages, {
 
 			<div data-role="header" id="header" data-position="fixed">
 				<h1>クレジットカードの入力</h1>
-					<a  data-rel="back" href="#" class="ui-btn-left" data-icon="arrow-l" data-direction="reverse" data-ajax="false">
+					<a id="backb" href="setting.html" class="ui-btn-left" data-icon="arrow-l" data-ajax="false">
 						戻る
 					</a>
 			</div>
@@ -145,19 +221,20 @@ jQuery.extend(jQuery.validator.messages, {
 					</dl>
 				</div>
 
-				<form method="POST" action="<!-- %= url_for :action => :create % -->" id="form_card">
-					<input type="hidden" name="id" value="<!-- %= @card.object % -->"/>
+				<form method="post" action="#" id="form_card">
+					<input type="hidden" id="customer_id" name="customer_id" value=""/>
+                    <input type="hidden" id="customer_key" name="customer_key" />
+                    <input type="hidden" id="customer_pass" name="customer_pass" />
+                    <input type="hidden" id="iv" name="iv" />
+
+                    <input type="hidden" id="kbn" name="kbn" />
 
 					<div data-role="fieldcontain" >
 						<ul class="setup_list" data-role="listview">
 
 							<li class="card_num">
-								<!--<label for="card[card_company]" class="fieldLabel">クレジットカード会社</label>-->
-								<div class="txt">
-									クレジットカード会社
-								</div>
-								<br />
-								<select id="card[card_company]" name="card[card_company]">
+								<label for="card_company" class="fieldLabel">クレジットカード会社</label>
+								<select id="card_company" name="card_company" class="required">
 									<option value="">カード会社を選択</option>
 									<option value="visa">VISA</option>
 									<option value="master">MASTER</option>
@@ -168,35 +245,30 @@ jQuery.extend(jQuery.validator.messages, {
 							</li>
 
 							<li class="card_name">
-								<label for="card[card_holder]" class="fieldLabel">カード名義人</label>
+								<label for="card_holder" class="fieldLabel">カード名義人</label>
 								<p style="color:red;">
 									・ クレジットカードの表記通りに入力してください。
 									<br/>
 									・ 姓・名の間に半角スペースを入力してください。
 								</p>
-								<input type="text" id="card[card_holder]" name="card[card_holder]" value="" class="required" placeholder="例）Taro Kaimono" />
+								<input type="text" id="card_holder" name="card_holder" value="" class="required" placeholder="例）TARO KAIMONO" />
 							</li>
 
 							<li class="card_num">
-								<label for="card[card_number]" class="fieldLabel">クレジットカード番号</label>
-								<input type="tel" id="card[card_number]" name="card[card_number]" value="" maxlength=16 class="required number" placeholder="例）数値16桁。15桁の場合、頭に0を埋めてください。" />
+								<label for="card_number" class="fieldLabel">クレジットカード番号</label>
+								<input type="tel" id="card_number" name="card_number" value="" maxlength=16 class="required number" placeholder="例）数値16桁。15桁の場合、頭に0を埋めてください。" />
 							</li>
 
 							<li class="card_limit">
-								<label for="card[card_validity_month]" class="fieldLabel">有効期限</label>
-								<div class="box2">
-									<div class="box2_01">
-										<label for="card[card_validity_month]">年月</label>
-										<input style="width:100px;" type="month" id="card[card_validity_month]" name="card[card_validity_month]" value="" class="required"  />
-									</div>
-								</div>
+								<label for="card_validity" class="fieldLabel">有効期限(年月)</label>
+								<input style="width:100px;" type="month" id="card_validity" name="card_validity"  />
 							</li>
 
 							<li class="card_sCode">
-								<label for="card[card_security_code]" class="fieldLabel">セキュリティコード</label>
+								<label for="card_security_code" class="fieldLabel">セキュリティコード</label>
 								<div class="box2">
 									<div class="box2_01">
-										<input style="width:100px;" type="password" id="card[card_security_code]" name="card[card_security_code]" value="" maxlength=4 class="required number" placeholder="例）123" />
+										<input style="width:100px;" type="password" id="card_security_code" name="card_security_code" value="" maxlength=4 class="required number" placeholder="例）123" />
 									</div>
 								</div>
 							</li>
@@ -205,11 +277,7 @@ jQuery.extend(jQuery.validator.messages, {
 							</li>
 
 							<li class="item_buy_1btn btn_txt_ow">
-								<div>
-									<button class="btn_next" type="submit">
-										登録する
-									</button>
-								</div>
+                                <input type="button" class="btn_next" value="登録する" onclick="saveCard()";/>
 							</li>
 
 						</ul>
@@ -231,7 +299,7 @@ jQuery.extend(jQuery.validator.messages, {
 						</a>
 					</li>
 					<li class="tab03 current">
-						<a href="setting.html" data-ajax="false">
+						<a id="tab3a" href="setting.html" data-ajax="false">
 							<span>設定</span>
 						</a>
 					</li>

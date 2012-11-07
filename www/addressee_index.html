@@ -30,52 +30,172 @@
 		<script type='text/javascript' charset="utf-8" src="js/jquery.validate.min.js"></script>
 
 		<script type="text/javascript">
+            $( document ).bind( "mobileinit", function() {
+                // jQuery Mobile フレームワークの設定変更は、ここで行なってください！
+                $.support.cors = true;
+                $.mobile.allowCrossDomainPages = true;
+            });
+
 			function onBodyLoad() {
 				document.addEventListener("deviceready", onDeviceReady, false);
 			}
 
 			function onDeviceReady() {
-				// Alert -----------------------------------------------------------------------
-				navigator.notification.alert("index.html");
+                    if(location.search.length > 1) {
+                        var get = new Object();
+                        var ret = location.search.substr(1).split("&");
+                        for(var i = 0; i < ret.length; i++) {
+                            var r = ret[i].split("=");
+                            get[r[0]] = r[1];
+                        }
+                        console.log("get:"+get['kbn']);
+						$("#kbn").val(get['kbn']);
+                        if(get['kbn'] == "buy"){
+                            $("#backb").attr("href","ordering_new.html?kbn=buy");
+                            $("#tab3a").attr("href","order.html");
+                        }
+                    }
+                onReadyFile();
 			}
 
-			// サンプル データ ----------------------------------------------------------------
-			function sampleItem() {
-				var qr_id = '2001010000160000038101';
-				var area_name = '北海道';
-				var url = 'http://speed-order.jp/class/json_pg/send_item_info.php';
-				var params = {
-					qr_id : qr_id,
-					area_name : area_name
-				};
-				var sample = {
-					url : url,
-					params : params
-				};
-				return sample;
-			}
+			function onReadyFile() {
+				// ファイルの読み込み
+console.log("start");
 
-			// POST通信 ---------------------------------------------------------------------
-			function sendPost(url, params) {
+                var fname = 'ordering';
+                var text = {};
+                window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, read, fail);
+                function read(fileSystem) {
+                    fileSystem.root.getFile(fname, {}, function(fileEntry) {
+                        fileEntry.file(function(file) {
+                            var reader = new FileReader();
+                            reader.onloadend = function(evt) {
+                            // ここに読み込み完了後の処理を書く
+                                console.log("text: " + evt.target.result);
+                                text = evt.target.result;
+                                json = JSON.parse(text);
+                                console.log("正常にテキストを読み込みました。");
+                                getCustomers(json);
+                                                           
+                            };
+                            reader.readAsText(file, "utf-8");
+                            // Data URL として読み込む
+                            // reader.readAsDataURL(file);
+                        }, fail)
+                    }, fail);
+                }
+            }
+
+
+            // ファイルがある場合は、サーバー通信を行い値を取得する。
+            function getCustomers(params){
+                console.log("Start:"+params['customer_id']);
+                
+                var url = 'https://gs850.ggsv.jp/~w850033/class/json/send_address_index.php';
+                
 				$.post(url, // アクセスするURL
-				params, // 送信データ
-				function(data, status, XHR) {// 処理結果
-					resultSpan.innerText = status + JSON.stringify(data);
-				});
-			}
+                    params, // 送信データ
+                    function(data, status, XHR) {// 処理結果
+                    if (status == 'success') {
+                       // お届け先の表示1
+                       $("#adr_id1").val(data.address_id1);
+                       $("#adr_name1").text(data.address_name1);
+                       
+                       if(data.address_ck1 == 1){
+                         $("#adr_ck1").html('<img src="images/speedorder/ico_check_r.png" width="16" height="15" alt="ここに届ける：" />');
+                       }
+                       if(data.address_id1 == 0 || data.address_id1 ==""){
+                         $("#adr1").html(" ");
+                       }
+                       
+console.log("data.address_id1:"+data.address_id1);
+console.log("data.address_name1:"+data.address_name1);
+console.log("data.address_ck1:"+data.address_ck1);
+                       
+                       // お届け先の表示2
+                       if(data.address_id2 == 0 || data.address_id2 == "" || data.address_id2 == undefined){
+                       }else{
+                            $("#adr_id2").val(data.address_id2);
+                            $("#adr_name2").text(data.address_name2);
+                       
+                            if(data.address_ck2 == 1){
+                                $("#adr_ck2").html('<img src="images/speedorder/ico_check_r.png" width="16" height="15" alt="ここに届ける：" />');
+                            }
+                            $("#adr2").css("display","block");
+                            console.log("data.address_id2:"+data.address_id2);
+                            console.log("data.address_name2:"+data.address_name2);
+                       }
+                       
+                       // お届け先の表示3
+                       if(data.address_id3 == 0 || data.address_id3 == "" || data.address_id3 == undefined){
+                       }else{
+                            $("#adr_id3").val(data.address_id3);
+                            $("#adr_name3").text(data.address_name3);
+                       
+                            if(data.address_ck3 == 1){
+                                $("#adr_ck3").html('<img src="images/speedorder/ico_check_r.png" width="16" height="15" alt="ここに届ける：" />');
+                            }
+                            $("#adr3").css("display","block");
+                       }
+                       
+                       // お届け先の表示4
+                       if(data.address_id4 == 0 || data.address_id4 == "" || data.address_id4 == undefined){
+                       }else{
+                            $("#adr_id4").val(data.address_id4);
+                            $("#adr_name4").text(data.address_name4);
+                       
+                            if(data.address_ck4 == 1){
+                                $("#adr_ck4").html('<img src="images/speedorder/ico_check_r.png" width="16" height="15" alt="ここに届ける：" />');
+                            }
+                            $("#adr4").css("display","block");
+                       }
+                       
+                       // お届け先の表示5
+                       if(data.address_id5 == 0 || data.address_id5 == "" || data.address_id5 == undefined){
+                       }else{
+                            $("#adress_add").css("display","none");
+                            $("#adr_id5").val(data.address_id5);
+                            $("#adr_name5").text(data.address_name5);
+                            if(data.address_ck5 == 1){
+                                $("#adr_ck5").html('<img src="images/speedorder/ico_check_r.png" width="16" height="15" alt="ここに届ける：" />');
+                            }
+                            $("#adr5").css("display","block");
+                       }
 
-			// GET通信 ---------------------------------------------------------------------
-			function sendGet(url, params) {
-				$.get(url, // アクセスするURL
-				params, // 送信データ
-				function(data, status, XHR) {// 処理結果
-					if (status == 'success') {
-						resultSpan.innerText = status + JSON.stringify(data);
-					} else {
-						resultSpan.innerText = status + JSON.stringify('NG');
-					}
-				});
-			}
+                       
+                       
+                    } else {
+                       message = 'お客様情報の登録に失敗しました';
+                       title = 'サーバーと通信できませんでした';
+                       button = 'OK';
+                       navigator.notification.alert(message, alertCallBack(), title, button);
+                       return false;
+                    }
+                    }
+                );
+            }
+            function goEdit(area){
+                var kbn = $("#kbn").val();
+                if(kbn == "buy"){
+                    rekbn= "&kbn=buy";
+                }else{
+                    rekbn= "";
+                }
+                
+                if(area == 1){
+                    location.href="addressee_new.html?id="+$("#adr_id1").val()+rekbn;
+                }else if(area == 2){
+                        location.href="addressee_new.html?id="+$("#adr_id2").val()+rekbn;
+                }else if(area == 3){
+                    location.href="addressee_new.html?id="+$("#adr_id3").val()+rekbn;
+                }else if(area == 4){
+                    location.href="addressee_new.html?id="+$("#adr_id4").val()+rekbn;
+                }else if(area == 5){
+                    location.href="addressee_new.html?id="+$("#adr_id5").val()+rekbn;
+                }else{
+                    location.href="addressee_new.html?id=0"+rekbn;
+                }
+            }
 
 		</script>
 
@@ -88,28 +208,83 @@
 		<div data-role="page" data-add-back-btn="false">
 			<div data-role="header" id="header" data-position="fixed">
 				<h1>お届け先一覧</h1>
-				<a data-rel="back" href="#" class="ui-btn-left" data-icon="arrow-l" data-direction="reverse" data-ajax="false">
+				<!--<a data-rel="back" href="#" class="ui-btn-left" data-icon="arrow-l" data-direction="reverse" data-ajax="false">-->
+				<a id="backb" href="setting.html" class="ui-btn-left" data-icon="arrow-l" data-ajax="false">
 					戻る
 				</a>
 			</div>
-
+			<input type="hidden" id="kbn" name="kbn" />
 			<div class="cont_ordering_new" data-role="content">
+				<br />
 				<ul class="user_mail_list" data-role="listview">
-					<!-- % @addressees.each do |addressee| % -->
-					<li>
-						<a href="addressee_edit.html?id=xx" data-icon="arrow-l">
-							<span class="ico_check"> 
-								<!-- % if addressee.recipient_main_flg == 'primary' %--> 
-									<img src="images/speedorder/ico_check_r.png" width="16" height="15" alt="ここに届ける："  /> 
-								<!-- % end %--> 
+					<li id="adr1">
+						<a href="#" data-icon="arrow-l" id="adr_href1" data-ajax="false" onclick="goEdit(1);">
+							<span class="ico_check">
+                                <span  id="adr_ck1"></span>
 							</span> 
-							<span class="tl"> 
-								<!-- %= addressee.recipient_subject %--> 
-							</span> 
+							<span class="tl">
+								<span id="adr_name1"></span>
+							</span>
+							<input type="hidden" id="adr_id1" name="adr_id1" value="" />
 						</a>
 					</li>
-					<!-- % end %-->
-				</ul>
+ 
+					<li id="adr2" style="display:none;">
+						<a href="#" data-icon="arrow-l" id="adr_href2" data-ajax="false" onclick="goEdit(2);">
+							<span class="ico_check">
+								<span  id="adr_ck2"></span>
+							</span>
+							<span class="tl">
+								<span id="adr_name2"></span>
+							</span>
+							<input type="hidden" id="adr_id2" name="adr_id2" value="" />
+						</a>
+					</li>
+                    
+					<li id="adr3" style="display:none;">
+						<a href="#" data-icon="arrow-l" id="adr_href3" data-ajax="false" onclick="goEdit(3);">
+							<span class="ico_check">
+								<span  id="adr_ck3"></span>
+							</span>
+							<span class="tl">
+								<span id="adr_name3"></span>
+							</span>
+							<input type="hidden" id="adr_id3" name="adr_id3" value="" />
+						</a>
+					</li>
+
+					<li id="adr4" style="display:none;">
+						<a href="#" data-icon="arrow-l" id="adr_href4" data-ajax="false" onclick="goEdit(4);">
+							<span class="ico_check">
+								<span  id="adr_ck4"></span>
+							</span>
+							<span class="tl">
+								<span id="adr_name4"></span>
+							</span>
+							<input type="hidden" id="adr_id4" name="adr_id4" value="" />
+						</a>
+					</li>
+                    
+					<li id="adr5" style="display:none;">
+						<a href="#" data-icon="arrow-l" id="adr_href5" data-ajax="false" onclick="goEdit(5);">
+							<span class="ico_check">
+								<span  id="adr_ck5"></span>
+							</span>
+							<span class="tl">
+								<span id="adr_name5"></span>
+							</span>
+							<input type="hidden" id="adr_id5" name="adr_id5" value="" />
+						</a>
+					</li>
+                    
+                </ul>
+				<br />
+				<br />
+				<div class="check_btn" id="adress_add">
+                    <a href="#" class="btn_next" data-role="button" onclick="goEdit(0);">お届け先の追加</a>
+					<span class="txt" style="color:red;">※お届け先は最大５件まで登録できます。</span>
+				</div>
+
 			</div>
 
 			<!-- nav -->
@@ -126,7 +301,7 @@
 						</a>
 					</li>
 					<li class="tab03 current">
-						<a href="setting.html" data-ajax="false">
+						<a id="tab3a" href="setting.html" data-ajax="false">
 							<span>設定</span>
 						</a>
 					</li>

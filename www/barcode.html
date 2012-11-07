@@ -11,14 +11,13 @@
 		<link rel="stylesheet" media="only screen and (max-device-width: 480px)" href="iphone.css" type="text/css" />
 		-->
 
-		<script type="text/javascript" charset="utf-8" src="js/jquery-1.6.4.min.js"></script>
+		<script type="text/javascript" charset="utf-8" src="js/jquery-1.8.2.min.js"></script>
 		<script type="text/javascript" charset="utf-8" src="js/base64.js"></script>
 		<script type="text/javascript" charset="utf-8" src="js/cordova-1.5.0.js"></script>
 		<script type="text/javascript" charset="utf-8" src="js/barcodescanner.js"></script>
 
 		<script type="text/javascript">
 			function onBodyLoad() {
-
 				document.addEventListener("deviceready", onDeviceReady, false);
 			}
 
@@ -26,17 +25,19 @@
 
 				// barcode読み取り
 				window.plugins.barcodeScanner.scan(function(result) {
-                                                   
 					// キャンセル
 					if (result.cancelled) {
+						// src から Media オブジェクトを作成
+						var src = 'mp3/cancel.mp3';
+		            	audio = new Media(src, null, null);
+		            	// オーディオ再生
+		            	audio.play();
 						// window.location.href = "setting.html";
                         scannerSuccess(result.text);
-                                                   
                     // 読み取り
 					} else {
 						scannerSuccess(result.text);
 					}
-                                                   
 				}, function(error) {
 					scannerFailure(error);
 				});
@@ -44,83 +45,47 @@
 
 			// Barcode 読み込み成功　-------------------------------------------------------------
 			function scannerSuccess(result) {
-
 				// test
 				result = 'http://speed-order.jp/2001010000040000028101';
 				// console.log("scannerSuccess: result: " + result);
-
+				
+				// src から Media オブジェクトを作成
+				var src = 'mp3/decide.mp3';
+            	audio = new Media(src, null, null);
+            	// オーディオ再生
+            	audio.play();
+            	
 				// qr_id抽出
 				cutProtocole = result.replace(/http:\/\/|https:\/\//, "");
 				var qr_id = cutProtocole.replace(/www.speed-order.jp\/|speed-order.jp\//, "");
 				console.log("scannerSuccess: qr_id: " + qr_id);
 				
-				// Geolocation
+				// Geolocation -------------------------------------------------------------
+				var watchId = null;
+				var latitude = 0;
+				var longitude = 0;
+				if ( navigator.geolocation ){
+					console.log('navigator::geolocation');
+					navigator.geolocation.getCurrentPosition(onGeoSuccess, onGeoError);
+				} else {
+					console.log('Could not navigator::geolocation');
+				}
+				function onGeoError(error) {
+					console.log('位置情報の取得に失敗しました');
+					window.location.href = 'show_item.html?qr_id=' + String(qr_id) + '&latitude=' + null + '&longitude=' + null;
+				}
+				function onGeoSuccess(position) {
+					var latitude  = position.coords.latitude;
+					var longitude = position.coords.longitude;
+					console.log('緯度: ' + latitude + ', 経度:' + longitude);
+					window.location.href = 'show_item.html?qr_id=' + String(qr_id) + '&order_latitude=' + String(latitude) + '&order_longitude=' + String(longitude);
+				}
 				
-				// console.log('::before onGeoSuccess::');
-				// navigator.geolocation.getCurrentPosition(onGeoSuccess, onGeoError);	
-				// function onGeoError(error) {
-					// alert('仮メッセージ：位置情報の取得に失敗しました');
-				// }
-				// var onGeoSuccess = function(position) {
-					// console.log('::onGeoSuccess::');
-					// var order_latitude  = position.coords.latitude;
-					// var order_longitude = position.coords.longitude;
-					// console.log('緯度: ' + order_latitude + ', 経度:' + order_longitude);
+				// GeoLocation -----------------------------------------------------------
+				function send_show_item(qr_id, latitude, longitude){
+					window.location.href = 'show_item.html?qr_id=' + String(qr_id) + '&order_latitude=' + String(latitude) + '&order_longitude=' + String(longitude);
+				}
 					
-					// customer_id の読み込み
-					fname = 'ordering';
-					window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, read, fail);
-					function read(fileSystem) {
-						fileSystem.root.getFile(fname, {}, function(fileEntry) {
-							fileEntry.file(function(file) {
-								var reader = new FileReader();
-								reader.onloadend = function(evt) {
-									// ここに読み込み完了後の処理を書く
-									
-									// jsonText = evt.target.result;
-									// json = JSON.parse(jsonText);
-									// 顧客IDの保存
-									// customer_id = json['customer_id'];
-									
-									// test 
-									customer_id = '00000000001';
-									
-									// 都道府県の取得
-									var area_name = '';
-									url = 'https://gs850.ggsv.jp/~w850033/class/json/get_addressee.php';
-									params = {customer_id : customer_id};
-									$.post(
-										url,
-										params,
-										function(data, status, XHR) {
-											if (status == 'success') {
-												console.log("get_area_name::data: " + data);
-												var area_name = data.customer_pref;
-												
-												//test
-												var area_name = '北海道';
-												
-												console.log(area_name);
-												var url = 'http://gs850.ggsv.jp/~w850033/class/json/send_item_info.php';
-												var params = {
-													qr_id : qr_id,
-													area_name : area_name
-												};
-												// サーバ通信
-												sendPost(url, params);
-											} else {
-												
-												// お届け先情報の取得に失敗
-												alert('仮メッセージ：お届け先情報の取得に失敗');
-											}
-										}
-									);
-								};
-								reader.readAsText(file, "utf-8");
-							}, fail)
-						}, fail);
-					}
-				// } // GeoLocation
 			}
 
 			// Barcode 読み込み失敗　---------------------------------------------------------------
@@ -133,41 +98,10 @@
 				navigator.notification.alert(message, alertCallBack(), title, button);
 
 			}
-
-			// POST通信 --------------------------------------------------------------------------
-			function sendPost(url, params) {
-
-				console.log('::sendPost::');
-
-				$.post(url, // アクセスするURL
-                    params, // 送信データ
-                    function(data, status, XHR) {// 処理結果
-
-                    if (status == 'success') {
-						// 商品詳細
-                        item = utf.URLencode(JSON.stringify(data));
-                        // console.log("JSON.data " + JSON.stringify(data));
-                        // console.log("item " + item);
-                        // console.log("item.utf " + utf.URLdecode(item));
-						window.location.href = "show_item.html?item=" + item;
-
-					} else {
-						message = 'もう一度QRコードを撮影してください';
-						title = '商品情報を取得できませんでした';
-						button = 'OK';
-						navigator.notification.alert(message, alertCallBack(), title, button);
-					}
-				});
-			}
-
+			
 			// alertCallBack -----------------------------------------------------------------------
 			function alertCallBack() {
 				window.location.href = 'barcode.html';
-			}
-			
-			// ファイル操作　error処理
-			function fail(error) {
-				console.log("ファイル処理失敗: " + error.code);
 			}
 
 // }
