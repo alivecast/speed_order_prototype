@@ -62,6 +62,13 @@
 				price += currency(params.item_price) + '<span>円</span>';
 				$("#price").html(price);
 				
+				//戻るボタン
+				var qr_back = '';
+				qr_back += '<a href="show_order_item.html?';
+				qr_back += 'item_name=' + params.item_name  + 'order_id=' + params.order_id + '&qr_id=' + params.qr_id + '&item_version=' + params.item_version + '" target="_blank" ';
+				qr_back += 'class="ui-btn-left" data-icon="arrow-l" data-direction="reverse"> 戻る </a>';
+				$("#qr_back").html(qr_back);
+				
 				// // 送料
 				// var order_carriage = '';
 				// if (parseInt(params.order_carriage) > 0 ){
@@ -82,7 +89,7 @@
 
 			<div data-role="header" data-position="inline">
 				<h1>商品を紹介する</h1>
-				<a href="" class="ui-btn-left" data-icon="arrow-l" data-direction="reverse"> 戻る </a>
+				<span id="qr_back"></span>
 			</div>
 
 			<div class="cont_itemDetail" data-role="content">
