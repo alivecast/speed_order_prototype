@@ -11,7 +11,6 @@
 		<link rel="stylesheet" media="only screen and (max-device-width: 480px)" href="iphone.css" type="text/css" />
 		-->
             
-        <link rel="stylesheet" href="js/jquery.mobile-1.2.0.min.css" type="text/css" />
         <script type="text/javascript" charset="utf-8" src="js/jquery-1.8.2.min.js"></script>
                     
         <script type="text/javascript" charset="utf-8" src="js/base64.js"></script>
@@ -48,6 +47,15 @@
 								// ここに読み込み完了後の処理を書く
 								text = evt.target.result;
 								json = JSON.parse(text);
+								
+								// // 復号
+                               	// var jsonEnc = JSON.parse(text);
+                                // var iv = jsonEnc.iv;
+                                // var key = jsonEnc.key;
+                                // var enc = jsonEnc.enc;
+                                // var jsonText = decAes(enc, key, iv);
+                                // json = JSON.parse(jsonText);
+								
 								if(json && json.order_attention && (json.order_attention != '' || json.order_attention != null)){
 									jsonObj = {order_attention: 'enable'};
 									setFile(fname, jsonObj);
@@ -91,70 +99,10 @@
 					location.href="website_all.html?page=tr.html";
 					return false;
                 }
-
-                
-				// 設定情報の初期化
-				
-				// 個人情報
-				// fname = 'ordering';
-				// window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, read, fail_ordering);
-				// function read(fileSystem) {
-					// fileSystem.root.getFile(fname, {}, function(fileEntry) {
-						// fileEntry.file(function(file) {
-							// var reader = new FileReader();
-							// reader.onloadend = function(evt) {
-								// // ここに読み込み完了後の処理を書く
-								// text = evt.target.result;
-								// console.log(text);
-								// json = JSON.parse(text);
-								// if(json.customer_id == null){
-									// jsonObj = {start: 'app'};
-									// setFile(fname, jsonObj);
-								// }
-							// };
-							// reader.readAsText(file, "utf-8");
-						// }, fail_ordering)
-					// }, fail_ordering);
-				// }
-				// // お届け先
-				// fname = 'address';
-				// window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, read, fail_address);
-				// function read(fileSystem) {
-					// fileSystem.root.getFile(fname, {}, function(fileEntry) {
-						// fileEntry.file(function(file) {
-							// var reader = new FileReader();
-							// reader.onloadend = function(evt) {
-								// // ここに読み込み完了後の処理を書く
-								// text = evt.target.result;
-								// json = JSON.parse(text);
-								// if(json.address_id == null){
-									// jsonObj = {start: 'app'};
-									// setFile(fname, jsonObj);
-								// }
-							// };
-							// reader.readAsText(file, "utf-8");
-						// }, fail_address)
-					// }, fail_address);
-				// }
 				
 				window.location.href = 'barcode.html';
 
 			}
-			// function fail_ordering(error){
-				// console.log('fail_ordering: ' + error);
-				// fname = 'ordering';
-				// delFile(fname);
-				// jsonObj = {start: 'app'};
-				// setFile(fname, jsonObj);
-			// }
-			// function fail_address(error){
-				// console.log('fail_address: ' + error);
-				// fname = 'address';
-				// delFile(fname);
-				// jsonObj = {start: 'app'};
-				// setFile(fname, jsonObj);
-			// }
-			
 
 		</script>
     	<script type="text/javascript" charset="utf-8" src="js/jquery.mobile-1.2.0.min.js"></script>
@@ -162,48 +110,7 @@
 	</head>
 
 	<body onload="onBodyLoad()">
-        <div data-role="page" data-add-back-btn="false">
 
-  <div data-role="header" data-position="inline" style="background:none #999;">
-    <h1>Please wait...</h1>
-  </div>
-
-  <div data-role="content">
-    <script src="/public/jquery/jquery-1.8.2.min.js" type="text/javascript"></script>
-    <script src="/public/jquery/jquery.activity-indicator-1.0.0.js"></script>
-
-  <style type="text/css">
-  body {
-    color: #fff;
-    background: #00406c;
-  }
-  .square {
-    width: 320px;
-    height: 360px;
-    color: #999;
-    background: #fff;
-    opacity: 0.2;
-    font-family: Helvetica, Arial, Sans-Serif;
-  }
-  </style>
-
-  <div data-role="content">
-    <div id="busy4" class="square">
-    </div>
-  </div>
-</div>
-
-<script>
-  $(function() {
-    // $('#busy1').activity();
-    // $('#busy2').activity({segments: 8, steps: 3, opacity: 0.3, width: 4, space: 0, length: 5, color: '#0b0b0b', speed: 1.5});
-    // $('#busy3').activity({segments: 8, width:2, space: 0, length: 3, color: '#fff', speed: 1.5});
-//    $('#busy4').activity({segments: 12, width: 5.5, space: 6, length: 13, color: '#252525', speed: 1.5});
-    $('#busy4').activity({segments: 32, width: 6, space: 3, length: 72, color: '#252525', speed: 1.5,  align: 'center', valign: 'center'});
-    // $('#busy5').activity({segments: 12, align: 'left', valign: 'top', steps: 3, width:2, space: 1, length: 3, color: '#030303', speed: 1.5});
-    // $('#busy6').activity({outside: true, align: 'right', segments: 10, steps: 3, width:2, space: 0, length: 3, color: '#000', speed: 1.5});
-  });
-</script>
 	</body>
 </html>
 
