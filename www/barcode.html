@@ -27,18 +27,32 @@
 				window.plugins.barcodeScanner.scan(function(result) {
 					// キャンセル
 					if (result.cancelled) {
-						// src から Media オブジェクトを作成
-						var src = 'mp3/cancel.mp3';
-		            	audio = new Media(src, null, null);
-		            	// オーディオ再生
-		            	audio.play();
 						// window.location.href = "setting.html";
-                        scannerSuccess(result.text);
+                        var src = 'mp3/cancel.mp3';
+				        audio = new Media(src, null, null);
+				        // オーディオ再生
+				        audio.play();
+				        // アラート
+				        var message = 'QRコード読み取りを中止しました';
+						var title = 'キャンセル';
+						var button = 'OK';
+						navigator.notification.alert(
+							message, 
+							function(){
+								// move
+				        		window.location.href = "setting.html";
+							}, 
+							title,
+							button
+						 );
+				        
                     // 読み取り
 					} else {
+						// 読み取り成功
 						scannerSuccess(result.text);
 					}
 				}, function(error) {
+					// 読み取り失敗
 					scannerFailure(error);
 				});
 			}
@@ -46,8 +60,7 @@
 			// Barcode 読み込み成功　-------------------------------------------------------------
 			function scannerSuccess(result) {
 				// test
-				result = 'http://speed-order.jp/2001010000040000028101';
-				// console.log("scannerSuccess: result: " + result);
+				// result = 'http://speed-order.jp/2001010000040000028101';
 				
 				// src から Media オブジェクトを作成
 				var src = 'mp3/decide.mp3';
@@ -91,11 +104,23 @@
 			// Barcode 読み込み失敗　---------------------------------------------------------------
 			function scannerFailure(message) {
 				// console.log("scannerFailure: message: " + message)
-
-				message = 'もう一度QRコードを撮影してください';
-				title = 'QRコードの読み取りに失敗しました';
-				button = 'OK';
-				navigator.notification.alert(message, alertCallBack(), title, button);
+				// src から Media オブジェクトを作成
+				var src = 'mp3/cancel.mp3';
+		        audio = new Media(src, null, null);
+		        // オーディオ再生
+		        audio.play();
+		        
+				var message = 'もう一度QRコードを撮影してください';
+				var title = 'QRコードの読み取りに失敗しました';
+				var button = 'OK';
+				navigator.notification.alert(
+					message, 
+					function(){
+						
+					}, 
+					title,
+					button
+				 );
 
 			}
 			
