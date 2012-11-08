@@ -12,46 +12,110 @@
 		-->
 
 		<link rel="stylesheet" href="js/jquery.mobile-1.2.0.min.css" type="text/css" />
+		<link rel="stylesheet" href="css/iphone.css" type="text/css" />
+		
 		<script type="text/javascript" charset="utf-8" src="js/jquery-1.8.2.min.js"></script>
-		<script type="text/javascript" charset="utf-8" src="js/jquery.mobile-1.2.0.min.js"></script>
 
 		<script type="text/javascript" charset="utf-8" src="js/base64.js"></script>
 		<script type="text/javascript" charset="utf-8" src="js/aes.js"></script>
 
 		<script type="text/javascript" charset="utf-8" src="js/cordova-1.5.0.js"></script>
+		
+		<script type="text/javascript" charset="utf-8" src="js/main.js"></script>
+		<script type='text/javascript' charset="utf-8" src="js/jquery.validate.min.js"></script>
+		
+		<link rel="stylesheet" href="css/iphone.css" type="text/css" />
 
 		<script type="text/javascript">
+            $( document ).bind( "mobileinit", function() {
+                // jQuery Mobile フレームワークの設定変更は、ここで行なってください！
+                $.support.cors = true;
+                $.mobile.allowCrossDomainPages = true;
+            });
 			function onBodyLoad() {
-
 				document.addEventListener("deviceready", onDeviceReady, false);
-
 			}
 
-			function onDeviceReady() {
+// 情報ファイルを読み込み
+function onDeviceReady(){
+	window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, read, fail);
+	function read(fileSystem) {
 
+		// ファイルの読み込み
+		var fname = 'ordering';
+		var ordering = {};
+
+		fileSystem.root.getFile(fname, {}, function(fileEntry) {
+			fileEntry.file(function(file) {
+				var text = {};
+				var reader = new FileReader();
+				reader.onloadend = function(evt) {
+					// ここに読み込み完了後の処理を書く
+
+console.log("text: " + evt.target.result);
+
+					text = evt.target.result;
+					ordering = JSON.parse(text);
+					
+					// // 復号
+                    // var jsonEnc = JSON.parse(text);
+                    // var iv = jsonEnc.iv;
+                    // var key = jsonEnc.key;
+                    // var enc = jsonEnc.enc;
+                    // var jsonText = decAes(enc, key, iv);
+                    // ordering = JSON.parse(jsonText);
+
+console.log("正常にテキストを読み込みましたよ。:cid "+ordering.customer_id);
+console.log("正常にテキストを読み込みましたよ。:key "+ordering.customer_key);
+console.log("正常にテキストを読み込みましたよ。:mail "+ordering.customer_mail_1);
+					$("#customer_id").val(ordering.customer_id);
+					$("#customer_key").val(ordering.customer_key);
+					
+					if(ordering.customer_mail_1){
+						$("#mail1").css("display","none");
+						$("#customer_mail_1").val(ordering.customer_mail_1);
+					}
+
+				};
+					reader.readAsText(file, "utf-8");
+            }, goSET)
+		}, goSET);
+	}
+}
+
+function goSET(error) {
+
+}
+
+			
 				function onClickButton(){
 					// Alert -----------------------------------------------------------------------
 					// navigator.notification.alert("report.html");
 					
-					var get = getQuery();
-					// 内容の取得
-					var body = document.getElementById('contact_text').value;
-					// 送信者情報：customer_id
-					var customer_id = get.customer_id;
-					// 販売者・商品 情報：qr_id, item_version
-					var qr_id = get.qr_id;
-					var item_version = get.item_version;
-					var order_id = get.order_id;
+//					var get = getQuery();
+//
+//					// 販売者・商品 情報：qr_id, item_version
+//					var qr_id = get.qr_id;
+//					var item_version = get.item_version;
+//					var order_id = get.order_id;
+					
+				// 内容の取得
+				var body = $('#report').val();
+				// 送信者情報：customer_id
+				var customer_id = $("#customer_id").val();
+				var customer_key = $("#customer_key").val();
+				var customer_mail = $("#customer_mail").val();
+				
 					// 送信処理
-					var url = 'https://gs850.ggsv.jp/~w850033/class/json/receive_contact.php';
-					var params = {contact: 
-						{
+					var url = 'https://gs850.ggsv.jp/~w850033/class/json/receive_report.php';
+					var params = {
 							body: body,
 							customer_id: customer_id,
-							qr_id: qr_id,
-							item_version: item_version,
-							order_id: order_id
-						}
+							customer_key: customer_key,
+							customer_mail: customer_mail
+//							qr_id: qr_id,
+//							item_version: item_version,
+//							order_id: order_id
 					}
 					$.post(
 						url, // アクセスするURL
@@ -62,6 +126,7 @@
 								var title = '送信完了';
 								var button = 'OK';
 								navigator.notification.alert(message, alertCallBack(), title, button);
+                                window.history.back();
 							} else {
 								var message = 'お問い合わせ内容の送信ができませんでした';
 								var title = '送信失敗';
@@ -71,22 +136,62 @@
 						}
 					);
 				}
-			}
-			
 			// alertCallBack -----------------------------------------------------------------------
 			function alertCallBack() {
-				window.location.href = 'show_order_index.html';
+                window.history.back();
+			//	window.location.href = 'show_order_index.html';
 			}
-
+			
 		</script>
+		
+<style type='text/css'> 
+    label.error {
+    color: red;
+    font-size: 16px;
+    font-weight: normal;
+    line-height: 1.4;
+    margin-top: 0.5em;
+    width: 100%;
+    float: none;
+}
+ 
+ label.error { display: inline-block; margin-left: 22%; }
+ 
+ label.error { margin-left: 0; display: block; }
+ 
+em { color: red; font-weight: bold; padding-right: .25em; }
+ 
+ 
+  </style> 
+<script type='text/javascript'> 
+$(function(){
+	$.extend($.validator.messages, {
+		required: "必須項目です",
+		number: "数値のみで入力してください",
+		equalTo: 'もう一度同じ値を入力して下さい。',
+		email: "メールアドレスを入力してください"
+	});
+
+	$('#contact_form').validate({
+
+	});
+});
+</script>
+            
+		<script type="text/javascript" charset="utf-8" src="js/jquery.mobile-1.2.0.min.js"></script>
+
+		
 	</head>
 
-	<body onload="onBodyLoad()">
+	<body onLoad="onBodyLoad()">
 
-		<div data-role="page" data-add-back-btn="false">
+		<div data-role="page" data-add-back-btn="false" data-theme="z">
 
-			<div data-role="header" data-position="inline">
-				<h1>original.html</h1>
+			<div data-role="header" id="header" data-position="fixed">
+				<h1>違反報告</h1>
+				<a data-rel="back" href="#" class="ui-btn-left" data-icon="arrow-l" data-direction="reverse" data-ajax="false">
+					戻る
+				</a>
 			</div>
 
 			<div class="cont_contact" data-role="content">
@@ -97,38 +202,57 @@
 					</div>
 				</div>
 
-				<form method="POST" action="<%= url_for :controller => :OrderInfoApp, :action => :sended %>">
-					<input type="hidden" name="id" value="<%= @order_info_app.object %>" />
+				<form method="POST" action="" id="contact_form">
+
+						<input type="hidden" name="customer_id" id="customer_id" />
+						<input type="hidden" name="customer_key" id="customer_key" />
+						
 					<div data-role="fieldcontain" >
 
-						<ul class="contact_list" data-role="listview">
+						<ul class="contact_list" data-role="listview" id="mail1">
 							<li>
-								<label for="#" class="fieldLabel">違反報告内容</label>
+								<label for="customer_mail" class="fieldLabel">メールアドレス</label>
+								<br />
+								<input type="email" id="customer_mail" name="customer_mail" value="" class="required email" placeholder="【必須】例）sample1@speed-order.jp" />
+							</li>
+							<li>
+								<label for="report" class="fieldLabel">違反報告内容</label>
 								<br />
 								<textarea id="report" cols="20" rows="5" name="report"></textarea>
 							</li>
 						</ul>
 
-						<div class="check_btn">
-							<!-- <a href="" class="btn_next" data-role="button">送信内容を確認する</a> -->
-							<input class="btn_next" type="button" value="送信する" onclick="onClickButton();"/>
+						<div class="check_btn btn_txt_ow">
+							<input class="btn_next" type="button" value="送信する" onClick="onClickButton();"/>
 						</div>
 					</div>
 				</form>
 			</div>
 
+			<!-- nav -->
 			<div class="footer" data-role="footer" data-position="fixed" data-id="tabber">
 				<ul>
-					<li class="tab01" current>
-						<a href="show_order.html" data-ajax="false"> <span>注文履歴</span> </a>
+					<li class="tab01">
+						<a href="show_order.html" data-ajax="false">
+							<span>注文履歴</span>
+						</a>
 					</li>
 					<li class="tab02">
-						<a href="barcode.html" data-ajax="false"> <span>読み取り</span> </a>
+						<a href="barcode.html" data-ajax="false">
+							<span>読み取り</span>
+						</a>
 					</li>
 					<li class="tab03">
-						<a href="setting.html" data-ajax="false"> <span>設定</span> </a>
+						<a href="setting.html" data-ajax="false">
+							<span>設定</span>
+						</a>
 					</li>
 				</ul>
-			</div><!-- /dr-footer -->
+				<!-- /dr-footer -->
+			</div>
+
+		</div>
+
+	</body>
 </html>
 

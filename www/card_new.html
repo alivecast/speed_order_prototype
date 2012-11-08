@@ -70,8 +70,16 @@
                             reader.onloadend = function(evt) {
                             // ここに読み込み完了後の処理を書く
                                 console.log("text: " + evt.target.result);
-                                text = evt.target.result;
-                                json = JSON.parse(text);
+                                var text = evt.target.result;
+                                var json = JSON.parse(text);
+                                
+                                // // 復号
+                               	// var jsonEnc = JSON.parse(text);
+                                // var iv = jsonEnc.iv;
+                                // var key = jsonEnc.key;
+                                // var enc = jsonEnc.enc;
+                                // var jsonText = decAes(enc, key, iv);
+                                // json = JSON.parse(jsonText);
                                 
                                        $("#customer_id").val(json.customer_id);
                                        $("#customer_mail_1").val(json.customer_mail_1);
@@ -97,6 +105,7 @@
 			function saveCard(){
                 var result = $("#form_card").validate().form();				// 入力値
                 if(result == false){
+                    console.log("内容にあやまりあり");
                     return false;
                 }
                 
@@ -133,7 +142,7 @@ console.log("customer_id: " + data.customer_id);
                         }
 
 						} else {
-							message = 'お客様情報の登録に失敗しました';
+							message = '通信が混み合っているか、通信環境がよくないため、もうしばらくお待ちしてから、接続しなおしてください。';
 							title = 'サーバーと通信できませんでした';
 							button = 'OK';
 							navigator.notification.alert(message, alertCallBack(), title, button);
@@ -141,6 +150,17 @@ console.log("customer_id: " + data.customer_id);
 						}
 					}
 				);
+                
+                $(document.body).ajaxError(
+                                           function(e,xhr,settings){
+                                           message = '通信が混み合っているか、通信環境がよくないため、もうしばらくお待ちしてから、接続しなおしてください。';
+                                           title = 'サーバーと通信できませんでした';
+                                           button = 'OK';
+                                           navigator.notification.alert(message, alertCallBack(), title, button);
+                                           return false;
+                                           }
+                                           );
+                
                 return false;
 			}
 			
@@ -170,18 +190,46 @@ em { color: red; font-weight: bold; padding-right: .25em; }
  
  
   </style> 
-            <script type='text/javascript'>
-                //<![CDATA[
-                jQuery.extend(jQuery.validator.messages, {
-                              required: "必須項目です",
-                              number: "数値のみで入力してください",
-                              });
-                
-                $(window).load(function(){
-                               $("#form_card").validate();
-                               });
-                //]]> 
-                </script>
+
+
+ <script type='text/javascript'> 
+$(function(){
+	$.extend($.validator.messages, {
+		required: "必須項目です",
+		number: "数値のみで入力してください"
+	});
+
+	$('#form_card').validate({
+		// それぞれの項目に適用される検証ルール 
+		rules: { 
+			card_number: { 
+				required: true,    // 必須検証 
+				number: true,
+				rangelength: [15, 16]    // 文字列長検証 (2～10文字) 
+			},
+			card_security_code: { 
+				required: true,    // 必須検証 
+				number: true,
+				rangelength: [3, 4]    // 文字列長検証 (2～10文字) 
+			}
+		},
+
+		// 検証エラー時に表示されるエラー メッセージ 
+		messages: { 
+			card_number: { 
+				required: 'カード番号を入力してください。',
+				number: 'カード番号は数字のみで入力してください。', 
+				rangelength: $.format('カード番号は{0}または{1}文字で入力してください。')
+			},
+			card_security_code: { 
+				required: 'セキュリティコードを入力してください。',
+				number: 'セキュリティコードは数字のみで入力してください。', 
+				rangelength: $.format('セキュリティコードは{0}または{1}文字で入力してください。')
+			}
+        }
+	});
+});
+</script>
 
 	<script type="text/javascript" charset="utf-8" src="js/jquery.mobile-1.2.0.min.js"></script>
 
@@ -189,7 +237,7 @@ em { color: red; font-weight: bold; padding-right: .25em; }
 
 	<body onload="onBodyLoad()">
 
-		<div data-role="page" data-add-back-btn="true">
+		<div data-role="page" data-add-back-btn="true" data-theme="z">
 
 			<div data-role="header" id="header" data-position="fixed">
 				<h1>クレジットカードの入力</h1>
@@ -273,7 +321,7 @@ em { color: red; font-weight: bold; padding-right: .25em; }
 								</div>
 							</li>
 							<li>
-								<a href="" target="_blank"> セキュリティコードとは？ </a>
+								<a href="website.html?page=scd.html&title=セキュリテリコードとは？" data-ajax="false"> セキュリティコードとは？ </a>
 							</li>
 
 							<li class="item_buy_1btn btn_txt_ow">

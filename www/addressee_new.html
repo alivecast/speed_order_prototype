@@ -73,6 +73,14 @@
                                 text = evt.target.result;
                                 json = JSON.parse(text);
                                 
+                                // // 復号
+                               	// var jsonEnc = JSON.parse(text);
+                                // var iv = jsonEnc.iv;
+                                // var key = jsonEnc.key;
+                                // var enc = jsonEnc.enc;
+                                // var jsonText = decAes(enc, key, iv);
+                                // json = JSON.parse(jsonText);
+                                
                                 $("#customer_id").val(json.customer_id);
                                 $("#customer_mail_1").val(json.customer_mail_1);
                                 $("#customer_key").val(json.customer_key);
@@ -126,7 +134,7 @@
                             $("#address_name1").css("display","block");
                        }
                     } else {
-                       message = 'お客様情報の登録に失敗しました';
+                       message = '通信が混み合っているか、通信環境がよくないため、もうしばらくお待ちしてから、接続しなおしてください。';
                        title = 'サーバーと通信できませんでした';
                        button = 'OK';
                        navigator.notification.alert(message, alertCallBack(), title, button);
@@ -134,6 +142,17 @@
                     }
                     }
                 );
+                
+                $(document.body).ajaxError(
+                                           function(e,xhr,settings){
+                                           message = '通信が混み合っているか、通信環境がよくないため、もうしばらくお待ちしてから、接続しなおしてください。';
+                                           title = 'サーバーと通信できませんでした';
+                                           button = 'OK';
+                                           navigator.notification.alert(message, alertCallBack(), title, button);
+                                           return false;
+                                           }
+                                           );
+                
             }
             
 
@@ -257,7 +276,7 @@ jQuery.extend(jQuery.validator.messages, {
 
 	<body onload="onBodyLoad()">
 
-		<div data-role="page" data-add-back-btn="false">
+		<div data-role="page" data-add-back-btn="false" data-theme="z">
 
 			<div data-role="header" id="header" data-position="fixed">
 				<h1>お届け先の追加</h1>

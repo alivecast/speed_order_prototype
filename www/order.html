@@ -66,6 +66,14 @@ console.log("text: " + evt.target.result);
 
 					text = evt.target.result;
 					ordering = JSON.parse(text);
+					
+					// // 復号
+                    // var jsonEnc = JSON.parse(text);
+                    // var iv = jsonEnc.iv;
+                    // var key = jsonEnc.key;
+                    // var enc = jsonEnc.enc;
+                    // var jsonText = decAes(enc, key, iv);
+                    // ordering = JSON.parse(jsonText);
 
 console.log("正常にテキストを読み込みましたよ。:cid "+ordering.customer_id);
 console.log("正常にテキストを読み込みましたよ。:key "+ordering.customer_key);
@@ -99,6 +107,14 @@ function ckPassTime(ordering) {
 					console.log("text: " + evt.target.result);
 					text = evt.target.result;
 					json = JSON.parse(text);
+					
+					// // 復号
+                    // var jsonEnc = JSON.parse(text);
+                    // var iv = jsonEnc.iv;
+                    // var key = jsonEnc.key;
+                    // var enc = jsonEnc.enc;
+                    // var jsonText = decAes(enc, key, iv);
+                    // json = JSON.parse(jsonText);
 
 					console.log("正常にテキストを読み込みました。:passtime "+json.pass_time);
 
@@ -210,6 +226,14 @@ console.log("text: " + evt.target.result);
 
 					text = evt.target.result;
 					order = JSON.parse(text);
+					
+					// // 復号
+                    // var jsonEnc = JSON.parse(text);
+                    // var iv = jsonEnc.iv;
+                    // var key = jsonEnc.key;
+                    // var enc = jsonEnc.enc;
+                    // var jsonText = decAes(enc, key, iv);
+                    // order = JSON.parse(jsonText);
 
 console.log("正常にテキストを読み込みました。order_amount: "+order.order_amount);
 console.log("正常にテキストを読み込みました。item_version: "+order.item_version);

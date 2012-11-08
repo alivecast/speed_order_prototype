@@ -129,6 +129,11 @@ function setFile(fname, jsonObj) {
 				};
 				// 内容を書き込み
 				var jsonText = JSON.stringify(jsonObj);
+				// 暗号化
+				// var enc = encAes(jsonText);
+				// var encText = JSON.stringify(encText);
+				// writer.write(encText);
+				// 書き込み
 				writer.write(jsonText);
 			}, setError2);
 		}, setError3);
@@ -249,3 +254,8 @@ function setCarriage(carriage) {
 	document.getElementById('#carriage').innerHTML = String(num);
 }
 
+function timeout(){
+	 // タイムアウト処理設定
+     // $.ajaxSetup({timeout: 3000});
+     
+}

@@ -81,6 +81,7 @@
 @property (nonatomic, retain) NSString*        alternateXib;
 @property (nonatomic)         BOOL             shutterPressed;
 @property (nonatomic, retain) IBOutlet UIView* overlayView;
+//@property (nonatomic, retain) UILabel *resultLabel;
 
 - (id)initWithProcessor:(CDVbcsProcessor*)processor alternateOverlay:(NSString *)alternateXib;
 - (void)startCapturing;
@@ -694,6 +695,20 @@ parentViewController:(UIViewController*)parentViewController
     overlayView.autoresizingMask    = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     overlayView.opaque              = NO;
     
+    // UILabel
+    //   121108 ogawa add UILabel
+    UILabel *label = [[UILabel alloc] init];
+    label.frame = CGRectMake(10, 10, 100, 50);
+    label.text = @"SPEED-ORDERのQRコードにかざしてください";
+    label.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleLeftMargin |     UIViewAutoresizingFlexibleTopMargin;
+    label.autoresizesSubviews = YES;
+    label.frame = bounds;
+    label.textAlignment = UITextAlignmentCenter;
+    label.font = [UIFont systemFontOfSize:[UIFont systemFontSize]];
+    //   121108 ogawa add UILabel
+    
+    
+    // toolbar
     UIToolbar* toolbar = [[[UIToolbar alloc] init] autorelease];
     toolbar.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
     
@@ -759,6 +774,8 @@ parentViewController:(UIViewController*)parentViewController
     
 //   121026 ogawa commentout    
 //    [overlayView addSubview: reticleView];
+    
+    [overlayView addSubview:label];
     
     return overlayView;
 }

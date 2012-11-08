@@ -11,6 +11,10 @@
 		0C1BF2351648AFE6002D2A62 /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = 0C1BF2341648AFE6002D2A62 /* Default.png */; };
 		0CAB13B91648C3A300861CDB /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 0CAB13B31648C26600861CDB /* Icon.png */; };
 		0CAB13BA1648C3A900861CDB /* icon114.png in Resources */ = {isa = PBXBuildFile; fileRef = 0CAB13B71648C2C300861CDB /* icon114.png */; };
+		0CF23523164B721900628108 /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 0C1BF2381648AFFE002D2A62 /* Default@2x.png */; };
+		0CF23525164B724100628108 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 0C1BF2361648AFF1002D2A62 /* Default-568h@2x.png */; };
+		0CF23526164B8B8100628108 /* icon57.png in Resources */ = {isa = PBXBuildFile; fileRef = 0CAB13B51648C2BE00861CDB /* icon57.png */; };
+		0CF23594164B8E5A00628108 /* BarcodeOverlay.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0CF23593164B8E5A00628108 /* BarcodeOverlay.xib */; };
 		48967ABB15084B2800F4D66A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 48967ABA15084B2800F4D66A /* Foundation.framework */; };
 		48967ABD15084B2800F4D66A /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 48967ABC15084B2800F4D66A /* UIKit.framework */; };
 		48967ABF15084B2800F4D66A /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 48967ABE15084B2800F4D66A /* CoreGraphics.framework */; };
@@ -59,6 +63,7 @@
 		0CAB13B31648C26600861CDB /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon.png; sourceTree = "<group>"; };
 		0CAB13B51648C2BE00861CDB /* icon57.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon57.png; sourceTree = "<group>"; };
 		0CAB13B71648C2C300861CDB /* icon114.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon114.png; sourceTree = "<group>"; };
+		0CF23593164B8E5A00628108 /* BarcodeOverlay.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = BarcodeOverlay.xib; path = BarCodeScannerCDV/Resources/BarcodeOverlay.xib; sourceTree = SOURCE_ROOT; };
 		48967AB615084B2800F4D66A /* BarCodeScannerCDV.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BarCodeScannerCDV.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		48967ABA15084B2800F4D66A /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		48967ABC15084B2800F4D66A /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
@@ -218,12 +223,12 @@
 		48967ADF15084B2800F4D66A /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				48967AF015084B2800F4D66A /* icons */,
 				48967AFC15084B2800F4D66A /* Capture.bundle */,
 				48967AE015084B2800F4D66A /* en.lproj */,
 				48967AE415084B2800F4D66A /* es.lproj */,
 				48967AE815084B2800F4D66A /* de.lproj */,
 				48967AEC15084B2800F4D66A /* se.lproj */,
-				48967AF015084B2800F4D66A /* icons */,
 				48967AF715084B2800F4D66A /* splash */,
 			);
 			name = Resources;
@@ -304,6 +309,7 @@
 			isa = PBXGroup;
 			children = (
 				48967B1815084B5100F4D66A /* CDVBarcodeScanner.mm */,
+				0CF23593164B8E5A00628108 /* BarcodeOverlay.xib */,
 				48967B1915084B5100F4D66A /* README.md */,
 				48967B4215084B5100F4D66A /* zxing-all-in-one.cpp */,
 				48967B4315084B5100F4D66A /* zxing-all-in-one.h */,
@@ -388,6 +394,10 @@
 				0C1BF2351648AFE6002D2A62 /* Default.png in Resources */,
 				0CAB13B91648C3A300861CDB /* Icon.png in Resources */,
 				0CAB13BA1648C3A900861CDB /* icon114.png in Resources */,
+				0CF23523164B721900628108 /* Default@2x.png in Resources */,
+				0CF23525164B724100628108 /* Default-568h@2x.png in Resources */,
+				0CF23526164B8B8100628108 /* icon57.png in Resources */,
+				0CF23594164B8E5A00628108 /* BarcodeOverlay.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

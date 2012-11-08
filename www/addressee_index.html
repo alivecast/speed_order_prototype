@@ -74,6 +74,15 @@ console.log("start");
                                 console.log("text: " + evt.target.result);
                                 text = evt.target.result;
                                 json = JSON.parse(text);
+                                
+                                // // 復号
+                               	// var jsonEnc = JSON.parse(text);
+                                // var iv = jsonEnc.iv;
+                                // var key = jsonEnc.key;
+                                // var enc = jsonEnc.enc;
+                                // var jsonText = decAes(enc, key, iv);
+                                // json = JSON.parse(jsonText);
+                                
                                 console.log("正常にテキストを読み込みました。");
                                 getCustomers(json);
                                                            
@@ -153,7 +162,6 @@ console.log("data.address_ck1:"+data.address_ck1);
                        // お届け先の表示5
                        if(data.address_id5 == 0 || data.address_id5 == "" || data.address_id5 == undefined){
                        }else{
-                            $("#adress_add").css("display","none");
                             $("#adr_id5").val(data.address_id5);
                             $("#adr_name5").text(data.address_name5);
                             if(data.address_ck5 == 1){
@@ -162,10 +170,68 @@ console.log("data.address_ck1:"+data.address_ck1);
                             $("#adr5").css("display","block");
                        }
 
+                       // お届け先の表示6
+                       if(data.address_id6 == 0 || data.address_id6 == "" || data.address_id6 == undefined){
+                       }else{
+                            $("#adr_id6").val(data.address_id6);
+                            $("#adr_name6").text(data.address_name6);
+                            if(data.address_ck6 == 1){
+                                $("#adr_ck6").html('<img src="images/speedorder/ico_check_r.png" width="16" height="15" alt="ここに届ける：" />');
+                            }
+                            $("#adr6").css("display","block");
+                       }
+                   
+
+                       // お届け先の表示7
+                       if(data.address_id7 == 0 || data.address_id7 == "" || data.address_id7 == undefined){
+                       }else{
+                            $("#adr_id7").val(data.address_id7);
+                            $("#adr_name7").text(data.address_name7);
+                            if(data.address_ck7 == 1){
+                                $("#adr_ck7").html('<img src="images/speedorder/ico_check_r.png" width="16" height="15" alt="ここに届ける：" />');
+                            }
+                            $("#adr7").css("display","block");
+                       }
+
+
+                       // お届け先の表示8
+                       if(data.address_id8 == 0 || data.address_id8 == "" || data.address_id8 == undefined){
+                       }else{
+                            $("#adr_id8").val(data.address_id8);
+                            $("#adr_name8").text(data.address_name8);
+                            if(data.address_ck8 == 1){
+                                $("#adr_ck8").html('<img src="images/speedorder/ico_check_r.png" width="16" height="15" alt="ここに届ける：" />');
+                            }
+                            $("#adr8").css("display","block");
+                       }
+
+
+                       // お届け先の表示9
+                       if(data.address_id9 == 0 || data.address_id9 == "" || data.address_id9 == undefined){
+                       }else{
+                            $("#adr_id9").val(data.address_id9);
+                            $("#adr_name9").text(data.address_name9);
+                            if(data.address_ck9 == 1){
+                                $("#adr_ck9").html('<img src="images/speedorder/ico_check_r.png" width="16" height="15" alt="ここに届ける：" />');
+                            }
+                            $("#adr9").css("display","block");
+                       }
                        
+
+                       // お届け先の表示10
+                       if(data.address_id10 == 0 || data.address_id10 == "" || data.address_id10 == undefined){
+                       }else{
+                            $("#adress_add").css("display","none");
+                            $("#adr_id10").val(data.address_id10);
+                            $("#adr_name10").text(data.address_name10);
+                            if(data.address_ck10 == 1){
+                                $("#adr_ck10").html('<img src="images/speedorder/ico_check_r.png" width="16" height="15" alt="ここに届ける：" />');
+                            }
+                            $("#adr10").css("display","block");
+                       }
                        
                     } else {
-                       message = 'お客様情報の登録に失敗しました';
+                       message = '通信が混み合っているか、通信環境がよくないため、もうしばらくお待ちしてから、接続しなおしてください。';
                        title = 'サーバーと通信できませんでした';
                        button = 'OK';
                        navigator.notification.alert(message, alertCallBack(), title, button);
@@ -173,6 +239,17 @@ console.log("data.address_ck1:"+data.address_ck1);
                     }
                     }
                 );
+                
+                $(document.body).ajaxError(
+                                           function(e,xhr,settings){
+                                           message = '通信が混み合っているか、通信環境がよくないため、もうしばらくお待ちしてから、接続しなおしてください。';
+                                           title = 'サーバーと通信できませんでした';
+                                           button = 'OK';
+                                           navigator.notification.alert(message, alertCallBack(), title, button);
+                                           return false;
+                                           }
+                                           );
+                
             }
             function goEdit(area){
                 var kbn = $("#kbn").val();
@@ -192,6 +269,17 @@ console.log("data.address_ck1:"+data.address_ck1);
                     location.href="addressee_new.html?id="+$("#adr_id4").val()+rekbn;
                 }else if(area == 5){
                     location.href="addressee_new.html?id="+$("#adr_id5").val()+rekbn;
+                 }else if(area == 6){
+                    location.href="addressee_new.html?id="+$("#adr_id6").val()+rekbn;
+                 }else if(area == 7){
+                    location.href="addressee_new.html?id="+$("#adr_id7").val()+rekbn;
+                 }else if(area == 8){
+                    location.href="addressee_new.html?id="+$("#adr_id8").val()+rekbn;
+                 }else if(area == 9){
+                    location.href="addressee_new.html?id="+$("#adr_id9").val()+rekbn;
+                 }else if(area == 10){
+                    location.href="addressee_new.html?id="+$("#adr_id10").val()+rekbn;
+                    
                 }else{
                     location.href="addressee_new.html?id=0"+rekbn;
                 }
@@ -205,7 +293,7 @@ console.log("data.address_ck1:"+data.address_ck1);
 
 	<body onload="onBodyLoad()">
 
-		<div data-role="page" data-add-back-btn="false">
+		<div data-role="page" data-add-back-btn="false" data-theme="z">
 			<div data-role="header" id="header" data-position="fixed">
 				<h1>お届け先一覧</h1>
 				<!--<a data-rel="back" href="#" class="ui-btn-left" data-icon="arrow-l" data-direction="reverse" data-ajax="false">-->
@@ -276,13 +364,73 @@ console.log("data.address_ck1:"+data.address_ck1);
 							<input type="hidden" id="adr_id5" name="adr_id5" value="" />
 						</a>
 					</li>
-                    
+
+					<li id="adr6" style="display:none;">
+						<a href="#" data-icon="arrow-l" id="adr_href6" data-ajax="false" onclick="goEdit(6);">
+							<span class="ico_check">
+                                <span  id="adr_ck6"></span>
+							</span> 
+							<span class="tl">
+								<span id="adr_name6"></span>
+							</span>
+							<input type="hidden" id="adr_id6" name="adr_id6" value="" />
+						</a>
+					</li>
+
+					<li id="adr7" style="display:none;">
+						<a href="#" data-icon="arrow-l" id="adr_href7" data-ajax="false" onclick="goEdit(7);">
+							<span class="ico_check">
+                                <span  id="adr_ck7"></span>
+							</span> 
+							<span class="tl">
+								<span id="adr_name7"></span>
+							</span>
+							<input type="hidden" id="adr_id7" name="adr_id7" value="" />
+						</a>
+					</li>
+
+					<li id="adr8" style="display:none;">
+						<a href="#" data-icon="arrow-l" id="adr_href8" data-ajax="false" onclick="goEdit(8);">
+							<span class="ico_check">
+                                <span  id="adr_ck8"></span>
+							</span> 
+							<span class="tl">
+								<span id="adr_name8"></span>
+							</span>
+							<input type="hidden" id="adr_id8" name="adr_id8" value="" />
+						</a>
+					</li>
+
+					<li id="adr9" style="display:none;">
+						<a href="#" data-icon="arrow-l" id="adr_href9" data-ajax="false" onclick="goEdit(9);">
+							<span class="ico_check">
+                                <span  id="adr_ck9"></span>
+							</span> 
+							<span class="tl">
+								<span id="adr_name9"></span>
+							</span>
+							<input type="hidden" id="adr_id9" name="adr_id9" value="" />
+						</a>
+					</li>
+
+					<li id="adr10" style="display:none;">
+						<a href="#" data-icon="arrow-l" id="adr_href10" data-ajax="false" onclick="goEdit(10);">
+							<span class="ico_check">
+                                <span  id="adr_ck10"></span>
+							</span> 
+							<span class="tl">
+								<span id="adr_name10"></span>
+							</span>
+							<input type="hidden" id="adr_id10" name="adr_id10" value="" />
+						</a>
+					</li>
+					
                 </ul>
 				<br />
 				<br />
 				<div class="check_btn" id="adress_add">
                     <a href="#" class="btn_next" data-role="button" onclick="goEdit(0);">お届け先の追加</a>
-					<span class="txt" style="color:red;">※お届け先は最大５件まで登録できます。</span>
+					<span class="txt" style="color:red;">※お届け先は最大10件まで登録できます。</span>
 				</div>
 
 			</div>

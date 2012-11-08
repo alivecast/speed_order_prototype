@@ -75,6 +75,15 @@
                                 console.log("text: " + evt.target.result);
                                 text = evt.target.result;
                                 json = JSON.parse(text);
+                                
+                                // // 復号
+                               	// var jsonEnc = JSON.parse(text);
+                                // var iv = jsonEnc.iv;
+                                // var key = jsonEnc.key;
+                                // var enc = jsonEnc.enc;
+                                // var jsonText = decAes(enc, key, iv);
+                                // json = JSON.parse(jsonText);
+                                
                                 console.log("正常にテキストを読み込みました。");
                                 getCustomers(json);
                                 $("#iv").val(json.iv);
@@ -136,7 +145,7 @@ console.log("customer_key:"+json.customer_key);
                        }
 
                     } else {
-                       message = 'お客様情報の登録に失敗しました';
+                       message = '通信が混み合っているか、通信環境がよくないため、もうしばらくお待ちしてから、接続しなおしてください。';
                        title = 'サーバーと通信できませんでした';
                        button = 'OK';
                        navigator.notification.alert(message, alertCallBack(), title, button);
@@ -144,6 +153,16 @@ console.log("customer_key:"+json.customer_key);
                     }
                     }
                 );
+
+                $(document.body).ajaxError(
+                                           function(e,xhr,settings){
+                                           message = '通信が混み合っているか、通信環境がよくないため、もうしばらくお待ちしてから、接続しなおしてください。';
+                                           title = 'サーバーと通信できませんでした';
+                                           button = 'OK';
+                                           navigator.notification.alert(message, alertCallBack(), title, button);
+                                           return false;
+                                           }
+                                           );
             }
             
 
@@ -153,7 +172,7 @@ console.log("customer_key:"+json.customer_key);
                 var result = $("#form_ordering").validate().form();				// 入力値
                 if(result == false){
 console.log("::form_ordering err::"+result);   
- //                   return false;
+                 return false;
                 }
                 
 console.log("::saveOrdering::");
@@ -203,7 +222,6 @@ console.log("customer_sex: "+ ordering['customer_sex']);
 				}
 				
 				// 送信
-//				var url = 'https://speed-order.jp/class/json/send_customer_id.php';
 				var url = 'https://gs850.ggsv.jp/~w850033/class/json/send_customer_id.php';
 
 				var params = ordering;
@@ -218,28 +236,17 @@ console.log("customer_sex: "+ ordering['customer_sex']);
 console.log("customer_id: " + customer_id);
 
 							//json
-//							var datalist = {
-//								customer_id: customer_id,
-//                                customer_key: customer_key,
-//                                customer_pass: ordering['customer_pass'],
-//                                customer_iv: ordering['customer_iv'],
-//								// iv: iv,
-//                                customer_name: ordering['customer_name'],
-//								customer_mail_1: ordering['customer_mail_1']
-//							}
-//console.log("customer_id: " + datalist['customer_id']);
-//console.log("customer_key: " + datalist['customer_key']);
-//console.log("customer_pass: " + datalist['customer_pass']);
-//console.log("customer_iv: " + datalist['customer_iv']);
-//console.log("customer_name: " + datalist['customer_name']);
-//console.log("customer_mail_1: " + datalist['customer_mail_1']);
-//
-//				            // ファイル処理
-//				            var fname = 'ordering';
-//
-//console.log("fname: " + fname);
-//							// ファイル登録
-//							setFile(fname, datalist);
+							var datalist = {
+								customer_id: customer_id,
+                                customer_key: customer_key,
+                                customer_pass: ordering['customer_pass'],
+                                iv: ordering['iv'],
+								customer_mail_1: ordering['customer_mail_1']
+							}
+
+				            // ファイル処理
+				            var fname = 'ordering';
+							setFile(fname, datalist);
 							
 							var kbn = $("#kbn").val();
 							if(kbn == "buy"){
@@ -340,7 +347,7 @@ $(function(){
 
 	<body onload="onBodyLoad()">
 
-		<div data-role="page" data-add-back-btn="false">
+		<div data-role="page" data-add-back-btn="false" data-theme="z">
 
 			<div data-role="header" id="header" data-position="fixed">
 				<h1>個人情報入力</h1>

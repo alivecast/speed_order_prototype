@@ -76,6 +76,14 @@
                                 text = evt.target.result;
                                 json = JSON.parse(text);
                                 
+                                // // 復号
+                               	// var jsonEnc = JSON.parse(text);
+                                // var iv = jsonEnc.iv;
+                                // var key = jsonEnc.key;
+                                // var enc = jsonEnc.enc;
+                                // var jsonText = decAes(enc, key, iv);
+                                // json = JSON.parse(jsonText);
+                                
                                 $("#customer_id").val(json.customer_id);
                                 $("#customer_key").val(json.customer_key);
                                 $("#customer_email_1").val(json.customer_email_1);
@@ -213,7 +221,7 @@ $(function(){
 
 	<body onload="onBodyLoad()">
 
-		<div data-role="page" data-add-back-btn="false">
+		<div data-role="page" data-add-back-btn="false" data-theme="z">
 
 			<div data-role="header" id="header" data-position="fixed">
 				<h1>暗証番号の入力</h1>

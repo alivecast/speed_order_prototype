@@ -13,6 +13,7 @@
 
 		<link rel="stylesheet" href="js/jquery.mobile-1.2.0.min.css" type="text/css" />
 		<link rel="stylesheet" href="css/iphone.css" type="text/css" />
+		
 		<script type="text/javascript" charset="utf-8" src="js/jquery-1.8.2.min.js"></script>
 
 		<script type="text/javascript" charset="utf-8" src="js/base64.js"></script>
@@ -20,100 +21,207 @@
 
 		<script type="text/javascript" charset="utf-8" src="js/cordova-1.5.0.js"></script>
 		
+		<script type="text/javascript" charset="utf-8" src="js/main.js"></script>
+		<script type='text/javascript' charset="utf-8" src="js/jquery.validate.min.js"></script>
+		
 		<link rel="stylesheet" href="css/iphone.css" type="text/css" />
 
 		<script type="text/javascript">
+            $( document ).bind( "mobileinit", function() {
+                // jQuery Mobile フレームワークの設定変更は、ここで行なってください！
+                $.support.cors = true;
+                $.mobile.allowCrossDomainPages = true;
+            });
 		
 			function onBodyLoad() {
-
 				document.addEventListener("deviceready", onDeviceReady, false);
 			}
 
-			function onDeviceReady() {
 
-				function onClickButton(){
-					// Alert -----------------------------------------------------------------------
-					// navigator.notification.alert("contact_order.html");
+// 情報ファイルを読み込み
+function onDeviceReady(){
+	window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, read, fail);
+	function read(fileSystem) {
+
+		// ファイルの読み込み
+		var fname = 'ordering';
+		var ordering = {};
+
+		fileSystem.root.getFile(fname, {}, function(fileEntry) {
+			fileEntry.file(function(file) {
+				var text = {};
+				var reader = new FileReader();
+				reader.onloadend = function(evt) {
+					// ここに読み込み完了後の処理を書く
+
+console.log("text: " + evt.target.result);
+
+					text = evt.target.result;
+					ordering = JSON.parse(text);
+
+console.log("正常にテキストを読み込みましたよ。:cid "+ordering.customer_id);
+console.log("正常にテキストを読み込みましたよ。:key "+ordering.customer_key);
+console.log("正常にテキストを読み込みましたよ。:mail "+ordering.customer_mail_1);
+					$("#customer_id").val(ordering.customer_id);
+					$("#customer_key").val(ordering.customer_key);
 					
-					var get = getQuery();
-					// 内容の取得
-					var body = document.getElementById('contact_text').value;
-					// 送信者情報：customer_id
-					var customer_id = get.customer_id;
-					// 販売者・商品 情報：qr_id, item_version
-					var qr_id = get.qr_id;
-					var item_version = get.item_version;
-					var order_id = get.order_id;
-					// 送信処理
-					var url = 'https://gs850.ggsv.jp/~w850033/class/json/receive_contact.php';
-					var params = {contact: 
-						{
-							body: body,
-							customer_id: customer_id,
-							qr_id: qr_id,
-							item_version: item_version,
-							order_id: order_id
+					if(ordering.customer_mail_1){
+						$("#mail1").css("display","none");
+						$("#customer_mail_1").val(ordering.customer_mail_1);
+					}
+
+				};
+					reader.readAsText(file, "utf-8");
+            }, goSET)
+		}, goSET);
+	}
+}
+
+function goSET(error) {
+
+}
+
+    
+
+			function onClickButton(){
+				// Alert -----------------------------------------------------------------------
+				// navigator.notification.alert("contact_order.html");
+
+//                var get = getQuery();
+                
+                // 販売者・商品 情報：qr_id, item_version
+//                var qr_id = get['qr_id'];
+//                var item_version = get['item_version'];
+//                var order_id = get['order_id'];
+                
+				// 内容の取得
+				var body = $('#contact_text').val();
+				// 送信者情報：customer_id
+				var customer_id = $("#customer_id").val();
+				var customer_key = $("#customer_key").val();
+				var customer_mail = $("#customer_mail").val();
+				
+console.log("-- customer_id--"+customer_id);
+				// 送信処理
+				var url = 'https://gs850.ggsv.jp/~w850033/class/json/receive_contact.php';
+				var params = {
+						body: body,
+						customer_id: customer_id,
+						customer_key: customer_key,
+						customer_mail: customer_mail
+//                        qr_id: qr_id,
+//                        item_version: item_version,
+//                        order_id: order_id
+				}
+				$.post(
+					url, // アクセスするURL
+					params, // 送信データ
+					function(data, status, XHR) {// 処理結果
+						if (status == 'success') {
+							var message = 'お問い合わせ内容を送信しました';
+							var title = '送信完了';
+							var button = 'OK';
+							navigator.notification.alert(message, alertCallBack(), title, button);
+                            window.history.back();
+						} else {
+							var message = 'お問い合わせ内容の送信ができませんでした';
+							var title = '送信失敗';
+							var button = 'OK';
+							navigator.notification.alert(message, alertCallBack(), title, button);
 						}
 					}
-					$.post(
-						url, // アクセスするURL
-						params, // 送信データ
-						function(data, status, XHR) {// 処理結果
-							if (status == 'success') {
-								var message = 'お問い合わせ内容を送信しました';
-								var title = '送信完了';
-								var button = 'OK';
-								navigator.notification.alert(message, alertCallBack(), title, button);
-							} else {
-								var message = 'お問い合わせ内容の送信ができませんでした';
-								var title = '送信失敗';
-								var button = 'OK';
-								navigator.notification.alert(message, alertCallBack(), title, button);
-							}
-						}
-					);
-				}
+				);
 			}
-			
+
 			// alertCallBack -----------------------------------------------------------------------
 			function alertCallBack() {
-				window.location.href = 'show_order_index.html';
+				window.history.back();
+//				window.location.href = 'show_order_index.html';
 			}
 
 		</script>
-		
+
+<style type='text/css'> 
+    label.error {
+    color: red;
+    font-size: 16px;
+    font-weight: normal;
+    line-height: 1.4;
+    margin-top: 0.5em;
+    width: 100%;
+    float: none;
+}
+ 
+ label.error { display: inline-block; margin-left: 22%; }
+ 
+ label.error { margin-left: 0; display: block; }
+ 
+em { color: red; font-weight: bold; padding-right: .25em; }
+ 
+ 
+  </style> 
+<script type='text/javascript'> 
+$(function(){
+	$.extend($.validator.messages, {
+		required: "必須項目です",
+		number: "数値のみで入力してください",
+		equalTo: 'もう一度同じ値を入力して下さい。',
+		email: "メールアドレスを入力してください"
+	});
+
+	$('#contact_form').validate({
+
+	});
+});
+</script>
+            
 		<script type="text/javascript" charset="utf-8" src="js/jquery.mobile-1.2.0.min.js"></script>
 		
 	</head>
 
 	<body onload="onBodyLoad()">
 
-		<div data-role="page" data-add-back-btn="false">
+		<div data-role="page" data-add-back-btn="false" data-theme="z">
 
-			<div data-role="header" data-position="inline">
+			<div data-role="header" id="header" data-position="fixed">
 				<h1>お問い合わせ</h1>
+				<a data-rel="back" href="#" class="ui-btn-left" data-icon="arrow-l" data-direction="reverse" data-ajax="false">
+					戻る
+				</a>
 			</div>
 
 			<div class="cont_contact" data-role="content">
 
 				<div class="contact_detail">
 					<div class="txt">
-						商品や送料など、販売者へのお問い合わせはこちらから行えます。
+						商品や送料など、販売者へのお問い合わせはこちらから行えます。<br />
+                        <span sytle="color:red;">また、お名前や電話番号などの個人情報は店舗側には公開されません。<br />
+                        必要な場合は、「お問い合わせ内容」にご記入ください。</span>
 					</div>
 				</div>
 
-				<form method="POST" action="" onsubmit="return false;">
+				<form method="POST" action="" id="contact_form">
 					<div data-role="fieldcontain" >
+						<input type="hidden" name="customer_id" id="customer_id" />
+						<input type="hidden" name="customer_key" id="customer_key" />
 
-						<ul class="contact_list" data-role="listview">
+						<ul class="contact_list" data-role="listview" id="mail1">
 							<li>
-								<label for="#" class="fieldLabel">お問い合わせ内容</label>
+								<label for="customer_mail" class="fieldLabel">メールアドレス</label>
 								<br />
-								<textarea id="contact_text" cols="20" rows="5" name="contact"></textarea>
+								<input type="email" id="customer_mail" name="customer_mail" value="" class="required email" placeholder="【必須】例）sample1@speed-order.jp" />
 							</li>
 						</ul>
 
-						<div class="check_btn">
+						<ul class="contact_list" data-role="listview">
+							<li>
+								<label for="contact_text" class="fieldLabel">お問い合わせ内容</label>
+								<br />
+								<textarea id="contact_text" cols="20" rows="5" class="required" name="contact_text"></textarea>
+							</li>
+						</ul>
+
+						<div class="check_btn btn_txt_ow">
 							<input class="btn_next" type="button" value="送信する" onclick="onClickButton();" />
 						</div>
 
@@ -122,19 +230,27 @@
 
 			</div>
 
+			<!-- nav -->
 			<div class="footer" data-role="footer" data-position="fixed" data-id="tabber">
 				<ul>
-					<li class="tab01" current>
-						<a href="show_order.html" data-ajax="false"> <span>注文履歴</span> </a>
+					<li class="tab01">
+						<a href="show_order.html" data-ajax="false">
+							<span>注文履歴</span>
+						</a>
 					</li>
 					<li class="tab02">
-						<a href="barcode.html" data-ajax="false"> <span>読み取り</span> </a>
+						<a href="barcode.html" data-ajax="false">
+							<span>読み取り</span>
+						</a>
 					</li>
 					<li class="tab03">
-						<a href="setting.html" data-ajax="false"> <span>設定</span> </a>
+						<a href="setting.html" data-ajax="false">
+							<span>設定</span>
+						</a>
 					</li>
 				</ul>
-			</div><!-- /dr-footer -->
+				<!-- /dr-footer -->
+			</div>
 
 		</div>
 

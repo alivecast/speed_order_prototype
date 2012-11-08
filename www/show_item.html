@@ -46,7 +46,7 @@
 				// orderファイルに保存
 				fname = 'order';
 				setFile(fname, get);
-				
+                
 				// お届け先
 				fname = 'ordering';
 				window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, read, noOrdering);
@@ -55,9 +55,44 @@
 						fileEntry.file(function(file) {
 							var reader = new FileReader();
 							reader.onloadend = function(evt) {
+console.log("★ordering::data: " + evt.target.result);
 								text = evt.target.result;
 								json = JSON.parse(text);
-								get['customer_id'] = json.customer_id;
+								
+								// // 復号
+                               	// var jsonEnc = JSON.parse(text);
+                                // var iv = jsonEnc.iv;
+                                // var key = jsonEnc.key;
+                                // var enc = jsonEnc.enc;
+                                // var jsonText = decAes(enc, key, iv);
+                                // json = JSON.parse(jsonText);
+								
+								get['customer_id']  = json.customer_id;
+                                get['customer_key'] = json.customer_key;
+                                
+                                      
+console.log("★customer_id: " + json.customer_id);
+console.log("★customer_key: " + json.customer_key);
+                                if (json.customer_id) {
+                                    var url = 'https://gs850.ggsv.jp/~w850033/class/json/get_addressee.php';
+                                    var hash = {
+                                       customer_id: json.customer_id,
+                                       customer_key: json.customer_key
+                                       };
+                                      
+                                       $.post(url,
+                                            hash,
+                                            function(data, status, XHR) {
+console.log("addressee::data: " + evt.target.result);
+                                              if (status == 'success' && data.address_id) {
+                                                $("#addressee").css("display", "block");
+                                                $("#recipient_subject").text(String(data.address_name));
+                                              }
+                                            }
+                                        );
+                                }
+                                       
+                                       
 								// 商品情報を取得
 								sendData(get);
 							};
@@ -67,6 +102,7 @@
 				}
 				function noOrdering(error){
 					get['customer_id'] = '';
+                    get['customer_key'] = '';
 					// 商品情報を取得
 					sendData(get);
 				}
@@ -77,12 +113,21 @@
 					var url = 'http://gs850.ggsv.jp/~w850033/class/json/send_item_info.php';
 					var hash = {
 						qr_id: get.qr_id,
-						customer_id: get.customer_id
+						customer_id: get.customer_id,
+                        customer_key: get.customer_key
 					};
 					$.post(url, // アクセスするURL
 					hash, // 送信データ
 					function(data, status, XHR) {// 処理結果
+						// setTimeout( function() {
+							// if (data == null || data == '') {
+								// alert("タイマーで実行");
+							// }
+						// }, 3000);
 						if (status == 'success') {
+							// loading追加処理
+							$('#loading').css('display', 'none');
+							$('#content').css('display', 'block');
 							// 商品詳細
 							if (data != {} && data != null) {
 								// 商品情報をセット
@@ -100,8 +145,20 @@
 							navigator.notification.alert(message, alertCallBack(), title, button);
 						}
 					});
+					$(document.body).ajaxError(
+                        function(e,xhr,settings){
+	                        message = '通信が混み合っているか、通信環境がよくないため、もうしばらくお待ちしてから、接続しなおしてください。';
+	                        title = 'サーバーと通信できませんでした';
+	                        button = 'OK';
+	                        navigator.notification.alert(message, errorPostCallBack(), title, button);
+	                        return false;
+                        }
+                	);
 				}
-
+				// alertCallBack -----------------------------------------------------------------------
+				function errorPostCallBack() {
+					window.location.href = 'setting.html';
+				}
 				// alertCallBack -----------------------------------------------------------------------
 				function alertCallBack() {
 					window.location.href = 'barcode.html';
@@ -196,55 +253,17 @@
 						}
 						// 合計金額をrelに持たせる
 						for (var i = 1; i <= max; i++) {
-							var toto = parseInt(params.item_price) * i + parseInt(params.order_carriage);
+							var toto = parseInt(params.item_price) * i;
+							if( params['non_carriage_price'] == 0 || params['non_carriage_price'] > toto){
+								toto = toto + parseInt(params.order_carriage);
+							}
 							amount += '<option value="' + String(i) + '" rel="' + toto + '">' + String(i) + '</option>';
 						}
 						$('#order_amount').html(amount).selectmenu('refresh', true);
 
 					} else {
 						$('#item_quantity_buy').css('display', 'none');
-					}
-
-					// 現在のお届け先
-					if (params.customer_id != '') {
-						fname = 'ordering';
-						window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, read, noAddressee);
-						function read(fileSystem) {
-							fileSystem.root.getFile(fname, {}, function(fileEntry) {
-								fileEntry.file(function(file) {
-									var reader = new FileReader();
-									reader.onloadend = function(evt) {
-										// ここに読み込み完了後の処理を書く
-										console.log("text: " + evt.target.result);
-										var text = evt.target.result;
-										var json = JSON.parse(text);
-										var customer_id = json.customer_id;
-										var url = 'https://gs850.ggsv.jp/~w850033/class/json/get_addressee.php';
-										var params = {
-											customer_id : customer_id
-										};
-										$.post(url, params, function(data, status, XHR) {
-											console.log("addressee::data: " + evt.target.result);
-											if (status == 'success') {
-												var recipient_subject = '<a href="addressee_index.html?customer_id=' + customer_id + '"><li id="item_shippingAddress" class="item_shippingAddress">';
-												recipient_subject += '現在のお届け先：<span id="recipient_subject">' + String(data.address_name) + '</span></p>';
-												recipient_subject += '<p class="txt">お届け先の変更はこちら</p>';
-												recipient_subject += '</a></li>';
-												document.getElementById("addressee").innerHTML = recipient_subject;
-											} else {
-												noAddressee();
-											}
-										});
-									};
-									reader.readAsText(file, "utf-8");
-								}, noAddressee)
-							}, noAddressee);
-						}
-						function noAddressee(error) {
-							// console.log('noAdrressee: ' + error);
-							$("#addressee").removeClass();
-							$("#addressee").css("display", "none");
-						}
+						$('#item_quantity_buy2').css('display', 'none');
 					}
 
 					// 商品説明
@@ -343,6 +362,14 @@
 								console.log("text: " + evt.target.result);
 								var text = evt.target.result;
 								var json = JSON.parse(text);
+								
+								// // 復号
+                               	// var jsonEnc = JSON.parse(text);
+                                // var iv = jsonEnc.iv;
+                                // var key = jsonEnc.key;
+                                // var enc = jsonEnc.enc;
+                                // var jsonText = decAes(enc, key, iv);
+                                // json = JSON.parse(jsonText);
 
 								params['customer_id'] = json.customer_id;
 								fname = 'order';
@@ -385,10 +412,18 @@
 			<div data-role="header" data-position="inline">
 				<h1>商品情報</h1>
 				<a href="barcode.html" class="ui-btn-left" data-icon="arrow-l" data-direction="reverse" data-ajax="false"> 戻る </a>
-				<a href="website_all.html?page=tr.html" class="ui-btn-right" data-icon="info" data-ajax="false">
-                </a>
+				<a href="website_all.html?page=tr.html" class="ui-btn-right" data-icon="info" data-direction="reverse" data-ajax="false">
+                使い方</a>
 			</div>
-			<div class="cont_itemDetail" data-role="content">
+			<!-- loading -->
+			<div class="cont_itemDetail" data-role="content" id="loading" style="text-align:center;top:50px">
+				<h1>Please Waiting...</h1>
+				<div >
+					<img src="images/loading_bar_or.gif" />
+				</div>
+			</div>
+			<!-- content -->
+			<div class="cont_itemDetail" data-role="content" id="content" style="display:none;">
 				
 				<form method="POST" action="show_order.html" onSubmit="return false;">
 					<div id="item_version_tete" ></div>
@@ -448,7 +483,7 @@
 										</div>
 									</div>
 								</div>
-								<div class="box2_02 item_buy btn_txt_ow">
+								<div class="box2_02 item_buy btn_txt_ow" id="item_quantity_buy2">
 									<input class="btn_next" type="button" onClick="order();return false;" value="購入する" />
 								</div>
 							</div>
@@ -456,7 +491,14 @@
 						<!--<% end %>-->
 					</ul>
 					<!-- お届け先 -->
-					<ul id="addressee" class="item_summary" data-role="listview"></ul>
+					<ul id="addressee" class="item_summary" data-role="listview" style="display:none;">
+                        <li id="item_shippingAddress" class="item_shippingAddress">
+                            <a href="addressee_index.html" data-ajax="false">
+                                現在のお届け先：<span id="recipient_subject"></span>
+                                <p class="txt">お届け先の変更はこちら</p>
+                            </a>
+                        </li>
+                    </ul>
 					<ul class="item_summary" data-role="listview">
 						<!-- 商品説明 -->
 						<li class="shop_contact" id="shop_contact" ></li>
@@ -473,10 +515,10 @@
 							</div>
 							<div class="box2">
 								<div class="box2_01 contact_link">
-									<a class="btn_prev" href="contact.html" data-role="button">フォームはこちら</a>
+									<a class="btn_prev form_link" href="contact.html" data-role="button"  data-ajax="false">フォームから</a>
 								</div>
 								<div class="box2_02 tel_link" id="company_phone" >
-									<a class="btn_prev" href="#" data-role="button" id="company_phone_go">電話で問い合わせる</a>
+									<a class="btn_prev tel_link" href="#" data-role="button" id="company_phone_go">電話から</a>
 								</div>
 							</div>
 						</li>
@@ -557,7 +599,7 @@
 					<dt>
 						返品・交換について
 					</dt>
-					<dd id="company_returned">
+					<dd id="company_returned"></dd>
 				</dl>
 				<ul data-role="listview">
 					<li class="shop_contact">
@@ -566,10 +608,10 @@
 						</div>
 						<div class="box2">
 							<div class="box2_01">
-								<a class="btn_prev" href="contact.html" data-role="button"> フォームはこちら </a>
+								<a class="btn_prev form_link" href="contact.html" data-role="button" data-ajax="false"> フォームから </a>
 							</div>
 							<div class="box2_02 tel_link">
-								<a class="btn_prev" href="#" data-role="button" id="company_phone2_go">電話で問い合わせる</a>
+								<a class="btn_prev tel_link" href="#" data-role="button" id="company_phone2_go">電話から</a>
 							</div>
 						</div>
 					</li>
@@ -591,7 +633,7 @@
 		</div>
 
 		<!-- 注文時の暗証番号入力 -->
-		<div id="order_pass" data-role="page" data-add-back-btn="false">
+		<div id="order_pass" data-role="page" data-add-back-btn="false" data-theme="z">
 			<div data-role="header" data-position="inline">
 				<h1>暗証番号の入力</h1>
 			</div>

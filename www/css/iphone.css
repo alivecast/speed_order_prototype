@@ -91,9 +91,6 @@ h1 {
 	border-bottom:#376F81 1px solid;
 	
 	
-	-webkit-box-shadow: 0 -2px 2px rgba(0,0,0,0.3);
-	box-shadow: 0 -2px 2px rgba(0,0,0,0.3);
-	
 	
 /*
 	background-image: -webkit-gradient(linear, left top, left bottom, from(#ddd), to(#bbb));
@@ -486,7 +483,11 @@ div.itemValue {
 }
 
 .ui-header .ui-btn {
-    margin-top: 4px;
+	top:8px;
+}
+
+.ui-header .ui-btn-right {
+	top:10px;
 }
 
 @media all and (min-width: 320px){
@@ -658,7 +659,8 @@ li.ui-li {
 	margin:0;
 	
 	color:#30402E;
-	height:36px;
+	
+	line-height:1.8em;
 }
 
 .ui-select .ui-btn select {
@@ -676,7 +678,11 @@ li.ui-li {
 ------------------------------------------ */
 body {
 	font-size:13px;
-    background-image: url(../images/bg_cont.png);
+    background:#EEEFEF url(../images/bg_cont.png) 0 0 repeat;
+	/*
+	-webkit-background-size:50px 50px;
+	background-size:50px 50px;
+	*/
 }
 
 .footer {
@@ -1038,6 +1044,7 @@ button.btn_next {
 
 .item_quantity_buy .ui-select {
 	width:90px;
+	display:inline-block;
 }
 
 .ui-li .ui-btn-inner a.ui-link-inherit, .ui-li-static.ui-li
@@ -1112,6 +1119,31 @@ button.btn_next {
 	padding:5px 10px;
 	font-size:14px;
 }
+
+
+/* ---/　販売者への問い合わせ
+----------------------------------*/
+.form_link .ui-btn-inner {
+	background:url(../images/ico_form_link.png) 10px 50% no-repeat;
+	-webkit-background-size:27px 27px;
+	background-size:27px 27px;
+	padding-left:30px;
+	
+	font-size:14px;
+	line-height:2em;
+	
+}
+
+.tel_link .ui-btn-inner {
+	background:url(../images/ico_tel_link.png) 10px 50% no-repeat;
+	-webkit-background-size:27px 27px;
+	background-size:27px 27px;
+	padding-left:30px;
+	
+	font-size:14px;
+	line-height:2em;
+}
+
 
 
 /* ------------------------------------------/
@@ -1640,9 +1672,29 @@ button.btn_next {
 
 
 
+
 /* ------------------------------------------/
 　お問い合わせ
 ------------------------------------------ */
+.cont_contact {
+}
+
+.contact_detail {
+	margin:15px 10px;
+}
+
+input#customer_mail {
+	padding:5px;
+	width:300px;
+}
+
+.cont_contact textarea#contact_text {
+	padding:5px;
+	width:300px;
+	height:200px;
+}
+
+
 .check_btn {
 	background-color:#C1CEBF;
 	-webkit-box-shadow: 0 2px 2px #999 inset;
@@ -1651,12 +1703,59 @@ button.btn_next {
 	border-top:none;
 }
 
+/* オレンジbtnでinput,buttonの場合のテキストの設定 */
+.btn_txt_ow .ui-btn-text {
+	color:#FFF;
+	text-shadow:1px 1px 0 #DA7B18;
+}
+
+.ui-btn-text {
+	z-index:3;
+}
 
 
+/* ------------------------------------------/
+　お問い合わせ確認
+------------------------------------------ */
+.cont_contact_check {
+	padding:15px 10px 0;
+}
 
 
+/* ------------------------------------------/
+　違反報告
+------------------------------------------ */
+
+input#customer_mail {
+	padding:5px;
+	width:300px;
+}
 
 
+.cont_contact textarea#report {
+	padding:5px;
+	width:300px;
+	height:200px;
+}
+
+
+.check_btn {
+	background-color:#C1CEBF;
+	-webkit-box-shadow: 0 2px 2px #999 inset;
+	box-shadow: 0 2px 2px #999 inset;
+	padding:15px 10px;
+	border-top:none;
+}
+
+/* オレンジbtnでinput,buttonの場合のテキストの設定 */
+.btn_txt_ow .ui-btn-text {
+	color:#FFF;
+	text-shadow:1px 1px 0 #DA7B18;
+}
+
+.ui-btn-text {
+	z-index:3;
+}
 
 
 

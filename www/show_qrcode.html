@@ -37,7 +37,7 @@
 
 			function onDeviceReady() {
 				// Alert -----------------------------------------------------------------------
-				navigator.notification.alert("show_qrcode.html");
+				// navigator.notification.alert("show_qrcode.html");
 				
 				// GETでJSON取得
 				var get = getQuery();
@@ -45,7 +45,8 @@
 				console.log("params: " + JSON.stringify(params));
 				
 				// 商品名
-                $("#item_name").text(params['item_name']);
+                // $("#item_name").text(params.item_name);
+                document.getElementById("item_name").innerText = params['item_name'];
                 
                 // 商品画像
                	var item_image = '';
@@ -64,10 +65,12 @@
 				
 				//戻るボタン
 				var qr_back = '';
-				qr_back += '<a href="show_order_item.html?';
-				qr_back += 'item_name=' + params.item_name  + 'order_id=' + params.order_id + '&qr_id=' + params.qr_id + '&item_version=' + params.item_version + '" target="_blank" ';
-				qr_back += 'class="ui-btn-left" data-icon="arrow-l" data-direction="reverse"> 戻る </a>';
-				$("#qr_back").html(qr_back);
+				//qr_back += '<a href="show_order_item.html?';
+				//qr_back += 'item_name=' + params.item_name  + 'order_id=' + params.order_id + '&qr_id=' + params.qr_id + '&item_version=' + params.item_version + '" target="_blank" ';
+				//qr_back += 'class="ui-btn-left" data-icon="arrow-l" data-direction="reverse"> 戻る </a>';
+				
+				// qr_back += '<a href="show_order.html" class="ui-btn-left" data-icon="arrow-l" data-direction="reverse">一覧</a>';
+				// $("#qr_back").html(qr_back);
 				
 				// // 送料
 				// var order_carriage = '';
@@ -85,13 +88,15 @@
 
 	<body onload="onBodyLoad()">
 
-		<div data-role="page" data-add-back-btn="false">
-
-			<div data-role="header" data-position="inline">
+		<div data-role="page" data-add-back-btn="false" data-theme="z">
+			
+			<div data-role="header" id="header" data-position="fixed">
 				<h1>商品を紹介する</h1>
-				<span id="qr_back"></span>
+				<a data-rel="back" href="#" class="ui-btn-left" data-icon="arrow-l" data-direction="reverse" data-ajax="false">
+					戻る
+				</a>
 			</div>
-
+			
 			<div class="cont_itemDetail" data-role="content">
 
 
@@ -136,8 +141,8 @@
 			</div>
 			<div class="footer" data-role="footer" data-position="fixed" data-id="tabber">
 				<ul>
-					<li class="tab01"><a href="show_order.html" data-ajax="false"> <span>注文履歴</span> </a></li>
-					<li class="tab02 current"><a href="barcode.html" data-ajax="false"> <span>読み取り</span> </a></li>
+					<li class="tab01 current"><a href="show_order.html" data-ajax="false"> <span>注文履歴</span> </a></li>
+					<li class="tab02"><a href="barcode.html" data-ajax="false"> <span>読み取り</span> </a></li>
 					<li class="tab03"><a href="setting.html" data-ajax="false"> <span>設定</span> </a></li>
 				</ul>
 			</div><!-- /dr-footer -->

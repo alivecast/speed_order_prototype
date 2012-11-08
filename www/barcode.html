@@ -27,7 +27,9 @@
 				window.plugins.barcodeScanner.scan(function(result) {
 					// キャンセル
 					if (result.cancelled) {
-						// window.location.href = "setting.html";
+						
+						// scannerSuccess(result.text);
+						
                         var src = 'mp3/cancel.mp3';
 				        audio = new Media(src, null, null);
 				        // オーディオ再生
