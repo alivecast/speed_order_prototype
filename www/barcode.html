@@ -51,7 +51,34 @@
                     // 読み取り
 					} else {
 						// 読み取り成功
-						scannerSuccess(result.text);
+						
+						// speed-orderを含むか判定
+						if(result.text.match(/www.speed-order.jp|speed-order.jp/i)){
+							scannerSuccess(result.text);
+						} else {
+					        var message = result.text;
+							var title = 'SPEED ORDER でお使いいただけないQRコードです';
+							var button = "OK";
+							navigator.notification.alert(
+							// var button = "閉じる,ブラウザで開く";
+							// navigator.notification.confirm(
+								message, 
+								// function(buttonIndex){
+									// if(buttonIndex == 2){
+					        			// window.open(result.text, null);
+					       			// } else if(buttonIndex == 1){
+					        			// window.location.href = 'setting.html';
+					        		// } else {
+					        			// window.location.href = 'setting.html';
+					        		// }
+								// }, 
+								function(){
+									window.location.href = 'setting.html';
+								},
+								title,
+								button
+							);
+						}
 					}
 				}, function(error) {
 					// 読み取り失敗

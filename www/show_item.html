@@ -69,15 +69,17 @@ console.log("★ordering::data: " + evt.target.result);
 								
 								get['customer_id']  = json.customer_id;
                                 get['customer_key'] = json.customer_key;
-                                
+                                get['customer_mail_1'] = json.customer_mail_1;
                                       
 console.log("★customer_id: " + json.customer_id);
 console.log("★customer_key: " + json.customer_key);
+console.log("★customer_mail_1: " + json.customer_mail_1);
                                 if (json.customer_id) {
                                     var url = 'https://gs850.ggsv.jp/~w850033/class/json/get_addressee.php';
                                     var hash = {
                                        customer_id: json.customer_id,
-                                       customer_key: json.customer_key
+                                       customer_key: json.customer_key,
+                                       customer_mail_1: json.customer_mail_1
                                        };
                                       
                                        $.post(url,
@@ -103,6 +105,7 @@ console.log("addressee::data: " + evt.target.result);
 				function noOrdering(error){
 					get['customer_id'] = '';
                     get['customer_key'] = '';
+                    get['customer_mail_1'] = '';
 					// 商品情報を取得
 					sendData(get);
 				}
@@ -114,7 +117,8 @@ console.log("addressee::data: " + evt.target.result);
 					var hash = {
 						qr_id: get.qr_id,
 						customer_id: get.customer_id,
-                        customer_key: get.customer_key
+                        customer_key: get.customer_key,
+                        customer_mail_1: get.customer_mail_1
 					};
 					$.post(url, // アクセスするURL
 					hash, // 送信データ
@@ -219,12 +223,16 @@ console.log("addressee::data: " + evt.target.result);
 					// if (params['item_is_activate_flg'] == 'enable' || params['item_is_ready_flg'] == 'enable'){ // test
 					if (params['item_is_activate_flg'] == 'disable' || params['item_is_ready_flg'] == 'disable') {
 						item_stock_sts = '<p class="ico ico_backOrder">販売準備中</p>';
+						$('#item_buy_3').css('display', 'none');
 					} else if (params.item_stock_sts == 'backstock') {
 						item_stock_sts = '<p class="ico ico_backOrder">入荷待ち</p>';
+						$('#item_buy_3').css('display', 'none');
 					} else if (params.item_stock_sts == 'discontinued' || params.item_is_stop_flg == 'disable') {
 						item_stock_sts = '<p class="ico ico_discontinued">販売中止</p>';
+						$('#item_buy_3').css('display', 'none');
 					} else if (params.item_stock_sts == 'nostock' || parseInt(params.item_stock_sts) < 1) {
 						item_stock_sts = '<p class="ico ico_backOrder">在庫切れ</p>';
+						$('#item_buy_3').css('display', 'none');
 					} else if (parseInt(params.item_stock_sts) < 3 && parseInt(params.item_stock_sts) > 0) {
 						item_stock_sts = '<p class="ico ico_onlyRemaining">残りわずか</p>';
 					}
@@ -264,6 +272,7 @@ console.log("addressee::data: " + evt.target.result);
 					} else {
 						$('#item_quantity_buy').css('display', 'none');
 						$('#item_quantity_buy2').css('display', 'none');
+						$('#item_buy_3').css('display', 'none');
 					}
 
 					// 商品説明
@@ -409,11 +418,10 @@ console.log("addressee::data: " + evt.target.result);
 	<body onload="onBodyLoad()">
 
 		<div data-role="page" id="page_itemDetail" data-add-back-btn="false">
-			<div data-role="header" data-position="inline">
+			<div data-role="header" id="header" data-position="fixed">
 				<h1>商品情報</h1>
 				<a href="barcode.html" class="ui-btn-left" data-icon="arrow-l" data-direction="reverse" data-ajax="false"> 戻る </a>
-				<a href="website_all.html?page=tr.html" class="ui-btn-right" data-icon="info" data-direction="reverse" data-ajax="false">
-                使い方</a>
+				<a href="website.html?page=tr.html" class="ui-btn-right" data-icon="info" data-direction="reverse" data-ajax="false">使い方</a>
 			</div>
 			<!-- loading -->
 			<div class="cont_itemDetail" data-role="content" id="loading" style="text-align:center;top:50px">
@@ -522,7 +530,7 @@ console.log("addressee::data: " + evt.target.result);
 								</div>
 							</div>
 						</li>
-						<li class="item_buy_1btn">
+						<li class="item_buy_1btn" id="item_buy_3">
 							<div class="item_buy btn_txt_ow">
 								<input class="btn_next" type="button" value="購入する" onClick="order(); return false"/>
 							</div>
@@ -601,6 +609,7 @@ console.log("addressee::data: " + evt.target.result);
 					</dt>
 					<dd id="company_returned"></dd>
 				</dl>
+                <!--
 				<ul data-role="listview">
 					<li class="shop_contact">
 						<div class="txt">
@@ -611,11 +620,12 @@ console.log("addressee::data: " + evt.target.result);
 								<a class="btn_prev form_link" href="contact.html" data-role="button" data-ajax="false"> フォームから </a>
 							</div>
 							<div class="box2_02 tel_link">
-								<a class="btn_prev tel_link" href="#" data-role="button" id="company_phone2_go">電話から</a>
+								<a class="btn_prev tel_link" href="#" data-role="button" id="coßmpany_phone2_go">電話から</a>
 							</div>
 						</div>
 					</li>
 				</ul>
+                -->
 			</div>
 			<div class="footer" data-role="footer" data-position="fixed" data-id="tabber">
 				<ul>

@@ -333,13 +333,15 @@
 	<body onload="onBodyLoad()">
 
 		<div data-role="page" id="page_itemDetail" data-add-back-btn="false" data-theme="z">
-			<div data-role="header" data-position="inline">
+			<div data-role="header" id="header" data-position="fixed">
 				<h1>購入商品</h1>
 				<a href="show_order.html" class="ui-btn-left" data-icon="arrow-l" data-direction="reverse" data-ajax="false" > 戻る </a>
 				
 				<div id="del_order"></div>
 			
 			</div>
+            
+            
 			<!-- loading -->
 			<div class="cont_itemDetail" data-role="content" id="loading" style="text-align:center;top:50px">
 				<h1>Please Waiting...</h1>
@@ -513,6 +515,7 @@
 					</dt>
 					<dd id="company_returned"></dd>
 				</dl>
+                <!--
 				<ul data-role="listview">
 					<li class="shop_contact">
 						<div class="txt">
@@ -528,13 +531,14 @@
 						</div>
 					</li>
 				</ul>
+                 -->
 			</div>
 			<div class="footer" data-role="footer" data-position="fixed" data-id="tabber">
 				<ul>
 					<li class="tab01 current">
 						<a href="show_order.html" data-ajax="false"> <span>注文履歴</span> </a>
 					</li>
-					<li class="tab02 current">
+					<li class="tab02">
 						<a href="barcode.html" data-ajax="false"> <span>読み取り</span> </a>
 					</li>
 					<li class="tab03">

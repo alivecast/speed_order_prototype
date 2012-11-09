@@ -186,14 +186,13 @@ $(function(){
 	<body onLoad="onBodyLoad()">
 
 		<div data-role="page" data-add-back-btn="false" data-theme="z">
-
+            
 			<div data-role="header" id="header" data-position="fixed">
 				<h1>違反報告</h1>
-				<a data-rel="back" href="#" class="ui-btn-left" data-icon="arrow-l" data-direction="reverse" data-ajax="false">
-					戻る
-				</a>
+				<a href="#" class="ui-btn-left" data-icon="arrow-l" data-direction="reverse" data-ajax="false" onclick="alertCallBack();"> 戻る </a>
+				<a href="website.html?page=tr.html" class="ui-btn-right" data-icon="info" data-direction="reverse" data-ajax="false">使い方</a>
 			</div>
-
+            
 			<div class="cont_contact" data-role="content">
 
 				<div class="contact_detail">
@@ -209,8 +208,8 @@ $(function(){
 						
 					<div data-role="fieldcontain" >
 
-						<ul class="contact_list" data-role="listview" id="mail1">
-							<li>
+						<ul class="contact_list" data-role="listview">
+							<li id="mail1">
 								<label for="customer_mail" class="fieldLabel">メールアドレス</label>
 								<br />
 								<input type="email" id="customer_mail" name="customer_mail" value="" class="required email" placeholder="【必須】例）sample1@speed-order.jp" />

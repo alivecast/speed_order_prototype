@@ -242,8 +242,8 @@ console.log("正常にテキストを読み込みました。qr_id: "+order.qr_i
                     postg['item_version']      = order.item_version;
                     postg['order_amount']      = order.order_amount;
                     postg['qr_id']             = order.qr_id;
-                    postg['latitude']          = order.latitude;
-                    postg['longitude']         = order.longitude;
+                    postg['order_latitude']    = order.order_latitude;
+                    postg['order_longitude']   = order.order_longitude;
                            
 
                     // 発注処理
@@ -333,5 +333,13 @@ function alertCallBack() {
 </script>
 </head>
 <body onload="onBodyLoad()">
+    <div data-role="page" id="page_itemDetail" data-add-back-btn="false">
+    <div class="cont_itemDetail" data-role="content" id="loading" style="text-align:center;top:50px">
+        <h1>Please Waiting...</h1>
+        <div >
+            <img src="images/loading_bar_or.gif" />
+        </div>
+    </div>
+    </div>
 </body>
 </html>

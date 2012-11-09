@@ -14,7 +14,7 @@
 		0CF23523164B721900628108 /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 0C1BF2381648AFFE002D2A62 /* Default@2x.png */; };
 		0CF23525164B724100628108 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 0C1BF2361648AFF1002D2A62 /* Default-568h@2x.png */; };
 		0CF23526164B8B8100628108 /* icon57.png in Resources */ = {isa = PBXBuildFile; fileRef = 0CAB13B51648C2BE00861CDB /* icon57.png */; };
-		0CF23594164B8E5A00628108 /* BarcodeOverlay.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0CF23593164B8E5A00628108 /* BarcodeOverlay.xib */; };
+		0CF2359D164BC8B800628108 /* logo_320.png in Resources */ = {isa = PBXBuildFile; fileRef = 0CF2359C164BC8B800628108 /* logo_320.png */; };
 		48967ABB15084B2800F4D66A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 48967ABA15084B2800F4D66A /* Foundation.framework */; };
 		48967ABD15084B2800F4D66A /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 48967ABC15084B2800F4D66A /* UIKit.framework */; };
 		48967ABF15084B2800F4D66A /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 48967ABE15084B2800F4D66A /* CoreGraphics.framework */; };
@@ -63,7 +63,7 @@
 		0CAB13B31648C26600861CDB /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon.png; sourceTree = "<group>"; };
 		0CAB13B51648C2BE00861CDB /* icon57.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon57.png; sourceTree = "<group>"; };
 		0CAB13B71648C2C300861CDB /* icon114.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon114.png; sourceTree = "<group>"; };
-		0CF23593164B8E5A00628108 /* BarcodeOverlay.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = BarcodeOverlay.xib; path = BarCodeScannerCDV/Resources/BarcodeOverlay.xib; sourceTree = SOURCE_ROOT; };
+		0CF2359C164BC8B800628108 /* logo_320.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = logo_320.png; sourceTree = "<group>"; };
 		48967AB615084B2800F4D66A /* BarCodeScannerCDV.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BarCodeScannerCDV.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		48967ABA15084B2800F4D66A /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		48967ABC15084B2800F4D66A /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
@@ -223,6 +223,7 @@
 		48967ADF15084B2800F4D66A /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				0CF2359C164BC8B800628108 /* logo_320.png */,
 				48967AF015084B2800F4D66A /* icons */,
 				48967AFC15084B2800F4D66A /* Capture.bundle */,
 				48967AE015084B2800F4D66A /* en.lproj */,
@@ -309,7 +310,6 @@
 			isa = PBXGroup;
 			children = (
 				48967B1815084B5100F4D66A /* CDVBarcodeScanner.mm */,
-				0CF23593164B8E5A00628108 /* BarcodeOverlay.xib */,
 				48967B1915084B5100F4D66A /* README.md */,
 				48967B4215084B5100F4D66A /* zxing-all-in-one.cpp */,
 				48967B4315084B5100F4D66A /* zxing-all-in-one.h */,
@@ -397,7 +397,7 @@
 				0CF23523164B721900628108 /* Default@2x.png in Resources */,
 				0CF23525164B724100628108 /* Default-568h@2x.png in Resources */,
 				0CF23526164B8B8100628108 /* icon57.png in Resources */,
-				0CF23594164B8E5A00628108 /* BarcodeOverlay.xib in Resources */,
+				0CF2359D164BC8B800628108 /* logo_320.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -505,9 +505,9 @@
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 3.0;
-				PROVISIONING_PROFILE = "62C3CF0E-12B4-48E5-BEDF-16496EF1DDFC";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "62C3CF0E-12B4-48E5-BEDF-16496EF1DDFC";
+				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				PROVISIONING_PROFILE = "3273011D-E65C-4710-8A4F-4911DC4051BC";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "3273011D-E65C-4710-8A4F-4911DC4051BC";
 				SDKROOT = iphoneos;
 			};
 			name = Debug;
@@ -525,9 +525,9 @@
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 3.0;
-				PROVISIONING_PROFILE = "62C3CF0E-12B4-48E5-BEDF-16496EF1DDFC";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "62C3CF0E-12B4-48E5-BEDF-16496EF1DDFC";
+				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				PROVISIONING_PROFILE = "3273011D-E65C-4710-8A4F-4911DC4051BC";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "3273011D-E65C-4710-8A4F-4911DC4051BC";
 				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;
 			};
@@ -537,6 +537,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
+				ARCHS = armv7;
+				CODE_SIGN_IDENTITY = "iPhone Distribution: AliveCast Inc.";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: AliveCast Inc.";
 				COPY_PHASE_STRIP = NO;
 				FRAMEWORK_SEARCH_PATHS = /Users/Shared/Cordova/Frameworks;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -559,6 +562,8 @@
 					/usr/lib/libSystem.B.dylib,
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "3273011D-E65C-4710-8A4F-4911DC4051BC";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "3273011D-E65C-4710-8A4F-4911DC4051BC";
 				TARGETED_DEVICE_FAMILY = 1;
 				WRAPPER_EXTENSION = app;
 			};
@@ -568,6 +573,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
+				ARCHS = armv7;
+				CODE_SIGN_IDENTITY = "iPhone Distribution: AliveCast Inc.";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: AliveCast Inc.";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				FRAMEWORK_SEARCH_PATHS = /Users/Shared/Cordova/Frameworks;
@@ -590,6 +598,8 @@
 					/usr/lib/libSystem.B.dylib,
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "3273011D-E65C-4710-8A4F-4911DC4051BC";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "3273011D-E65C-4710-8A4F-4911DC4051BC";
 				TARGETED_DEVICE_FAMILY = 1;
 				VALIDATE_PRODUCT = YES;
 				WRAPPER_EXTENSION = app;

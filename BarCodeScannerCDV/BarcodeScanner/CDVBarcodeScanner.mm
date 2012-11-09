@@ -695,19 +695,6 @@ parentViewController:(UIViewController*)parentViewController
     overlayView.autoresizingMask    = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     overlayView.opaque              = NO;
     
-    // UILabel
-    //   121108 ogawa add UILabel
-    UILabel *label = [[UILabel alloc] init];
-    label.frame = CGRectMake(10, 10, 100, 50);
-    label.text = @"SPEED-ORDERのQRコードにかざしてください";
-    label.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleLeftMargin |     UIViewAutoresizingFlexibleTopMargin;
-    label.autoresizesSubviews = YES;
-    label.frame = bounds;
-    label.textAlignment = UITextAlignmentCenter;
-    label.font = [UIFont systemFontOfSize:[UIFont systemFontSize]];
-    //   121108 ogawa add UILabel
-    
-    
     // toolbar
     UIToolbar* toolbar = [[[UIToolbar alloc] init] autorelease];
     toolbar.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
@@ -745,6 +732,35 @@ parentViewController:(UIViewController*)parentViewController
     [toolbar setFrame:rectArea];
     
     [overlayView addSubview: toolbar];
+    
+    // 121108 ogawa add
+    
+    // UILabel
+    
+    UILabel *label = [[UILabel alloc] init];
+    label.frame = CGRectMake(0, rootViewHeight - toolbarHeight - 40, 320, 20);
+    label.textColor = [UIColor colorWithRed:1.0 green:1.0 blue:1.0 alpha:1.0];
+    //    label.backgroundColor = [UIColor clearColor];
+    label.backgroundColor = [UIColor colorWithRed:0.0 green:0.0 blue:0.0 alpha:0.4];
+    label.text = @"SPEED-ORDERのQRコードにかざしてください";
+    label.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleLeftMargin |     UIViewAutoresizingFlexibleTopMargin;
+    label.autoresizesSubviews = YES;
+    label.textAlignment = UITextAlignmentCenter;
+    label.font = [UIFont systemFontOfSize:[UIFont systemFontSize]];
+    
+    // UIImage
+    
+    UIImageView *imageView = [[UIImageView alloc] init];
+    UIImage *image = [UIImage imageNamed:@"logo_320.png"];
+    [imageView setFrame:CGRectMake(0.0, 5, 320, 480)];
+//    [imageView setContentMode:UIViewContentModeScaleAspectFit];
+    [imageView setContentMode:UIViewContentModeTop];
+    [imageView setImage:image];
+    [self.view addSubview:imageView];
+    [image release];
+    [imageView release];
+    
+    //   121108 ogawa add
     
 //    121026 ogawa commentout
 //    UIImage* reticleImage = [self buildReticleImage];

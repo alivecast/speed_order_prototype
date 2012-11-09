@@ -102,7 +102,7 @@ console.log("start");
 
                 var fname = 'ordering';
                 var text = {};
-                window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, read, fail);
+                window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, read, onView);
                 function read(fileSystem) {
                     fileSystem.root.getFile(fname, {}, function(fileEntry) {
                         fileEntry.file(function(file) {
@@ -127,9 +127,14 @@ console.log("start");
                             reader.readAsText(file, "utf-8");
                             // Data URL として読み込む
                             // reader.readAsDataURL(file);
-                        }, fail)
-                    }, fail);
+                        }, onView)
+                    }, onView);
                 }
+            }
+            
+            function onView(error){
+                $("#loading").css("display","none");
+                $("#content_all").css("display","block");
             }
 
             // ファイルがある場合は、サーバー通信を行い値を取得する。
@@ -192,6 +197,9 @@ console.log("password_ck:"+data.password_ck);
                             $("#setup_ok").css("display","none");
                             $("#setup_no").css("display","block");
                        }
+                       
+                       $("#loading").css("display","none");
+                       $("#content_all").css("display","block");
 
 						if(data.password_ck == 1){
 							if(data.customer_ck == 1 || data.card_ck == 1){
@@ -276,6 +284,7 @@ console.log("password_ck:"+data.password_ck);
 			function goErr(error) {
 				location.href="passcode_input.html";
 			}
+
 		</script>
 
 	<script type="text/javascript" charset="utf-8" src="js/jquery.mobile-1.2.0.min.js"></script>
@@ -293,51 +302,18 @@ console.log("password_ck:"+data.password_ck);
 					戻る
 				</a>
  -->
-                <a href="website.html?page=tr.html" class="ui-btn-right" data-icon="info" data-ajax="false">　
-                使い方</a>
+                <a href="website.html?page=tr.html" class="ui-btn-right" data-icon="info" data-ajax="false">使い方</a>
 			</div>
 
-			<div data-role="content" id="content_all">
+            <div class="cont_itemDetail" data-role="content" id="loading" style="text-align:center;top:50px">
+                <h1>Please Waiting...</h1>
+                <div >
+                    <img src="images/loading_bar_or.gif" />
+                </div>
+            </div>
+            
+			<div data-role="content" id="content_all" style="display:none;">
 
-<!--
-				<% if $buy['flg'] == 'enable' && @item_info_app %>
-				<ul data-role="listview">
-					<li style="background-color:#ccc;">
-						<div class="txt">
-							ご購入をご希望された商品
-						</div>
-						<%= @item_info_app.item_name %>
-					</li>
-				</ul>
-				<% end %>
--->
-<!--
-				<div class="setup_no">
-					<div class="tl">
-						ご注文いただくには下記の設定を行ってください。
-					</div>
-					<div class="txt">
-						<img src="images/speedorder/ico_check_r.png" width="16" height="15" alt="" />表示がない項目の設定を行ってください。
-					</div>
-
-					<% elsif !@setting && @is_item %>
-					<div class="tl">
-						下記の設定をすると購入手続きが完了いたします。
-						<br>
-						購入手続き後のキャンセルもできます。
-					</div>
-					<div class="txt">
-						<img src="images/speedorder/ico_check_r.png" width="16" height="15" alt="" />表示がない項目の設定を行ってください。
-					</div>
-					<% else %>
-					<div class="setup_ok">
-						<div class="tl">
-							ご注文いただけます。
-						</div>
-					</div>
-					<% end %>
-				</div>
--->
                 <div id="order" style="display:none">
 				<div class="setup_no">
 					<div class="tl">
@@ -434,6 +410,7 @@ console.log("password_ck:"+data.password_ck);
 			</div>
 
 		</div>
+
 	</body>
 </html>
 
