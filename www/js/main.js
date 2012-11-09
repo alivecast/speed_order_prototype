@@ -25,8 +25,10 @@ function decJson(json) {
 
 // AES128 encode CBC ------------------------------------------------------------
 function encAes(str) {
-	var key = CryptoJS.enc.Hex.parse(randPass(32));
-	var iv = CryptoJS.enc.Hex.parse(randPass(32));
+	// var key = CryptoJS.enc.Hex.parse(randPass(32));
+	var key = CryptoJS.enc.Hex.stringify(CryptoJS.lib.WordArray.random(16));
+	// var iv = CryptoJS.enc.Hex.parse(randPass(32));
+	var iv = CryptoJS.enc.Hex.stringify(CryptoJS.lib.WordArray.random(16));
 	var encrypted = CryptoJS.AES.encrypt(str, key, {
 		iv : iv
 	});
