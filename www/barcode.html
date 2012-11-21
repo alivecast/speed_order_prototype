@@ -28,25 +28,25 @@
 					// キャンセル
 					if (result.cancelled) {
 						
-						scannerSuccess(result.text);
+						// scannerSuccess(result.text);
 						
-                        // var src = 'mp3/cancel.mp3';
-				        // audio = new Media(src, null, null);
-				        // // オーディオ再生
-				        // audio.play();
-				        // // アラート
-				        // var message = 'QRコード読み取りを中止しました';
-						// var title = 'キャンセル';
-						// var button = 'OK';
-						// navigator.notification.alert(
-							// message, 
-							// function(){
-								// // move
-				        		// window.location.href = "setting.html";
-							// }, 
-							// title,
-							// button
-						 // );
+                        var src = 'mp3/cancel.mp3';
+				        audio = new Media(src, null, null);
+				        // オーディオ再生
+				        audio.play();
+				        // アラート
+				        var message = 'QRコード読み取りを中止しました';
+						var title = 'キャンセル';
+						var button = 'OK';
+						navigator.notification.alert(
+							message, 
+							function(){
+								// move
+				        		window.location.href = "setting.html";
+							}, 
+							title,
+							button
+						 );
 				        
                     // 読み取り
 					} else {
@@ -89,7 +89,7 @@
 			// Barcode 読み込み成功　-------------------------------------------------------------
 			function scannerSuccess(result) {
 				// test
-				result = 'http://speed-order.jp/2001010000040000028101';
+				// result = 'http://speed-order.jp/2001010000040000028101';
 				
 				// src から Media オブジェクトを作成
 				var src = 'mp3/decide.mp3';
